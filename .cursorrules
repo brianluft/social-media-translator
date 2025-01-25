@@ -1,34 +1,49 @@
 # Translate Video Subtitles iOS App
 
-## Project Overview
-An iOS application that translates "burned-in" subtitles from videos in the user's photo library to their device's preferred language.
+iOS app to translate burned-in video subtitles to user's preferred language.
 
-## Key Features
-- Select and import videos from iOS photo library
-- Process videos with burned-in (hardcoded) subtitles
-- Use GPU-accelerated techniques for subtitle detection and extraction
-- Track frame ranges where each subtitle appears
-- Translate detected subtitles using Apple's translation API
-- Display translated subtitles overlaid on the original video using Apple's video player
+## Features
+- Import videos from photo library
+- GPU-accelerated subtitle detection
+- Translation using Apple's API
+- Overlay translated subtitles during playback
 
-## Technical Components
-1. Video Processing
-   - GPU-accelerated image processing for subtitle detection
-   - Subtitle region identification and cropping
-   - Frame range tracking for subtitle timing
+## Core Components
 
-2. Translation
-   - Integration with Apple's translation API
-   - On-device translation capabilities
-   - Support for device's preferred language
+1. **VideoManager**
+   - PhotosKit/AVFoundation for video selection/loading
+   - PHPickerViewController for UI
+   - Memory management for large files
 
-3. Playback
-   - Native iOS video player integration
-   - Synchronized subtitle overlay display
-   - Clean presentation of translated text
+2. **SubtitleDetector**
+   - Vision + Metal for GPU-accelerated OCR
+   - Outputs SubtitleEntry list
+   - Progress reporting during detection
 
-## Goals
-- Provide seamless translation of videos with burned-in subtitles
-- Maintain high performance using on-device processing
-- Create intuitive user experience for video selection and playback
-- Handle various subtitle styles and positions effectively 
+3. **TranslationService**
+   - Apple Translation framework
+   - Batch processing
+   - Progress reporting
+
+4. **VideoPlayerController**
+   - AVKit player with subtitle overlay
+   - Basic playback controls
+
+5. **SubtitleOverlayRenderer**
+   - Core Animation/Text for subtitle display
+   - Position and style management
+
+## Data Models
+
+1. **SubtitleEntry**
+   - Text, timestamps, position, translation status
+
+2. **TranslatedSubtitle**
+   - Original/translated text, timing, formatting
+
+## Workflow
+1. Select video → VideoManager loads
+2. SubtitleDetector processes video
+3. TranslationService translates all subtitles
+4. Play video with translated overlays
+5. Use delegates for progress updates 
