@@ -17,9 +17,17 @@ let package = Package(
     targets: [
         .target(
             name: "VideoSubtitlesLib",
-            dependencies: []),
+            dependencies: [],
+            path: "Sources/VideoSubtitlesLib",
+            exclude: [],
+            sources: ["Models", "Core", "Services"]),
         .testTarget(
             name: "VideoSubtitlesLibTests",
-            dependencies: ["VideoSubtitlesLib"]),
+            dependencies: ["VideoSubtitlesLib"],
+            path: "Tests/VideoSubtitlesLibTests",
+            exclude: [],
+            resources: [
+                .copy("TestAssets/Videos/test1.mp4")
+            ]),
     ]
 ) 
