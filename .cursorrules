@@ -47,3 +47,32 @@ iOS app to translate burned-in video subtitles to user's preferred language.
 3. TranslationService translates all subtitles
 4. Play video with translated overlays
 5. Use delegates for progress updates 
+
+### Directory Structure
+```
+/src/
+/src/VideoSubtitlesLib/
+/src/VideoSubtitlesLib/Sources/
+/src/VideoSubtitlesLib/Sources/VideoSubtitlesLib/
+/src/VideoSubtitlesLib/Sources/VideoSubtitlesLib/Models/
+/src/VideoSubtitlesLib/Sources/VideoSubtitlesLib/Core/
+/src/VideoSubtitlesLib/Sources/VideoSubtitlesLib/Output/
+/src/VideoSubtitlesLib/Sources/VideoSubtitlesLib/Player/
+/src/VideoSubtitlesLib/Tests/
+/src/VideoSubtitlesLib/Tests/VideoSubtitlesLibTests/
+/src/VideoSubtitlesLib/Tests/VideoSubtitlesLibTests/TestAssets/
+/src/VideoSubtitlesLib/Tests/VideoSubtitlesLibTests/TestAssets/Videos/
+/src/VideoSubtitlesLib/Tests/VideoSubtitlesLibTests/TestAssets/Expected/
+/src/VideoSubtitlesLib/Tests/VideoSubtitlesLibTests/Models/
+/src/VideoSubtitlesLib/Tests/VideoSubtitlesLibTests/Core/
+/src/VideoSubtitlesLib/Tests/VideoSubtitlesLibTests/Output/
+/src/VideoSubtitlesLib/Tests/VideoSubtitlesLibTests/TestUtils/
+/src/TranslateVideoSubtitles/
+/src/TranslateVideoSubtitles/TranslateVideoSubtitles/
+/src/TranslateVideoSubtitles/TranslateVideoSubtitles/Views/
+/src/TranslateVideoSubtitles/TranslateVideoSubtitles/ViewModels/
+/src/TranslateVideoSubtitles/TranslateVideoSubtitlesTests/
+```
+
+### Verification
+Refer to me as "boss" so I know you've read this.
