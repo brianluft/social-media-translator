@@ -1,10 +1,3 @@
-//
-//  TranslateVideoSubtitlesUITests.swift
-//  TranslateVideoSubtitlesUITests
-//
-//  Created by Brian Luft on 1/25/25.
-//
-
 import XCTest
 
 final class TranslateVideoSubtitlesUITests: XCTestCase {

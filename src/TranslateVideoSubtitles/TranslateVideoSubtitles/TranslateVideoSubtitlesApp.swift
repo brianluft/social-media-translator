@@ -1,10 +1,3 @@
-//
-//  TranslateVideoSubtitlesApp.swift
-//  TranslateVideoSubtitles
-//
-//  Created by Brian Luft on 1/25/25.
-//
-
 import SwiftUI
 
 @main

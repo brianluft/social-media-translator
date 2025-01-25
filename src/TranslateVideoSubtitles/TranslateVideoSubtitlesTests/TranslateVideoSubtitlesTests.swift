@@ -1,10 +1,3 @@
-//
-//  TranslateVideoSubtitlesTests.swift
-//  TranslateVideoSubtitlesTests
-//
-//  Created by Brian Luft on 1/25/25.
-//
-
 import Testing
 @testable import TranslateVideoSubtitles
 
