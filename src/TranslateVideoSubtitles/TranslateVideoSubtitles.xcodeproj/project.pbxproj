@@ -1,0 +1,557 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXContainerItemProxy section */
+		D334ED6F2D45881E00C4ACF9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D334ED562D45881D00C4ACF9 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D334ED5D2D45881D00C4ACF9;
+			remoteInfo = TranslateVideoSubtitles;
+		};
+		D334ED792D45881E00C4ACF9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D334ED562D45881D00C4ACF9 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D334ED5D2D45881D00C4ACF9;
+			remoteInfo = TranslateVideoSubtitles;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		D334ED5E2D45881D00C4ACF9 /* TranslateVideoSubtitles.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TranslateVideoSubtitles.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D334ED6E2D45881E00C4ACF9 /* TranslateVideoSubtitlesTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TranslateVideoSubtitlesTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D334ED782D45881E00C4ACF9 /* TranslateVideoSubtitlesUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TranslateVideoSubtitlesUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		D334ED602D45881D00C4ACF9 /* TranslateVideoSubtitles */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = TranslateVideoSubtitles;
+			sourceTree = "<group>";
+		};
+		D334ED712D45881E00C4ACF9 /* TranslateVideoSubtitlesTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = TranslateVideoSubtitlesTests;
+			sourceTree = "<group>";
+		};
+		D334ED7B2D45881E00C4ACF9 /* TranslateVideoSubtitlesUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = TranslateVideoSubtitlesUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D334ED5B2D45881D00C4ACF9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D334ED6B2D45881E00C4ACF9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D334ED752D45881E00C4ACF9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		D334ED552D45881D00C4ACF9 = {
+			isa = PBXGroup;
+			children = (
+				D334ED602D45881D00C4ACF9 /* TranslateVideoSubtitles */,
+				D334ED712D45881E00C4ACF9 /* TranslateVideoSubtitlesTests */,
+				D334ED7B2D45881E00C4ACF9 /* TranslateVideoSubtitlesUITests */,
+				D334ED5F2D45881D00C4ACF9 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D334ED5F2D45881D00C4ACF9 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D334ED5E2D45881D00C4ACF9 /* TranslateVideoSubtitles.app */,
+				D334ED6E2D45881E00C4ACF9 /* TranslateVideoSubtitlesTests.xctest */,
+				D334ED782D45881E00C4ACF9 /* TranslateVideoSubtitlesUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		D334ED5D2D45881D00C4ACF9 /* TranslateVideoSubtitles */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D334ED822D45881E00C4ACF9 /* Build configuration list for PBXNativeTarget "TranslateVideoSubtitles" */;
+			buildPhases = (
+				D334ED5A2D45881D00C4ACF9 /* Sources */,
+				D334ED5B2D45881D00C4ACF9 /* Frameworks */,
+				D334ED5C2D45881D00C4ACF9 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				D334ED602D45881D00C4ACF9 /* TranslateVideoSubtitles */,
+			);
+			name = TranslateVideoSubtitles;
+			packageProductDependencies = (
+			);
+			productName = TranslateVideoSubtitles;
+			productReference = D334ED5E2D45881D00C4ACF9 /* TranslateVideoSubtitles.app */;
+			productType = "com.apple.product-type.application";
+		};
+		D334ED6D2D45881E00C4ACF9 /* TranslateVideoSubtitlesTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D334ED852D45881E00C4ACF9 /* Build configuration list for PBXNativeTarget "TranslateVideoSubtitlesTests" */;
+			buildPhases = (
+				D334ED6A2D45881E00C4ACF9 /* Sources */,
+				D334ED6B2D45881E00C4ACF9 /* Frameworks */,
+				D334ED6C2D45881E00C4ACF9 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D334ED702D45881E00C4ACF9 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				D334ED712D45881E00C4ACF9 /* TranslateVideoSubtitlesTests */,
+			);
+			name = TranslateVideoSubtitlesTests;
+			packageProductDependencies = (
+			);
+			productName = TranslateVideoSubtitlesTests;
+			productReference = D334ED6E2D45881E00C4ACF9 /* TranslateVideoSubtitlesTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		D334ED772D45881E00C4ACF9 /* TranslateVideoSubtitlesUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D334ED882D45881E00C4ACF9 /* Build configuration list for PBXNativeTarget "TranslateVideoSubtitlesUITests" */;
+			buildPhases = (
+				D334ED742D45881E00C4ACF9 /* Sources */,
+				D334ED752D45881E00C4ACF9 /* Frameworks */,
+				D334ED762D45881E00C4ACF9 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D334ED7A2D45881E00C4ACF9 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				D334ED7B2D45881E00C4ACF9 /* TranslateVideoSubtitlesUITests */,
+			);
+			name = TranslateVideoSubtitlesUITests;
+			packageProductDependencies = (
+			);
+			productName = TranslateVideoSubtitlesUITests;
+			productReference = D334ED782D45881E00C4ACF9 /* TranslateVideoSubtitlesUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		D334ED562D45881D00C4ACF9 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1620;
+				LastUpgradeCheck = 1620;
+				TargetAttributes = {
+					D334ED5D2D45881D00C4ACF9 = {
+						CreatedOnToolsVersion = 16.2;
+					};
+					D334ED6D2D45881E00C4ACF9 = {
+						CreatedOnToolsVersion = 16.2;
+						TestTargetID = D334ED5D2D45881D00C4ACF9;
+					};
+					D334ED772D45881E00C4ACF9 = {
+						CreatedOnToolsVersion = 16.2;
+						TestTargetID = D334ED5D2D45881D00C4ACF9;
+					};
+				};
+			};
+			buildConfigurationList = D334ED592D45881D00C4ACF9 /* Build configuration list for PBXProject "TranslateVideoSubtitles" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = D334ED552D45881D00C4ACF9;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = D334ED5F2D45881D00C4ACF9 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				D334ED5D2D45881D00C4ACF9 /* TranslateVideoSubtitles */,
+				D334ED6D2D45881E00C4ACF9 /* TranslateVideoSubtitlesTests */,
+				D334ED772D45881E00C4ACF9 /* TranslateVideoSubtitlesUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		D334ED5C2D45881D00C4ACF9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D334ED6C2D45881E00C4ACF9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D334ED762D45881E00C4ACF9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D334ED5A2D45881D00C4ACF9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D334ED6A2D45881E00C4ACF9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D334ED742D45881E00C4ACF9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		D334ED702D45881E00C4ACF9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D334ED5D2D45881D00C4ACF9 /* TranslateVideoSubtitles */;
+			targetProxy = D334ED6F2D45881E00C4ACF9 /* PBXContainerItemProxy */;
+		};
+		D334ED7A2D45881E00C4ACF9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D334ED5D2D45881D00C4ACF9 /* TranslateVideoSubtitles */;
+			targetProxy = D334ED792D45881E00C4ACF9 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		D334ED802D45881E00C4ACF9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		D334ED812D45881E00C4ACF9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		D334ED832D45881E00C4ACF9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"TranslateVideoSubtitles/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.brianluft.TranslateVideoSubtitles;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		D334ED842D45881E00C4ACF9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"TranslateVideoSubtitles/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.brianluft.TranslateVideoSubtitles;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		D334ED862D45881E00C4ACF9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.brianluft.TranslateVideoSubtitlesTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TranslateVideoSubtitles.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/TranslateVideoSubtitles";
+			};
+			name = Debug;
+		};
+		D334ED872D45881E00C4ACF9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.brianluft.TranslateVideoSubtitlesTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TranslateVideoSubtitles.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/TranslateVideoSubtitles";
+			};
+			name = Release;
+		};
+		D334ED892D45881E00C4ACF9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.brianluft.TranslateVideoSubtitlesUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = TranslateVideoSubtitles;
+			};
+			name = Debug;
+		};
+		D334ED8A2D45881E00C4ACF9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.brianluft.TranslateVideoSubtitlesUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = TranslateVideoSubtitles;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		D334ED592D45881D00C4ACF9 /* Build configuration list for PBXProject "TranslateVideoSubtitles" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D334ED802D45881E00C4ACF9 /* Debug */,
+				D334ED812D45881E00C4ACF9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D334ED822D45881E00C4ACF9 /* Build configuration list for PBXNativeTarget "TranslateVideoSubtitles" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D334ED832D45881E00C4ACF9 /* Debug */,
+				D334ED842D45881E00C4ACF9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D334ED852D45881E00C4ACF9 /* Build configuration list for PBXNativeTarget "TranslateVideoSubtitlesTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D334ED862D45881E00C4ACF9 /* Debug */,
+				D334ED872D45881E00C4ACF9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D334ED882D45881E00C4ACF9 /* Build configuration list for PBXNativeTarget "TranslateVideoSubtitlesUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D334ED892D45881E00C4ACF9 /* Debug */,
+				D334ED8A2D45881E00C4ACF9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = D334ED562D45881D00C4ACF9 /* Project object */;
+}
