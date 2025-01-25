@@ -1,0 +1,34 @@
+# Translate Video Subtitles iOS App
+
+## Project Overview
+An iOS application that translates "burned-in" subtitles from videos in the user's photo library to their device's preferred language.
+
+## Key Features
+- Select and import videos from iOS photo library
+- Process videos with burned-in (hardcoded) subtitles
+- Use GPU-accelerated techniques for subtitle detection and extraction
+- Track frame ranges where each subtitle appears
+- Translate detected subtitles using Apple's translation API
+- Display translated subtitles overlaid on the original video using Apple's video player
+
+## Technical Components
+1. Video Processing
+   - GPU-accelerated image processing for subtitle detection
+   - Subtitle region identification and cropping
+   - Frame range tracking for subtitle timing
+
+2. Translation
+   - Integration with Apple's translation API
+   - On-device translation capabilities
+   - Support for device's preferred language
+
+3. Playback
+   - Native iOS video player integration
+   - Synchronized subtitle overlay display
+   - Clean presentation of translated text
+
+## Goals
+- Provide seamless translation of videos with burned-in subtitles
+- Maintain high performance using on-device processing
+- Create intuitive user experience for video selection and playback
+- Handle various subtitle styles and positions effectively 

@@ -1,0 +1,41 @@
+# Set default behavior to automatically normalize line endings
+* text=auto
+
+# Source code
+*.swift text eol=lf
+*.h text eol=lf
+*.m text eol=lf
+*.mm text eol=lf
+*.cpp text eol=lf
+*.c text eol=lf
+*.hpp text eol=lf
+*.metal text eol=lf
+*.strings text eol=lf
+*.storyboard text eol=lf
+*.xib text eol=lf
+*.plist text eol=lf
+*.json text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.sh text eol=lf
+Podfile text eol=lf
+Cartfile text eol=lf
+.gitattributes text eol=lf
+.gitignore text eol=lf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
+*.mov binary
+*.mp4 binary
+*.mp3 binary
+*.zip binary
+*.jar binary
+*.framework binary
+*.xcframework binary
+*.a binary
+*.xcassets binary 
