@@ -2,7 +2,7 @@
 
 ## Phase 1: Project Setup
 1. Create Swift Package for core library `VideoSubtitlesLib`
-   👤 - Create new project in Xcode
+   - 👤 Create new project in Xcode
    - Set up package manifest
    - Define basic module structure
    - Add test target with XCTest
@@ -13,14 +13,14 @@
    - Add JSON coding for testing
 
 3. Set up test infrastructure
-   👤 - Source and add sample .mp4 files with burned-in subtitles
-   👤 - Create expected .srt outputs (manually transcribe timing/text)
+   - 👤 Source and add sample .mp4 files with burned-in subtitles
+   - 👤 Create expected .srt outputs (manually transcribe timing/text)
    - Create test utilities
    - Add debug logging helpers
 
 ## Phase 2: Core Subtitle Detection
 1. Implement `SubtitleDetector`
-   👤 - Add required framework dependencies in Xcode
+   - 👤 Add required framework dependencies in Xcode
    - Basic frame extraction using AVFoundation
    - Vision setup for OCR
    - Test with single frame first
@@ -35,7 +35,7 @@
 
 ## Phase 3: Translation Integration
 1. Implement `TranslationService`
-   👤 - Enable translation capabilities in Xcode project
+   - 👤 Enable translation capabilities in Xcode project
    - Basic Apple Translation setup
    - Single text translation
    - Batch processing
@@ -62,15 +62,15 @@
 
 ## Phase 5: Integration Testing
 1. End-to-end tests
-   👤 - Record performance metrics
-   👤 - Monitor memory usage in Xcode
+   - 👤 Record performance metrics
+   - 👤 Monitor memory usage in Xcode
    - Process sample videos
    - Verify outputs against known good SRTs
    - Detailed debug logging
 
 ## Phase 6: Video Player Integration
 1. Implement `VideoPlayerController`
-   👤 - Add required AVKit permissions/entitlements
+   - 👤 Add required AVKit permissions/entitlements
    - Basic AVKit setup
    - Playback controls
    - Subtitle timing integration
@@ -82,13 +82,13 @@
 
 ## Phase 7: iOS App Development
 1. Create SwiftUI project
-   👤 - Create new iOS app target in Xcode
-   👤 - Configure signing and capabilities
+   - 👤 Create new iOS app target in Xcode
+   - 👤 Configure signing and capabilities
    - Set up dependency on VideoSubtitlesLib
    - Basic UI structure
 
 2. Implement video selection
-   👤 - Add PhotosKit permissions to Info.plist
+   - 👤 Add PhotosKit permissions to Info.plist
    - PhotosKit integration
    - Permission handling
    - File size handling
