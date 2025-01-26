@@ -4,7 +4,7 @@ import AVFoundation
 import CoreImage
 
 /// Theory of Operation:
-/// The SubtitleDetector processes videos to extract burned-in subtitles through the following steps:
+/// The SubtitleDetector processes videos to extract text through the following steps:
 ///
 /// 1. Frame Extraction:
 ///    - Samples video at 2 frames per second using AVFoundation
@@ -15,43 +15,40 @@ import CoreImage
 ///    - Uses Vision framework's VNRecognizeTextRequest for OCR
 ///    - Processes each frame to detect text regions
 ///    - Filters results by confidence score (threshold: 0.4)
-///    - Captures text content, position, and timing
+///    - Captures text content and position
 ///
-/// 3. Subtitle Merging:
-///    - Groups similar subtitles that appear in consecutive frames
-///    - Merges subtitles when:
-///      * Text content matches (case-insensitive)
-///      * Time gap is less than 0.5 seconds
-///    - Uses highest confidence detection when merging
-///    - Preserves original timing and positioning
+/// 3. Frame Processing:
+///    - Groups all text segments found in each frame
+///    - Maintains original positioning and confidence scores
+///    - Tracks timing information per frame
 ///
 /// 4. Progress Reporting:
 ///    - Reports progress through delegate pattern
-///    - Provides completion callback with merged subtitles
+///    - Provides completion callback with frame segments
 ///    - Reports errors if they occur during processing
 ///
 /// The detector is designed to be memory-efficient (processing one frame at a time)
 /// and accurate (using Vision's accurate recognition level with language correction).
 /// It handles video orientation correctly and provides normalized coordinates for
-/// subtitle positioning.
+/// text positioning.
 
-/// Protocol for reporting subtitle detection progress
-public protocol SubtitleDetectionDelegate: AnyObject {
+/// Protocol for reporting text detection progress
+public protocol TextDetectionDelegate: AnyObject {
     func detectionDidProgress(_ progress: Float)
-    func detectionDidComplete(subtitles: [SubtitleEntry])
+    func detectionDidComplete(frames: [FrameSegments])
     func detectionDidFail(with error: Error)
 }
 
-/// Handles detection of burned-in subtitles from video frames using Vision OCR
+/// Handles detection of text from video frames using Vision OCR
 public class SubtitleDetector {
     
     // MARK: - Properties
     private let videoAsset: AVAsset
     private let imageGenerator: AVAssetImageGenerator
-    private weak var delegate: SubtitleDetectionDelegate?
+    private weak var delegate: TextDetectionDelegate?
     
     /// Sampling rate in frames per second
-    private let samplingRate: Float = 2.0 // Sample 2 frames per second
+    public let samplingRate: Float = 2.0 // Sample 2 frames per second
     
     /// Minimum confidence score for text detection
     private let minimumConfidence: Float = 0.4
@@ -69,7 +66,7 @@ public class SubtitleDetector {
     }()
     
     // MARK: - Initialization
-    public init(videoAsset: AVAsset, delegate: SubtitleDetectionDelegate? = nil) {
+    public init(videoAsset: AVAsset, delegate: TextDetectionDelegate? = nil) {
         self.videoAsset = videoAsset
         self.delegate = delegate
         
@@ -81,30 +78,28 @@ public class SubtitleDetector {
     }
     
     // MARK: - Public Methods
-    public func detectSubtitles() async throws {
+    public func detectText() async throws {
         do {
             // Get video duration
             let duration = try await videoAsset.load(.duration)
             let durationSeconds = CMTimeGetSeconds(duration)
             let frameCount = Int(durationSeconds * Float64(samplingRate))
-            var subtitles: [SubtitleEntry] = []
+            var frames: [FrameSegments] = []
             
             // Process frames
             for frameIndex in 0..<frameCount {
                 let time = CMTime(seconds: Double(frameIndex) / Double(samplingRate), preferredTimescale: 600)
                 
                 let image = try imageGenerator.copyCGImage(at: time, actualTime: nil)
-                let detectedTexts = try await detectText(in: image, at: time)
-                subtitles.append(contentsOf: detectedTexts)
+                let frameSegments = try await detectText(in: image, at: time)
+                frames.append(frameSegments)
                 
                 // Report progress
                 let progress = Float(frameIndex + 1) / Float(frameCount)
                 delegate?.detectionDidProgress(progress)
             }
             
-            // Merge similar subtitles that appear in consecutive frames
-            let mergedSubtitles = mergeConsecutiveSubtitles(subtitles)
-            delegate?.detectionDidComplete(subtitles: mergedSubtitles)
+            delegate?.detectionDidComplete(frames: frames)
             
         } catch {
             delegate?.detectionDidFail(with: error)
@@ -116,62 +111,37 @@ public class SubtitleDetector {
     /// - Parameters:
     ///   - image: The frame to process
     ///   - time: The timestamp of the frame
-    /// - Returns: Array of detected subtitles
-    public func detectText(in image: CGImage, at time: CMTime) async throws -> [SubtitleEntry] {
+    /// - Returns: FrameSegments containing all detected text
+    public func detectText(in image: CGImage, at time: CMTime) async throws -> FrameSegments {
         let requestHandler = VNImageRequestHandler(cgImage: image)
         try requestHandler.perform([textRecognitionRequest])
         
-        guard let observations = textRecognitionRequest.results else { return [] }
+        guard let observations = textRecognitionRequest.results else { 
+            return FrameSegments(timestamp: CMTimeGetSeconds(time), segments: [])
+        }
         
-        return observations
+        let segments = observations
             .filter { $0.confidence >= minimumConfidence }
             .map { observation in
-                SubtitleEntry(
+                // Convert Vision coordinates (bottom-left origin) to normalized coordinates (top-left origin)
+                let visionBox = observation.boundingBox
+                let normalizedBox = CGRect(
+                    x: visionBox.origin.x,
+                    y: 1 - visionBox.origin.y - visionBox.height,  // Flip Y coordinate
+                    width: visionBox.width,
+                    height: visionBox.height
+                )
+                
+                return TextSegment(
                     text: observation.topCandidates(1)[0].string,
-                    startTime: CMTimeGetSeconds(time),
-                    endTime: CMTimeGetSeconds(time) + (1.0 / Double(samplingRate)),
-                    position: observation.boundingBox,
+                    position: normalizedBox,
                     confidence: observation.confidence
                 )
             }
-    }
-    
-    private func mergeConsecutiveSubtitles(_ subtitles: [SubtitleEntry]) -> [SubtitleEntry] {
-        var mergedSubtitles: [SubtitleEntry] = []
-        var currentGroup: [SubtitleEntry] = []
         
-        func mergeSimilarSubtitles(_ group: [SubtitleEntry]) -> SubtitleEntry? {
-            guard !group.isEmpty else { return nil }
-            
-            // Use the subtitle with highest confidence as the base
-            let base = group.max(by: { $0.confidence < $1.confidence })!
-            
-            return SubtitleEntry(
-                text: base.text,
-                startTime: group.map(\.startTime).min()!,
-                endTime: group.map(\.endTime).max()!,
-                position: base.position,
-                confidence: base.confidence
-            )
-        }
-        
-        for subtitle in subtitles.sorted(by: { $0.startTime < $1.startTime }) {
-            if let last = currentGroup.last,
-               subtitle.startTime - last.endTime < 0.5, // Gap threshold of 0.5 seconds
-               subtitle.text.lowercased() == last.text.lowercased() {
-                currentGroup.append(subtitle)
-            } else {
-                if let merged = mergeSimilarSubtitles(currentGroup) {
-                    mergedSubtitles.append(merged)
-                }
-                currentGroup = [subtitle]
-            }
-        }
-        
-        if let merged = mergeSimilarSubtitles(currentGroup) {
-            mergedSubtitles.append(merged)
-        }
-        
-        return mergedSubtitles
+        return FrameSegments(
+            timestamp: CMTimeGetSeconds(time),
+            segments: segments
+        )
     }
 } 

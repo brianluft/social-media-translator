@@ -28,7 +28,8 @@ let package = Package(
             exclude: [],
             resources: [
                 .copy("TestAssets/Videos/test1.mp4"),
-                .copy("TestAssets/Videos/test2.mp4")
+                .copy("TestAssets/Videos/test2.mp4"),
+                .copy("TestAssets/Videos/test3.mp4")
             ]),
     ]
 ) 

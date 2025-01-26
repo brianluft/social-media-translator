@@ -6,12 +6,12 @@ final class SubtitleDetectorTests: XCTestCase {
     
     // MARK: - Test Properties
     private var detector: SubtitleDetector!
-    private var mockDelegate: MockSubtitleDetectionDelegate!
+    private var mockDelegate: MockTextDetectionDelegate!
     
     // MARK: - Setup/Teardown
     override func setUp() async throws {
         try await super.setUp()
-        mockDelegate = MockSubtitleDetectionDelegate()
+        mockDelegate = MockTextDetectionDelegate()
     }
     
     override func tearDown() async throws {
@@ -21,17 +21,17 @@ final class SubtitleDetectorTests: XCTestCase {
     }
     
     // MARK: - Helper Classes
-    private class MockSubtitleDetectionDelegate: SubtitleDetectionDelegate {
+    private class MockTextDetectionDelegate: TextDetectionDelegate {
         var progressUpdates: [Float] = []
-        var completedSubtitles: [SubtitleEntry]?
+        var completedFrames: [FrameSegments]?
         var detectionError: Error?
         
         func detectionDidProgress(_ progress: Float) {
             progressUpdates.append(progress)
         }
         
-        func detectionDidComplete(subtitles: [SubtitleEntry]) {
-            completedSubtitles = subtitles
+        func detectionDidComplete(frames: [FrameSegments]) {
+            completedFrames = frames
         }
         
         func detectionDidFail(with error: Error) {
@@ -40,7 +40,7 @@ final class SubtitleDetectorTests: XCTestCase {
     }
     
     // MARK: - Test Methods
-    func testSubtitleDetection() async throws {
+    func testTextDetection() async throws {
         // Get the test video URL
         let testBundle = Bundle.module
         guard let videoURL = testBundle.url(forResource: "test1", withExtension: "mp4") else {
@@ -52,46 +52,53 @@ final class SubtitleDetectorTests: XCTestCase {
         detector = SubtitleDetector(videoAsset: videoAsset, delegate: mockDelegate)
         
         // Perform detection
-        try await detector.detectSubtitles()
+        try await detector.detectText()
         
         // Verify progress updates were received
         XCTAssertFalse(mockDelegate.progressUpdates.isEmpty, "Should receive progress updates")
         XCTAssertEqual(mockDelegate.progressUpdates.last, 1.0, "Final progress should be 1.0")
         
-        // Verify detected subtitles
-        guard let subtitles = mockDelegate.completedSubtitles else {
-            XCTFail("No subtitles detected")
+        // Verify detected frames
+        guard let frames = mockDelegate.completedFrames else {
+            XCTFail("No frames detected")
             return
         }
         
-        // We expect 3 subtitles, one per second
-        XCTAssertEqual(subtitles.count, 3, "Should detect 3 subtitles")
+        // We expect frames with text
+        XCTAssertFalse(frames.isEmpty, "Should detect text in frames")
         
-        // Expected subtitle texts
+        // Expected texts that should appear somewhere in the frames
         let expectedTexts = ["Hello World", "Test subtitle", "Another test"]
         
-        // Verify subtitle content and timing
-        for (index, subtitle) in subtitles.enumerated() {
-            // Verify text content (case-insensitive comparison since OCR might vary in casing)
-            XCTAssertEqual(subtitle.text.lowercased(), expectedTexts[index].lowercased(),
-                          "Subtitle at index \(index) should match expected text")
+        // Collect all detected text
+        let detectedTexts = frames.flatMap { frame in
+            frame.segments.map { $0.text.lowercased() }
+        }
+        
+        // Verify each expected text appears at least once
+        for expectedText in expectedTexts {
+            XCTAssertTrue(detectedTexts.contains { $0.contains(expectedText.lowercased()) },
+                         "Should find '\(expectedText)' in detected text")
+        }
+        
+        // Verify frame properties
+        for frame in frames {
+            // Verify timing is reasonable
+            XCTAssertGreaterThanOrEqual(frame.timestamp, 0.0)
+            XCTAssertLessThanOrEqual(frame.timestamp, 5.0) // Assuming test video is under 5s
             
-            // Verify timing (approximately)
-            let expectedStart = Double(index)
-            XCTAssertEqual(subtitle.startTime, expectedStart, accuracy: 0.5,
-                          "Subtitle should start at approximately \(expectedStart) seconds")
-            XCTAssertEqual(subtitle.endTime, expectedStart + 1.0, accuracy: 0.5,
-                          "Subtitle should end approximately 1 second after start")
-            
-            // Verify confidence
-            XCTAssertGreaterThan(subtitle.confidence, 0.4,
-                               "Subtitle confidence should be above minimum threshold")
-            
-            // Verify position is within valid bounds
-            XCTAssertGreaterThanOrEqual(subtitle.position.origin.x, 0)
-            XCTAssertGreaterThanOrEqual(subtitle.position.origin.y, 0)
-            XCTAssertLessThanOrEqual(subtitle.position.maxX, 1.0)
-            XCTAssertLessThanOrEqual(subtitle.position.maxY, 1.0)
+            // Verify segments in frame
+            for segment in frame.segments {
+                // Verify confidence
+                XCTAssertGreaterThan(segment.confidence, 0.4,
+                                   "Text confidence should be above minimum threshold")
+                
+                // Verify position is within valid bounds
+                XCTAssertGreaterThanOrEqual(segment.position.origin.x, 0)
+                XCTAssertGreaterThanOrEqual(segment.position.origin.y, 0)
+                XCTAssertLessThanOrEqual(segment.position.maxX, 1.0)
+                XCTAssertLessThanOrEqual(segment.position.maxY, 1.0)
+            }
         }
     }
     
@@ -103,7 +110,7 @@ final class SubtitleDetectorTests: XCTestCase {
         detector = SubtitleDetector(videoAsset: invalidAsset, delegate: mockDelegate)
         
         do {
-            try await detector.detectSubtitles()
+            try await detector.detectText()
             XCTFail("Expected error for invalid asset")
         } catch {
             XCTAssertNotNil(mockDelegate.detectionError, "Delegate should receive error")
@@ -121,22 +128,33 @@ final class SubtitleDetectorTests: XCTestCase {
         let videoAsset = AVAsset(url: videoURL)
         detector = SubtitleDetector(videoAsset: videoAsset, delegate: mockDelegate)
         
-        // Extract and test a single frame at 0.5 seconds (middle of first subtitle)
+        // Extract and test a single frame at 0.5 seconds (middle of first text)
         let imageGenerator = AVAssetImageGenerator(asset: videoAsset)
         imageGenerator.appliesPreferredTrackTransform = true
         let time = CMTime(seconds: 0.5, preferredTimescale: 600)
         let image = try imageGenerator.copyCGImage(at: time, actualTime: nil)
         
-        let subtitles = try await detector.detectText(in: image, at: time)
+        let frameSegments = try await detector.detectText(in: image, at: time)
         
         // Verify single frame detection
-        XCTAssertFalse(subtitles.isEmpty, "Should detect text in frame")
-        XCTAssertEqual(subtitles.count, 1, "Should find one subtitle")
+        XCTAssertFalse(frameSegments.segments.isEmpty, "Should detect text in frame")
         
-        let subtitle = subtitles[0]
-        XCTAssertEqual(subtitle.text.lowercased(), "hello world", "Should detect correct text")
-        XCTAssertGreaterThan(subtitle.confidence, 0.4, "Should have sufficient confidence")
-        XCTAssertEqual(subtitle.startTime, 0.5, "Should have correct timestamp")
+        // Find segment with highest confidence
+        let bestSegment = frameSegments.segments.max(by: { $0.confidence < $1.confidence })!
+        
+        XCTAssertEqual(bestSegment.text.lowercased(), "hello world", "Should detect correct text")
+        XCTAssertGreaterThan(bestSegment.confidence, 0.4, "Should have sufficient confidence")
+        XCTAssertEqual(frameSegments.timestamp, 0.5, "Should have correct timestamp")
+        
+        // Verify position is within valid bounds
+        XCTAssertGreaterThanOrEqual(bestSegment.position.origin.x, 0)
+        XCTAssertGreaterThanOrEqual(bestSegment.position.origin.y, 0)
+        XCTAssertLessThanOrEqual(bestSegment.position.maxX, 1.0)
+        XCTAssertLessThanOrEqual(bestSegment.position.maxY, 1.0)
+        
+        // Verify position is roughly in the expected region (2/3 down the frame)
+        XCTAssertGreaterThan(bestSegment.position.origin.y, 0.5,
+                           "Text should be in lower half of frame")
     }
     
     func testHighFrameRateVideo() async throws {
@@ -151,41 +169,55 @@ final class SubtitleDetectorTests: XCTestCase {
         detector = SubtitleDetector(videoAsset: videoAsset, delegate: mockDelegate)
         
         // Perform detection
-        try await detector.detectSubtitles()
+        try await detector.detectText()
         
         // Verify progress updates
         XCTAssertFalse(mockDelegate.progressUpdates.isEmpty, "Should receive progress updates")
         XCTAssertEqual(mockDelegate.progressUpdates.last, 1.0, "Final progress should be 1.0")
         
-        // Verify detected subtitles
-        guard let subtitles = mockDelegate.completedSubtitles else {
-            XCTFail("No subtitles detected")
+        // Verify detected frames
+        guard let frames = mockDelegate.completedFrames else {
+            XCTFail("No frames detected")
             return
         }
         
-        // We expect 2 subtitles:
-        // 1. "Test message" from frame 1-116 (0.0s - 0.97s at 120fps)
-        // 2. "Second test" from frame 229-364 (1.91s - 3.03s at 120fps)
-        XCTAssertEqual(subtitles.count, 2, "Should detect 2 subtitles")
+        // Group frames by text content to verify timing
+        let frameGroups = Dictionary(grouping: frames) { frame -> String in
+            frame.segments.max(by: { $0.confidence < $1.confidence })?.text.lowercased() ?? ""
+        }
         
-        // Verify first subtitle
-        XCTAssertEqual(subtitles[0].text.lowercased(), "test message", "First subtitle text should match")
-        XCTAssertEqual(subtitles[0].startTime, 0.0, accuracy: 0.5, "First subtitle should start at beginning")
-        XCTAssertEqual(subtitles[0].endTime, 0.97, accuracy: 0.5, "First subtitle should end at ~0.97s")
-        XCTAssertGreaterThan(subtitles[0].confidence, 0.4, "Should have sufficient confidence")
+        // Verify "test message" group
+        if let testMessageFrames = frameGroups["test message"] {
+            let timestamps = testMessageFrames.map { $0.timestamp }.sorted()
+            XCTAssertGreaterThan(timestamps.count, 0, "Should have frames with 'test message'")
+            XCTAssertEqual(timestamps.first!, 0.0, accuracy: 0.5, "Should start at beginning")
+            XCTAssertEqual(timestamps.last!, 1.0, accuracy: 0.5, "Should end around 1s")
+        } else {
+            XCTFail("Missing 'test message' frames")
+        }
         
-        // Verify second subtitle
-        XCTAssertEqual(subtitles[1].text.lowercased(), "second test", "Second subtitle text should match")
-        XCTAssertEqual(subtitles[1].startTime, 1.91, accuracy: 0.5, "Second subtitle should start at ~1.91s")
-        XCTAssertEqual(subtitles[1].endTime, 3.03, accuracy: 0.5, "Second subtitle should end at ~3.03s")
-        XCTAssertGreaterThan(subtitles[1].confidence, 0.4, "Should have sufficient confidence")
+        // Verify "second test" group
+        if let secondTestFrames = frameGroups["second test"] {
+            let timestamps = secondTestFrames.map { $0.timestamp }.sorted()
+            XCTAssertGreaterThan(timestamps.count, 0, "Should have frames with 'second test'")
+            XCTAssertEqual(timestamps.first!, 2.0, accuracy: 0.5, "Should start around 2s")
+            XCTAssertEqual(timestamps.last!, 3.0, accuracy: 0.5, "Should end around 3s")
+        } else {
+            XCTFail("Missing 'second test' frames")
+        }
         
-        // Verify positions are within bounds
-        for subtitle in subtitles {
-            XCTAssertGreaterThanOrEqual(subtitle.position.origin.x, 0)
-            XCTAssertGreaterThanOrEqual(subtitle.position.origin.y, 0)
-            XCTAssertLessThanOrEqual(subtitle.position.maxX, 1.0)
-            XCTAssertLessThanOrEqual(subtitle.position.maxY, 1.0)
+        // Verify positions are within bounds and in expected region
+        for frame in frames {
+            for segment in frame.segments {
+                XCTAssertGreaterThanOrEqual(segment.position.origin.x, 0)
+                XCTAssertGreaterThanOrEqual(segment.position.origin.y, 0)
+                XCTAssertLessThanOrEqual(segment.position.maxX, 1.0)
+                XCTAssertLessThanOrEqual(segment.position.maxY, 1.0)
+                
+                // Verify position is roughly in the expected region (2/3 down the frame)
+                XCTAssertGreaterThan(segment.position.origin.y, 0.5,
+                                   "Text should be in lower half of frame")
+            }
         }
     }
 } 

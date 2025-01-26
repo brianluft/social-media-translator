@@ -2,7 +2,7 @@ import Foundation
 
 public protocol TranslationServiceDelegate: AnyObject {
     func translationService(_ service: TranslationService, didUpdateProgress progress: Double)
-    func translationService(_ service: TranslationService, didTranslateSubtitle subtitle: SubtitleEntry)
+    func translationService(_ service: TranslationService, didTranslateSegment segment: TranslatedSegment)
     func translationService(_ service: TranslationService, didFinishWithError error: Error?)
 }
 
@@ -14,7 +14,7 @@ public class TranslationService {
         self.targetLanguage = targetLanguage
     }
     
-    public func translateSubtitles(_ subtitles: [SubtitleEntry]) {
+    public func translateFrames(_ frames: [FrameSegments]) {
         // TODO: Implement translation using Apple's Translation framework
         // This will be implemented in the next phase
     }

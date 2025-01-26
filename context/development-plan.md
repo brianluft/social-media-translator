@@ -8,8 +8,17 @@
    - Add test target with XCTest
 
 2. Create basic models
-   - `SubtitleEntry` struct
-   - `TranslatedSubtitle` struct
+   - `TextSegment` struct for individual text blocks
+     - Position (rect in normalized coordinates)
+     - Text content
+     - Confidence score
+   - `FrameSegments` struct for all text in a frame
+     - Timestamp
+     - Array of TextSegments
+   - `TranslatedSegment` struct
+     - Original TextSegment
+     - Translated text
+     - Style/formatting info
    - Add JSON coding for testing
 
 3. Set up test infrastructure
@@ -22,8 +31,10 @@
 1. Implement `SubtitleDetector`
    - 👤 Add required framework dependencies in Xcode
    - Basic frame extraction using AVFoundation
-   - Vision setup for OCR
+   - Vision setup for OCR with text rectangle detection
    - Test with single frame first
+   - Implement text segment classification
+   - Track segments across frames by position
    - Add frame-by-frame processing
    - Add progress reporting protocol
 

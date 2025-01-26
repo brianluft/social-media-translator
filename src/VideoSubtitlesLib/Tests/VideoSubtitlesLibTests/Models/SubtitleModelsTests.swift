@@ -4,15 +4,13 @@ import CoreGraphics
 
 final class SubtitleModelsTests: XCTestCase {
     
-    // MARK: - SubtitleEntry Tests
+    // MARK: - TextSegment Tests
     
-    func testSubtitleEntryJSONCoding() throws {
+    func testTextSegmentJSONCoding() throws {
         let id = UUID()
-        let original = SubtitleEntry(
+        let original = TextSegment(
             id: id,
             text: "Hello World",
-            startTime: 1.5,
-            endTime: 3.0,
             position: CGRect(x: 0.1, y: 0.8, width: 0.8, height: 0.1),
             confidence: 0.95
         )
@@ -23,53 +21,76 @@ final class SubtitleModelsTests: XCTestCase {
         
         // Test decoding
         let decoder = JSONDecoder()
-        let decoded = try decoder.decode(SubtitleEntry.self, from: data)
+        let decoded = try decoder.decode(TextSegment.self, from: data)
         
         // Verify equality
         XCTAssertEqual(decoded.id, original.id)
         XCTAssertEqual(decoded.text, original.text)
-        XCTAssertEqual(decoded.startTime, original.startTime)
-        XCTAssertEqual(decoded.endTime, original.endTime)
         XCTAssertEqual(decoded.position, original.position)
         XCTAssertEqual(decoded.confidence, original.confidence)
     }
     
-    func testSubtitleEntryEquatable() {
+    func testTextSegmentEquatable() {
         let id = UUID()
-        let entry1 = SubtitleEntry(
+        let segment1 = TextSegment(
             id: id,
             text: "Test",
-            startTime: 1.0,
-            endTime: 2.0,
             position: CGRect(x: 0.1, y: 0.8, width: 0.8, height: 0.1),
             confidence: 0.9
         )
         
-        let entry2 = SubtitleEntry(
+        let segment2 = TextSegment(
             id: id,
             text: "Test",
-            startTime: 1.0,
-            endTime: 2.0,
             position: CGRect(x: 0.1, y: 0.8, width: 0.8, height: 0.1),
             confidence: 0.9
         )
         
-        XCTAssertEqual(entry1, entry2)
+        XCTAssertEqual(segment1, segment2)
     }
     
-    // MARK: - TranslatedSubtitle Tests
+    // MARK: - FrameSegments Tests
     
-    func testTranslatedSubtitleJSONCoding() throws {
+    func testFrameSegmentsJSONCoding() throws {
+        let id = UUID()
+        let textSegment = TextSegment(
+            text: "Hello",
+            position: CGRect(x: 0.1, y: 0.8, width: 0.8, height: 0.1),
+            confidence: 0.95
+        )
+        
+        let original = FrameSegments(
+            id: id,
+            timestamp: 1.5,
+            segments: [textSegment]
+        )
+        
+        // Test encoding
+        let encoder = JSONEncoder()
+        let data = try encoder.encode(original)
+        
+        // Test decoding
+        let decoder = JSONDecoder()
+        let decoded = try decoder.decode(FrameSegments.self, from: data)
+        
+        // Verify equality
+        XCTAssertEqual(decoded.id, original.id)
+        XCTAssertEqual(decoded.timestamp, original.timestamp)
+        XCTAssertEqual(decoded.segments.count, original.segments.count)
+        XCTAssertEqual(decoded.segments.first?.text, original.segments.first?.text)
+    }
+    
+    // MARK: - TranslatedSegment Tests
+    
+    func testTranslatedSegmentJSONCoding() throws {
         let id = UUID()
         let originalId = UUID()
-        let original = TranslatedSubtitle(
+        let original = TranslatedSegment(
             id: id,
-            originalSubtitleId: originalId,
+            originalSegmentId: originalId,
             originalText: "Hello",
             translatedText: "Hola",
             targetLanguage: "es",
-            startTime: 1.5,
-            endTime: 3.0,
             position: CGRect(x: 0.1, y: 0.8, width: 0.8, height: 0.1)
         )
         
@@ -79,84 +100,91 @@ final class SubtitleModelsTests: XCTestCase {
         
         // Test decoding
         let decoder = JSONDecoder()
-        let decoded = try decoder.decode(TranslatedSubtitle.self, from: data)
+        let decoded = try decoder.decode(TranslatedSegment.self, from: data)
         
         // Verify equality
         XCTAssertEqual(decoded.id, original.id)
-        XCTAssertEqual(decoded.originalSubtitleId, original.originalSubtitleId)
+        XCTAssertEqual(decoded.originalSegmentId, original.originalSegmentId)
         XCTAssertEqual(decoded.originalText, original.originalText)
         XCTAssertEqual(decoded.translatedText, original.translatedText)
         XCTAssertEqual(decoded.targetLanguage, original.targetLanguage)
-        XCTAssertEqual(decoded.startTime, original.startTime)
-        XCTAssertEqual(decoded.endTime, original.endTime)
         XCTAssertEqual(decoded.position, original.position)
     }
     
-    func testTranslatedSubtitleEquatable() {
+    func testTranslatedSegmentEquatable() {
         let id = UUID()
         let originalId = UUID()
-        let subtitle1 = TranslatedSubtitle(
+        let segment1 = TranslatedSegment(
             id: id,
-            originalSubtitleId: originalId,
+            originalSegmentId: originalId,
             originalText: "Hello",
             translatedText: "Hola",
             targetLanguage: "es",
-            startTime: 1.0,
-            endTime: 2.0,
             position: CGRect(x: 0.1, y: 0.8, width: 0.8, height: 0.1)
         )
         
-        let subtitle2 = TranslatedSubtitle(
+        let segment2 = TranslatedSegment(
             id: id,
-            originalSubtitleId: originalId,
+            originalSegmentId: originalId,
             originalText: "Hello",
             translatedText: "Hola",
             targetLanguage: "es",
-            startTime: 1.0,
-            endTime: 2.0,
             position: CGRect(x: 0.1, y: 0.8, width: 0.8, height: 0.1)
         )
         
-        XCTAssertEqual(subtitle1, subtitle2)
+        XCTAssertEqual(segment1, segment2)
     }
     
-    func testSubtitleEntryDescription() {
+    // MARK: - Description Tests
+    
+    func testTextSegmentDescription() {
         let id = UUID()
-        let entry = SubtitleEntry(
+        let segment = TextSegment(
             id: id,
             text: "Test",
-            startTime: 1.5,
-            endTime: 3.0,
             position: CGRect(x: 0.1, y: 0.8, width: 0.8, height: 0.1),
             confidence: 0.95
         )
         
-        let description = entry.description
+        let description = segment.description
         XCTAssertTrue(description.contains("Test"))
-        XCTAssertTrue(description.contains("1.50"))
-        XCTAssertTrue(description.contains("3.00"))
         XCTAssertTrue(description.contains("0.95"))
     }
     
-    func testTranslatedSubtitleDescription() {
+    func testFrameSegmentsDescription() {
+        let id = UUID()
+        let textSegment = TextSegment(
+            text: "Hello",
+            position: CGRect(x: 0.1, y: 0.8, width: 0.8, height: 0.1),
+            confidence: 0.95
+        )
+        
+        let frameSegments = FrameSegments(
+            id: id,
+            timestamp: 1.5,
+            segments: [textSegment]
+        )
+        
+        let description = frameSegments.description
+        XCTAssertTrue(description.contains("Hello"))
+        XCTAssertTrue(description.contains("1.50"))
+    }
+    
+    func testTranslatedSegmentDescription() {
         let id = UUID()
         let originalId = UUID()
-        let subtitle = TranslatedSubtitle(
+        let segment = TranslatedSegment(
             id: id,
-            originalSubtitleId: originalId,
+            originalSegmentId: originalId,
             originalText: "Hello",
             translatedText: "Hola",
             targetLanguage: "es",
-            startTime: 1.5,
-            endTime: 3.0,
             position: CGRect(x: 0.1, y: 0.8, width: 0.8, height: 0.1)
         )
         
-        let description = subtitle.description
+        let description = segment.description
         XCTAssertTrue(description.contains("Hello"))
         XCTAssertTrue(description.contains("Hola"))
         XCTAssertTrue(description.contains("es"))
-        XCTAssertTrue(description.contains("1.50"))
-        XCTAssertTrue(description.contains("3.00"))
     }
 } 

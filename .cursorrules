@@ -16,30 +16,42 @@ iOS app to translate burned-in video subtitles to user's preferred language.
    - Memory management for large files
 
 2. **SubtitleDetector**
-   - Vision + Metal for GPU-accelerated OCR
-   - Outputs SubtitleEntry list
+   - Vision + Metal for GPU-accelerated OCR with rectangle detection
+   - Text segment classification and tracking
+   - Outputs FrameSegments list with position data
    - Progress reporting during detection
 
 3. **TranslationService**
    - Apple Translation framework
-   - Batch processing
+   - Batch processing of text segments
+   - Maintains segment positions and types
    - Progress reporting
 
 4. **VideoPlayerController**
-   - AVKit player with subtitle overlay
+   - AVKit player with multi-segment overlay support
    - Basic playback controls
 
 5. **SubtitleOverlayRenderer**
-   - Core Animation/Text for subtitle display
-   - Position and style management
+   - Core Animation/Text for multi-segment display
+   - Position-aware rendering
+   - Style management per segment type
 
 ## Data Models
 
-1. **SubtitleEntry**
-   - Text, timestamps, position, translation status
+1. **TextSegment**
+   - Text content and position
+   - Segment type (subtitle, username, UI element)
+   - Confidence score from OCR
+   - Rectangle in normalized coordinates
 
-2. **TranslatedSubtitle**
-   - Original/translated text, timing, formatting
+2. **FrameSegments**
+   - Timestamp
+   - Collection of TextSegments for the frame
+
+3. **TranslatedSegment**
+   - Original TextSegment reference
+   - Translated text
+   - Preserved position and styling
 
 ## Workflow
 1. Select video → VideoManager loads
