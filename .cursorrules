@@ -62,28 +62,27 @@ iOS app to translate burned-in video subtitles to user's preferred language.
 
 ### Directory Structure
 ```
-/src/
-/src/VideoSubtitlesLib/
-/src/VideoSubtitlesLib/Sources/
-/src/VideoSubtitlesLib/Sources/VideoSubtitlesLib/
-/src/VideoSubtitlesLib/Sources/VideoSubtitlesLib/Models/
-/src/VideoSubtitlesLib/Sources/VideoSubtitlesLib/Core/
-/src/VideoSubtitlesLib/Sources/VideoSubtitlesLib/Output/
-/src/VideoSubtitlesLib/Sources/VideoSubtitlesLib/Player/
-/src/VideoSubtitlesLib/Tests/
-/src/VideoSubtitlesLib/Tests/VideoSubtitlesLibTests/
-/src/VideoSubtitlesLib/Tests/VideoSubtitlesLibTests/TestAssets/
-/src/VideoSubtitlesLib/Tests/VideoSubtitlesLibTests/TestAssets/Videos/
-/src/VideoSubtitlesLib/Tests/VideoSubtitlesLibTests/TestAssets/Expected/
-/src/VideoSubtitlesLib/Tests/VideoSubtitlesLibTests/Models/
-/src/VideoSubtitlesLib/Tests/VideoSubtitlesLibTests/Core/
-/src/VideoSubtitlesLib/Tests/VideoSubtitlesLibTests/Output/
-/src/VideoSubtitlesLib/Tests/VideoSubtitlesLibTests/TestUtils/
-/src/TranslateVideoSubtitles/
-/src/TranslateVideoSubtitles/TranslateVideoSubtitles/
-/src/TranslateVideoSubtitles/TranslateVideoSubtitles/Views/
-/src/TranslateVideoSubtitles/TranslateVideoSubtitles/ViewModels/
-/src/TranslateVideoSubtitles/TranslateVideoSubtitlesTests/
+/VideoSubtitlesLib/
+/VideoSubtitlesLib/Sources/
+/VideoSubtitlesLib/Sources/VideoSubtitlesLib/
+/VideoSubtitlesLib/Sources/VideoSubtitlesLib/Models/
+/VideoSubtitlesLib/Sources/VideoSubtitlesLib/Core/
+/VideoSubtitlesLib/Sources/VideoSubtitlesLib/Output/
+/VideoSubtitlesLib/Sources/VideoSubtitlesLib/Player/
+/VideoSubtitlesLib/Tests/
+/VideoSubtitlesLib/Tests/VideoSubtitlesLibTests/
+/VideoSubtitlesLib/Tests/VideoSubtitlesLibTests/TestAssets/
+/VideoSubtitlesLib/Tests/VideoSubtitlesLibTests/TestAssets/Videos/
+/VideoSubtitlesLib/Tests/VideoSubtitlesLibTests/TestAssets/Expected/
+/VideoSubtitlesLib/Tests/VideoSubtitlesLibTests/Models/
+/VideoSubtitlesLib/Tests/VideoSubtitlesLibTests/Core/
+/VideoSubtitlesLib/Tests/VideoSubtitlesLibTests/Output/
+/VideoSubtitlesLib/Tests/VideoSubtitlesLibTests/TestUtils/
+/TranslateVideoSubtitles/
+/TranslateVideoSubtitles/TranslateVideoSubtitles/
+/TranslateVideoSubtitles/TranslateVideoSubtitles/Views/
+/TranslateVideoSubtitles/TranslateVideoSubtitles/ViewModels/
+/TranslateVideoSubtitles/TranslateVideoSubtitlesTests/
 ```
 
 ### Verification

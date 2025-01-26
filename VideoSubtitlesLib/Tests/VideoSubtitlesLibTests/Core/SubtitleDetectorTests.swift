@@ -261,8 +261,8 @@ final class SubtitleDetectorTests: XCTestCase {
 
         // Expected Chinese texts and their frame ranges (30 fps)
         let expectedTexts = [
-            ("这是一条测试消息", 13...61),
-            ("再试一条消息", 79...125)
+            ("这是一条测试消息", 13 ... 61),
+            ("再试一条消息", 79 ... 125),
         ]
 
         // Group frames by timestamp
@@ -273,10 +273,10 @@ final class SubtitleDetectorTests: XCTestCase {
         // Verify each expected text appears in its frame range
         for (expectedText, frameRange) in expectedTexts {
             let framesInRange = frameRange.compactMap { framesByTimestamp[$0] }.flatMap { $0 }
-            
+
             // Verify we found frames in the expected range
             XCTAssertFalse(framesInRange.isEmpty, "Should find frames for text: \(expectedText)")
-            
+
             // Check if the text appears in the frames and is positioned correctly
             let hasCorrectlyPositionedText = framesInRange.contains { frame in
                 frame.segments.contains { segment in
@@ -285,7 +285,7 @@ final class SubtitleDetectorTests: XCTestCase {
                     return segment.text.contains(expectedText) && isInLowerThird
                 }
             }
-            
+
             XCTAssertTrue(
                 hasCorrectlyPositionedText,
                 "Should find '\(expectedText)' in lower third of frame range \(frameRange)"
@@ -293,11 +293,11 @@ final class SubtitleDetectorTests: XCTestCase {
         }
 
         // Verify "electroly" appears in correct position
-        let allSegments = frames.flatMap { $0.segments }
+        let allSegments = frames.flatMap(\.segments)
         let electrolySegment = allSegments.first { segment in
             segment.text.lowercased().contains("electroly")
         }
-        
+
         XCTAssertNotNil(electrolySegment, "Should find 'electroly' text")
         if let segment = electrolySegment {
             // Verify position in lower 1/10th

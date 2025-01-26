@@ -69,7 +69,11 @@ public class SubtitleDetector {
 
     // MARK: - Initialization
 
-    public init(videoAsset: AVAsset, delegate: TextDetectionDelegate? = nil, recognitionLanguages: [String] = ["en-US"]) {
+    public init(
+        videoAsset: AVAsset,
+        delegate: TextDetectionDelegate? = nil,
+        recognitionLanguages: [String] = ["en-US"]
+    ) {
         self.videoAsset = videoAsset
         self.delegate = delegate
         self.recognitionLanguages = recognitionLanguages

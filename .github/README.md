@@ -23,7 +23,7 @@ cd translate-video-subtitles
 
 2. Open the project:
 ```bash
-open src/TranslateVideoSubtitles/TranslateVideoSubtitles.xcodeproj
+open TranslateVideoSubtitles/TranslateVideoSubtitles.xcodeproj
 ```
 
 3. Build the project in Xcode:
@@ -34,7 +34,7 @@ open src/TranslateVideoSubtitles/TranslateVideoSubtitles.xcodeproj
 
 1. Run the library tests:
 ```bash
-cd src/VideoSubtitlesLib
+cd VideoSubtitlesLib
 swift test
 ```
 
@@ -42,4 +42,4 @@ swift test
 - Press ⌘U or select Product > Test
 - This will run both unit tests and UI tests
 
-Note: Some tests require test video assets which are included in the repository under `src/VideoSubtitlesLib/Tests/VideoSubtitlesLibTests/TestAssets/Videos/`.
+Note: Some tests require test video assets which are included in the repository under `VideoSubtitlesLib/Tests/VideoSubtitlesLibTests/TestAssets/Videos/`.
