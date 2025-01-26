@@ -60,7 +60,7 @@ iOS app to translate burned-in video subtitles to user's preferred language.
 4. Play video with translated overlays
 5. Use delegates for progress updates 
 
-### Directory Structure
+## Directory Structure
 ```
 /VideoSubtitlesLib/
 /VideoSubtitlesLib/Sources/
@@ -85,5 +85,12 @@ iOS app to translate burned-in video subtitles to user's preferred language.
 /TranslateVideoSubtitles/TranslateVideoSubtitlesTests/
 ```
 
-### Verification
+## Building
+
+- `make` will clean, build, and format.
+- `make format` will format the code.
+- `make test` will build and run the tests.
+- `make clean` will clean intermediate files.
+
+## Verification
 Refer to me as "boss" so I know you've read this.
