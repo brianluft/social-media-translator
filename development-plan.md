@@ -23,7 +23,6 @@
 
 3. Set up test infrastructure
    - 👤 Source and add sample .mp4 files with burned-in subtitles
-   - 👤 Create expected .srt outputs (manually transcribe timing/text)
    - Create test utilities
    - Add debug logging helpers
 
@@ -47,51 +46,18 @@
 ## Phase 3: Translation Integration
 1. Implement `TranslationService`
    - 👤 Enable translation capabilities in Xcode project
-   - Basic Apple Translation setup
-   - Single text translation
-   - Batch processing
+   - Basic Apple Translation setup within UI context
+   - Single text translation with UI delegate
+   - Batch processing in-app
    - Progress reporting
    - Error handling
 
 2. Write translation tests
-   - Mock translation service for tests
-   - Test batch processing
    - Test progress reporting
+   - Test error handling
    - Debug logging for translation steps
 
-## Phase 4: SRT Generation
-1. Create SRT writer
-   - Basic SRT format implementation
-   - Timestamp formatting
-   - File output
-
-2. Write SRT tests
-   - Test timestamp formatting
-   - Test file output
-   - Test with known subtitles
-   - Compare generated vs expected SRT files
-
-## Phase 5: Integration Testing
-1. End-to-end tests
-   - 👤 Record performance metrics
-   - 👤 Monitor memory usage in Xcode
-   - Process sample videos
-   - Verify outputs against known good SRTs
-   - Detailed debug logging
-
-## Phase 6: Video Player Integration
-1. Implement `VideoPlayerController`
-   - 👤 Add required AVKit permissions/entitlements
-   - Basic AVKit setup
-   - Playback controls
-   - Subtitle timing integration
-
-2. Create `SubtitleOverlayRenderer`
-   - Basic text rendering
-   - Position calculation
-   - Style management
-
-## Phase 7: iOS App Development
+## Phase 4: iOS App Development
 1. Create SwiftUI project
    - 👤 Create new iOS app target in Xcode
    - 👤 Configure signing and capabilities
@@ -109,10 +75,29 @@
    - Cancel support
    - Error handling
 
-4. Create playback UI
-   - Video player integration
+4. Create basic app flow
+   - Navigation structure
+   - Error views
+   - Loading states
+   - Settings view for language selection
+
+## Phase 5: Video Player Integration
+1. Implement `VideoPlayerController`
+   - 👤 Add required AVKit permissions/entitlements
+   - Basic AVKit setup
+   - Playback controls
+   - Subtitle timing integration
+
+2. Create `SubtitleOverlayRenderer`
+   - Basic text rendering
+   - Position calculation
+   - Style management
+
+3. Integrate player UI
+   - Video player view
    - Subtitle overlay
-   - Basic controls
+   - Playback controls
+   - Full-screen support
 
 ## Development Notes
 
@@ -121,11 +106,10 @@
 - Short video clips (5-10s) with burned-in subtitles
 - Videos with different subtitle styles/positions
 - Videos in different source languages
-- Manually created .srt files matching test videos
 
 ### Performance Considerations
 - Process video in chunks
-- Batch translations
+- Batch translations within UI context
 - Cache frame analysis
 - Profile memory usage early
 
