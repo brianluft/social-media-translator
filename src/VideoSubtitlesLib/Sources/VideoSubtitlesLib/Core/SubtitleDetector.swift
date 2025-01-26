@@ -1,7 +1,7 @@
-import Foundation
-import Vision
 import AVFoundation
 import CoreImage
+import Foundation
+import Vision
 
 /// Theory of Operation:
 /// The SubtitleDetector processes videos to extract text through the following steps:
@@ -41,22 +41,22 @@ public protocol TextDetectionDelegate: AnyObject {
 
 /// Handles detection of text from video frames using Vision OCR
 public class SubtitleDetector {
-    
     // MARK: - Properties
+
     private let videoAsset: AVAsset
     private let imageGenerator: AVAssetImageGenerator
     private weak var delegate: TextDetectionDelegate?
-    
+
     /// Sampling rate in frames per second
     public let samplingRate: Float = 2.0 // Sample 2 frames per second
-    
+
     /// Minimum confidence score for text detection
     private let minimumConfidence: Float = 0.4
-    
+
     // Vision request for text detection
     private lazy var textRecognitionRequest: VNRecognizeTextRequest = {
-        let request = VNRecognizeTextRequest { [weak self] request, error in
-            if let error = error {
+        let request = VNRecognizeTextRequest { [weak self] _, error in
+            if let error {
                 print("Text recognition error: \(error)")
             }
         }
@@ -64,20 +64,22 @@ public class SubtitleDetector {
         request.usesLanguageCorrection = true
         return request
     }()
-    
+
     // MARK: - Initialization
+
     public init(videoAsset: AVAsset, delegate: TextDetectionDelegate? = nil) {
         self.videoAsset = videoAsset
         self.delegate = delegate
-        
+
         // Configure image generator
-        self.imageGenerator = AVAssetImageGenerator(asset: videoAsset)
-        self.imageGenerator.appliesPreferredTrackTransform = true
-        self.imageGenerator.requestedTimeToleranceBefore = .zero
-        self.imageGenerator.requestedTimeToleranceAfter = .zero
+        imageGenerator = AVAssetImageGenerator(asset: videoAsset)
+        imageGenerator.appliesPreferredTrackTransform = true
+        imageGenerator.requestedTimeToleranceBefore = .zero
+        imageGenerator.requestedTimeToleranceAfter = .zero
     }
-    
+
     // MARK: - Public Methods
+
     public func detectText() async throws {
         do {
             // Get video duration
@@ -85,28 +87,28 @@ public class SubtitleDetector {
             let durationSeconds = CMTimeGetSeconds(duration)
             let frameCount = Int(durationSeconds * Float64(samplingRate))
             var frames: [FrameSegments] = []
-            
+
             // Process frames
-            for frameIndex in 0..<frameCount {
+            for frameIndex in 0 ..< frameCount {
                 let time = CMTime(seconds: Double(frameIndex) / Double(samplingRate), preferredTimescale: 600)
-                
+
                 let image = try imageGenerator.copyCGImage(at: time, actualTime: nil)
                 let frameSegments = try await detectText(in: image, at: time)
                 frames.append(frameSegments)
-                
+
                 // Report progress
                 let progress = Float(frameIndex + 1) / Float(frameCount)
                 delegate?.detectionDidProgress(progress)
             }
-            
+
             delegate?.detectionDidComplete(frames: frames)
-            
+
         } catch {
             delegate?.detectionDidFail(with: error)
             throw error
         }
     }
-    
+
     /// Detects text in a single frame
     /// - Parameters:
     ///   - image: The frame to process
@@ -115,11 +117,11 @@ public class SubtitleDetector {
     public func detectText(in image: CGImage, at time: CMTime) async throws -> FrameSegments {
         let requestHandler = VNImageRequestHandler(cgImage: image)
         try requestHandler.perform([textRecognitionRequest])
-        
-        guard let observations = textRecognitionRequest.results else { 
+
+        guard let observations = textRecognitionRequest.results else {
             return FrameSegments(timestamp: CMTimeGetSeconds(time), segments: [])
         }
-        
+
         let segments = observations
             .filter { $0.confidence >= minimumConfidence }
             .map { observation in
@@ -127,21 +129,21 @@ public class SubtitleDetector {
                 let visionBox = observation.boundingBox
                 let normalizedBox = CGRect(
                     x: visionBox.origin.x,
-                    y: 1 - visionBox.origin.y - visionBox.height,  // Flip Y coordinate
+                    y: 1 - visionBox.origin.y - visionBox.height, // Flip Y coordinate
                     width: visionBox.width,
                     height: visionBox.height
                 )
-                
+
                 return TextSegment(
                     text: observation.topCandidates(1)[0].string,
                     position: normalizedBox,
                     confidence: observation.confidence
                 )
             }
-        
+
         return FrameSegments(
             timestamp: CMTimeGetSeconds(time),
             segments: segments
         )
     }
-} 
+}

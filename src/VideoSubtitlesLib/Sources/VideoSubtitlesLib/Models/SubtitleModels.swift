@@ -1,5 +1,5 @@
-import Foundation
 import CoreGraphics
+import Foundation
 
 /// Represents a single text segment detected in a video frame
 public struct TextSegment: Codable, Identifiable, Equatable {
@@ -11,7 +11,7 @@ public struct TextSegment: Codable, Identifiable, Equatable {
     public let position: CGRect
     /// Confidence score of the OCR detection (0-1)
     public let confidence: Float
-    
+
     public init(
         id: UUID = UUID(),
         text: String,
@@ -33,7 +33,7 @@ public struct FrameSegments: Codable, Identifiable, Equatable {
     public let timestamp: TimeInterval
     /// All text segments detected in this frame
     public let segments: [TextSegment]
-    
+
     public init(
         id: UUID = UUID(),
         timestamp: TimeInterval,
@@ -59,7 +59,7 @@ public struct TranslatedSegment: Codable, Identifiable, Equatable {
     public let targetLanguage: String
     /// Position inherited from original segment
     public let position: CGRect
-    
+
     public init(
         id: UUID = UUID(),
         originalSegmentId: UUID,
@@ -78,9 +78,10 @@ public struct TranslatedSegment: Codable, Identifiable, Equatable {
 }
 
 // MARK: - CustomStringConvertible
+
 extension TextSegment: CustomStringConvertible {
     public var description: String {
-        return """
+        """
         TextSegment(
             id: \(id),
             text: "\(text)",
@@ -92,11 +93,11 @@ extension TextSegment: CustomStringConvertible {
 
 extension FrameSegments: CustomStringConvertible {
     public var description: String {
-        return """
+        """
         FrameSegments(
             id: \(id),
             timestamp: \(String(format: "%.2f", timestamp)),
-            segments: [\(segments.map { $0.description }.joined(separator: ", "))]
+            segments: [\(segments.map(\.description).joined(separator: ", "))]
         )
         """
     }
@@ -104,7 +105,7 @@ extension FrameSegments: CustomStringConvertible {
 
 extension TranslatedSegment: CustomStringConvertible {
     public var description: String {
-        return """
+        """
         TranslatedSegment(
             id: \(id),
             original: "\(originalText)",
@@ -112,4 +113,4 @@ extension TranslatedSegment: CustomStringConvertible {
         )
         """
     }
-} 
+}

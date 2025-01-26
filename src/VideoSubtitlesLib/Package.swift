@@ -6,12 +6,13 @@ let package = Package(
     name: "VideoSubtitlesLib",
     platforms: [
         .iOS(.v15),
-        .macOS(.v12)
+        .macOS(.v12),
     ],
     products: [
         .library(
             name: "VideoSubtitlesLib",
-            targets: ["VideoSubtitlesLib"]),
+            targets: ["VideoSubtitlesLib"]
+        ),
     ],
     dependencies: [],
     targets: [
@@ -20,7 +21,8 @@ let package = Package(
             dependencies: [],
             path: "Sources/VideoSubtitlesLib",
             exclude: [],
-            sources: ["Models", "Core", "Services"]),
+            sources: ["Models", "Core", "Services"]
+        ),
         .testTarget(
             name: "VideoSubtitlesLibTests",
             dependencies: ["VideoSubtitlesLib"],
@@ -29,7 +31,8 @@ let package = Package(
             resources: [
                 .copy("TestAssets/Videos/test1.mp4"),
                 .copy("TestAssets/Videos/test2.mp4"),
-                .copy("TestAssets/Videos/test3.mp4")
-            ]),
+                .copy("TestAssets/Videos/test3.mp4"),
+            ]
+        ),
     ]
-) 
+)
