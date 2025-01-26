@@ -2,7 +2,7 @@
 
 all:
 	cd VideoSubtitlesLib && swift build -c release
-	xcodebuild -workspace TranslateVideoSubtitles.xcworkspace -scheme TranslateVideoSubtitles -configuration Release
+	xcodebuild -quiet -workspace TranslateVideoSubtitles.xcworkspace -scheme TranslateVideoSubtitles -configuration Release 2>&1 | grep -E "warning:|error:"
 
 format:
 	cd BuildTools && swift run -c release swiftformat ..
@@ -12,4 +12,4 @@ test:
 
 clean:
 	cd VideoSubtitlesLib && rm -rf .build
-	xcodebuild clean -workspace TranslateVideoSubtitles.xcworkspace -scheme TranslateVideoSubtitles -configuration Release 
+	xcodebuild -quiet clean -workspace TranslateVideoSubtitles.xcworkspace -scheme TranslateVideoSubtitles -configuration Release 2>&1 | grep -E "warning:|error:"
