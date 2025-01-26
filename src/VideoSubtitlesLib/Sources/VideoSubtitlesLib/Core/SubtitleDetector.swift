@@ -48,7 +48,7 @@ public class SubtitleDetector {
     private weak var delegate: TextDetectionDelegate?
 
     /// Sampling rate in frames per second
-    public let samplingRate: Float = 2.0 // Sample 2 frames per second
+    public let samplingRate: Float = 30.0 // Sample at video frame rate
 
     /// Minimum confidence score for text detection
     private let minimumConfidence: Float = 0.4
@@ -62,6 +62,7 @@ public class SubtitleDetector {
         }
         request.recognitionLevel = .accurate
         request.usesLanguageCorrection = true
+        request.recognitionLanguages = ["zh-Hans", "zh-Hant", "en-US"] // Support Chinese and English
         return request
     }()
 

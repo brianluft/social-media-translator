@@ -234,4 +234,76 @@ final class SubtitleDetectorTests: XCTestCase {
             }
         }
     }
+
+    func testChineseSubtitlesDetection() async throws {
+        // Get the test video URL
+        let testBundle = Bundle.module
+        guard let videoURL = testBundle.url(forResource: "test3", withExtension: "mp4") else {
+            XCTFail("Could not find test video")
+            return
+        }
+
+        let videoAsset = AVAsset(url: videoURL)
+        detector = SubtitleDetector(videoAsset: videoAsset, delegate: mockDelegate)
+
+        // Perform detection
+        try await detector.detectText()
+
+        // Verify progress updates were received
+        XCTAssertFalse(mockDelegate.progressUpdates.isEmpty, "Should receive progress updates")
+        XCTAssertEqual(mockDelegate.progressUpdates.last, 1.0, "Final progress should be 1.0")
+
+        // Verify detected frames
+        guard let frames = mockDelegate.completedFrames else {
+            XCTFail("No frames detected")
+            return
+        }
+
+        // Expected Chinese texts and their frame ranges (30 fps)
+        let expectedTexts = [
+            ("这是一条测试消息", 13...61),
+            ("再试一条消息", 79...125)
+        ]
+
+        // Group frames by timestamp
+        let framesByTimestamp = Dictionary(grouping: frames) { frame -> Int in
+            Int(round(frame.timestamp * 30.0)) // Convert timestamp to frame number at 30fps
+        }
+
+        // Verify each expected text appears in its frame range
+        for (expectedText, frameRange) in expectedTexts {
+            let framesInRange = frameRange.compactMap { framesByTimestamp[$0] }.flatMap { $0 }
+            
+            // Verify we found frames in the expected range
+            XCTAssertFalse(framesInRange.isEmpty, "Should find frames for text: \(expectedText)")
+            
+            // Check if the text appears in the frames and is positioned correctly
+            let hasCorrectlyPositionedText = framesInRange.contains { frame in
+                frame.segments.contains { segment in
+                    // Text should be in lower 1/3rd of the frame
+                    let isInLowerThird = segment.position.origin.y >= 0.66
+                    return segment.text.contains(expectedText) && isInLowerThird
+                }
+            }
+            
+            XCTAssertTrue(
+                hasCorrectlyPositionedText,
+                "Should find '\(expectedText)' in lower third of frame range \(frameRange)"
+            )
+        }
+
+        // Verify "electroly" appears in correct position
+        let allSegments = frames.flatMap { $0.segments }
+        let electrolySegment = allSegments.first { segment in
+            segment.text.lowercased().contains("electroly")
+        }
+        
+        XCTAssertNotNil(electrolySegment, "Should find 'electroly' text")
+        if let segment = electrolySegment {
+            // Verify position in lower 1/10th
+            XCTAssertGreaterThanOrEqual(segment.position.origin.y, 0.9, "Should be in lower 1/10th")
+            // Verify position in left half
+            XCTAssertLessThanOrEqual(segment.position.maxX, 0.5, "Should be in left half")
+        }
+    }
 }
