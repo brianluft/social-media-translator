@@ -1,12 +1,12 @@
-// swift-tools-version: 5.5
+// swift-tools-version: 6.0
 
 import PackageDescription
 
 let package = Package(
     name: "VideoSubtitlesLib",
     platforms: [
-        .iOS(.v15),
-        .macOS(.v12),
+        .iOS(.v18),
+        .macOS(.v15),
     ],
     products: [
         .library(

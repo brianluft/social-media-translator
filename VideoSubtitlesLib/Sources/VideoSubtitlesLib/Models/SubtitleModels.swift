@@ -46,7 +46,7 @@ public struct FrameSegments: Codable, Identifiable, Equatable {
 }
 
 /// Represents a translated text segment with preserved positioning
-public struct TranslatedSegment: Codable, Identifiable, Equatable {
+public struct TranslatedSegment: Codable, Identifiable, Equatable, Sendable {
     /// Unique identifier for the translated segment
     public let id: UUID
     /// Reference to the original text segment
