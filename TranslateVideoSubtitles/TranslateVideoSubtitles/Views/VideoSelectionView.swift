@@ -7,28 +7,28 @@ struct VideoSelectionView: View {
     @State private var isShowingPhotoPicker = false
     @State private var navigateToProcessing = false
     @State private var selectedVideo: PHPickerResult?
-    
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 20) {
                 Spacer()
-                
+
                 Image(systemName: "film")
                     .font(.system(size: 60))
                     .foregroundColor(.accentColor)
-                
+
                 Text("Translate Video Subtitles")
                     .font(.title2)
                     .bold()
-                
+
                 Text("Choose a video from your photo library to translate its subtitles")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
-                
+
                 Spacer()
-                
+
                 Button(action: {
                     isShowingPhotoPicker = true
                 }) {
@@ -41,19 +41,21 @@ struct VideoSelectionView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .padding(.horizontal)
-                
+
                 Spacer()
             }
             .navigationDestination(isPresented: $navigateToProcessing) {
-                if let selectedVideo = selectedVideo {
+                if let selectedVideo {
                     ProcessingView(videoAsset: selectedVideo)
                 }
             }
-            .photosPicker(isPresented: $isShowingPhotoPicker,
-                         selection: $viewModel.selectedItem,
-                         matching: .videos)
+            .photosPicker(
+                isPresented: $isShowingPhotoPicker,
+                selection: $viewModel.selectedItem,
+                matching: .videos
+            )
             .onChange(of: viewModel.selectedItem) { newValue in
-                if let newValue = newValue {
+                if let newValue {
                     selectedVideo = newValue
                     navigateToProcessing = true
                 }
