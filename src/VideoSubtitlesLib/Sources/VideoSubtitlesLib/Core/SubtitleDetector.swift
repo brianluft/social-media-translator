@@ -46,6 +46,7 @@ public class SubtitleDetector {
     private let videoAsset: AVAsset
     private let imageGenerator: AVAssetImageGenerator
     private weak var delegate: TextDetectionDelegate?
+    private let recognitionLanguages: [String]
 
     /// Sampling rate in frames per second
     public let samplingRate: Float = 30.0 // Sample at video frame rate
@@ -62,15 +63,16 @@ public class SubtitleDetector {
         }
         request.recognitionLevel = .accurate
         request.usesLanguageCorrection = true
-        request.recognitionLanguages = ["zh-Hans", "zh-Hant", "en-US"] // Support Chinese and English
+        request.recognitionLanguages = recognitionLanguages
         return request
     }()
 
     // MARK: - Initialization
 
-    public init(videoAsset: AVAsset, delegate: TextDetectionDelegate? = nil) {
+    public init(videoAsset: AVAsset, delegate: TextDetectionDelegate? = nil, recognitionLanguages: [String] = ["en-US"]) {
         self.videoAsset = videoAsset
         self.delegate = delegate
+        self.recognitionLanguages = recognitionLanguages
 
         // Configure image generator
         imageGenerator = AVAssetImageGenerator(asset: videoAsset)

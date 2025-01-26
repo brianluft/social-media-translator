@@ -52,7 +52,7 @@ final class SubtitleDetectorTests: XCTestCase {
         }
 
         let videoAsset = AVAsset(url: videoURL)
-        detector = SubtitleDetector(videoAsset: videoAsset, delegate: mockDelegate)
+        detector = SubtitleDetector(videoAsset: videoAsset, delegate: mockDelegate, recognitionLanguages: ["en-US"])
 
         // Perform detection
         try await detector.detectText()
@@ -115,7 +115,7 @@ final class SubtitleDetectorTests: XCTestCase {
         let invalidURL = URL(fileURLWithPath: "/nonexistent/path/video.mp4")
         let invalidAsset = AVAsset(url: invalidURL)
 
-        detector = SubtitleDetector(videoAsset: invalidAsset, delegate: mockDelegate)
+        detector = SubtitleDetector(videoAsset: invalidAsset, delegate: mockDelegate, recognitionLanguages: ["en-US"])
 
         do {
             try await detector.detectText()
@@ -134,7 +134,7 @@ final class SubtitleDetectorTests: XCTestCase {
         }
 
         let videoAsset = AVAsset(url: videoURL)
-        detector = SubtitleDetector(videoAsset: videoAsset, delegate: mockDelegate)
+        detector = SubtitleDetector(videoAsset: videoAsset, delegate: mockDelegate, recognitionLanguages: ["en-US"])
 
         // Extract and test a single frame at 0.5 seconds (middle of first text)
         let imageGenerator = AVAssetImageGenerator(asset: videoAsset)
@@ -177,7 +177,7 @@ final class SubtitleDetectorTests: XCTestCase {
         }
 
         let videoAsset = AVAsset(url: videoURL)
-        detector = SubtitleDetector(videoAsset: videoAsset, delegate: mockDelegate)
+        detector = SubtitleDetector(videoAsset: videoAsset, delegate: mockDelegate, recognitionLanguages: ["en-US"])
 
         // Perform detection
         try await detector.detectText()
@@ -244,7 +244,7 @@ final class SubtitleDetectorTests: XCTestCase {
         }
 
         let videoAsset = AVAsset(url: videoURL)
-        detector = SubtitleDetector(videoAsset: videoAsset, delegate: mockDelegate)
+        detector = SubtitleDetector(videoAsset: videoAsset, delegate: mockDelegate, recognitionLanguages: ["zh-Hans"])
 
         // Perform detection
         try await detector.detectText()
