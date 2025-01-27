@@ -15,8 +15,10 @@ struct PlayerView: View {
     var body: some View {
         GeometryReader { _ in
             ZStack {
+                // Video player
                 VideoPlayerView(player: viewModel.player)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .edgesIgnoringSafeArea(.all)
 
                 // Subtitle overlay
                 viewModel.subtitleOverlay
@@ -67,6 +69,12 @@ struct PlayerView: View {
                 }
             }
         }
+        .onAppear {
+            viewModel.play()
+        }
+        .onDisappear {
+            viewModel.pause()
+        }
     }
 }
 
@@ -104,10 +112,8 @@ class PlayerViewModel: ObservableObject {
         let total = Int(duration)
         return String(
             format: "%d:%02d / %d:%02d",
-            current / 60,
-            current % 60,
-            total / 60,
-            total % 60
+            current / 60, current % 60,
+            total / 60, total % 60
         )
     }
 
@@ -123,6 +129,14 @@ class PlayerViewModel: ObservableObject {
 
         // Initial subtitle update
         updateSubtitles(at: 0)
+    }
+
+    func play() {
+        videoPlayerController.play()
+    }
+
+    func pause() {
+        videoPlayerController.pause()
     }
 
     func togglePlayback() {

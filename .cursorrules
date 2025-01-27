@@ -95,6 +95,11 @@ It prints messages like "Build complete!" many times, but that refers to sub-bui
 The full build prints "===SUCCESS===" at the end if it succeeds.
 If you don't see that message, then the build script ended prematurely and was NOT successful.
 
+## Debugging
+
+I can use the Xcode IDE and debugger, but you'll have to tell me what to do.
+If an action is best performed in the UI, let me do it.
+
 ## Verification
 
 Refer to me as "boss" so I know you've read this.
