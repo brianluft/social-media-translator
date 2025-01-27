@@ -1,6 +1,8 @@
 #!/bin/zsh
 set -uo pipefail
 
+NSUnbufferedIO=YES
+
 echo "--- Tools ---"
 set -e
 (cd BuildTools && swift package resolve && swift build -c release --product xcbeautify && swift build -c release --product swiftformat)
@@ -11,7 +13,6 @@ if [ -z "$XCBEAUTIFY" ]; then
   echo "xcbeautify not found"
   exit 1
 fi
-echo "XCBEAUTIFY=$XCBEAUTIFY"
 
 set +e
 SWIFTFORMAT=$(find BuildTools/.build -type f -name swiftformat | grep apple-macosx | grep -v dSYM)
@@ -19,15 +20,13 @@ if [ -z "$SWIFTFORMAT" ]; then
   echo "swiftformat not found"
   exit 1
 fi
-echo "SWIFTFORMAT=$SWIFTFORMAT"
 
 set -e
 NUM_CORES=$(sysctl -n hw.ncpu)
-echo "NUM_CORES=$NUM_CORES"
 
 echo "--- Clean ---"
 set +e
-NSUnbufferedIO=YES xcodebuild clean -workspace TranslateVideoSubtitles.xcworkspace -scheme TranslateVideoSubtitles -configuration Debug -destination 'generic/platform=iOS Simulator' 2>&1  | $XCBEAUTIFY --disable-logging
+xcodebuild clean -workspace TranslateVideoSubtitles.xcworkspace -scheme TranslateVideoSubtitles -configuration Debug -destination 'generic/platform=iOS Simulator' 2>&1  | $XCBEAUTIFY --disable-logging
 if [ $? -ne 0 ]; then
   echo "`xcodebuild clean` failed with exit code $?"
   exit 1
@@ -42,7 +41,7 @@ $SWIFTFORMAT .
 
 echo "--- Debug ---"
 set +e
-NSUnbufferedIO=YES xcodebuild -workspace TranslateVideoSubtitles.xcworkspace -scheme TranslateVideoSubtitles -configuration Debug -destination 'generic/platform=iOS Simulator' -jobs $NUM_CORES 2>&1 | $XCBEAUTIFY --disable-logging
+xcodebuild -workspace TranslateVideoSubtitles.xcworkspace -scheme TranslateVideoSubtitles -configuration Debug -destination 'generic/platform=iOS Simulator' -jobs $NUM_CORES 2>&1 | $XCBEAUTIFY --disable-logging
 if [ $? -ne 0 ]; then
   echo "`xcodebuild` failed with exit code $?"
   exit 1
