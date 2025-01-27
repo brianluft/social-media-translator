@@ -1,8 +1,11 @@
 import AVFoundation
+import os
 import PhotosUI
 import SwiftUI
 import Translation
 import VideoSubtitlesLib
+
+private let logger = Logger(subsystem: "TranslateVideoSubtitles", category: "ProcessingView")
 
 struct ProcessingView: View {
     let videoItem: PhotosPickerItem
@@ -10,44 +13,54 @@ struct ProcessingView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        VStack(spacing: 30) {
-            Spacer()
+        ZStack {
+            // Main content
+            VStack(spacing: 30) {
+                Spacer()
 
-            ProgressView(value: viewModel.progress) {
-                Text(viewModel.currentStatus)
-                    .font(.headline)
-            }
-            .progressViewStyle(.circular)
-            .scaleEffect(2)
-            .padding(.bottom, 30)
+                ProgressView(value: viewModel.progress) {
+                    Text(viewModel.currentStatus)
+                        .font(.headline)
+                }
+                .progressViewStyle(.circular)
+                .scaleEffect(2)
+                .padding(.bottom, 30)
 
-            Text(viewModel.detailedStatus)
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-
-            if viewModel.showError {
-                Text(viewModel.errorMessage)
-                    .foregroundColor(.red)
+                Text(viewModel.detailedStatus)
                     .font(.subheadline)
+                    .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
-                    .padding()
+                    .padding(.horizontal)
+
+                if viewModel.showError {
+                    Text(viewModel.errorMessage)
+                        .foregroundColor(.red)
+                        .font(.subheadline)
+                        .multilineTextAlignment(.center)
+                        .padding()
+                }
+
+                Spacer()
+
+                Button(role: .destructive, action: {
+                    viewModel.cancelProcessing()
+                    dismiss()
+                }) {
+                    Text("Cancel")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.red)
+                .padding(.horizontal)
+                .padding(.bottom)
             }
 
-            Spacer()
-
-            Button(role: .destructive, action: {
-                viewModel.cancelProcessing()
-                dismiss()
-            }) {
-                Text("Cancel")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.borderedProminent)
-            .tint(.red)
-            .padding(.horizontal)
-            .padding(.bottom)
+            // Translation host view - positioned as an overlay to ensure it's in the view hierarchy
+            viewModel.translationHostView
+                .frame(width: 50, height: 50) // Give it a real size
+                .opacity(0.01) // Almost invisible but still "shown"
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
         }
         .navigationBarBackButtonHidden()
         .navigationDestination(isPresented: $viewModel.processingComplete) {
@@ -74,29 +87,46 @@ final class ProcessingViewModel: ObservableObject {
     private var isCancelled = false
     private var detector: SubtitleDetector?
     private var translator: TranslationService?
-    private var translationHostView: some View {
-        Color.clear // Minimal view to host translation session
+
+    var translationHostView: some View {
+        VStack {
+            // Empty view with frame to ensure it's properly laid out
+            Color.clear
+                .frame(width: 50, height: 50) // Match the frame size in parent
+                .onAppear {
+                    logger.info("Translation host view appeared in hierarchy")
+                }
+                .onDisappear {
+                    logger.info("Translation host view disappeared from hierarchy")
+                }
+        }
+        .background(Color.clear) // Add a background to ensure view is rendered
     }
 
     private var frameSegments: [FrameSegments] = []
 
     func processVideo(_ item: PhotosPickerItem) async {
+        logger.info("Starting video processing")
         do {
             // Load video from PhotosPickerItem
             guard let videoData = try await item.loadTransferable(type: Data.self) else {
+                logger.error("Failed to load video data from PhotosPickerItem")
                 throw NSError(
                     domain: "VideoProcessing",
                     code: -1,
                     userInfo: [NSLocalizedDescriptionKey: "Failed to load video data"]
                 )
             }
+            logger.debug("Successfully loaded video data")
 
             // Save to temporary file
             let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".mov")
             try videoData.write(to: tempURL)
+            logger.debug("Saved video to temporary file: \(tempURL.lastPathComponent)")
 
             // Create AVAsset
             let asset = AVURLAsset(url: tempURL)
+            logger.debug("Created AVAsset from video")
 
             // Initialize processing components with Sendable closures
             let detectionDelegate = DetectionDelegate(
@@ -135,9 +165,15 @@ final class ProcessingViewModel: ObservableObject {
                 }
             )
 
+            logger.info("Initializing SubtitleDetector")
             detector = SubtitleDetector(videoAsset: asset, delegate: detectionDelegate)
-            translator = TranslationService(hostView: translationHostView, delegate: translationDelegate)
-            translator?.startSession(target: .init(languageCode: .english))
+
+            logger.info("Initializing TranslationService with host view")
+            translator = TranslationService(
+                hostView: translationHostView,
+                delegate: translationDelegate,
+                target: .init(identifier: "en")
+            )
 
             // Detect subtitles
             detailedStatus = "Detecting subtitles..."
@@ -145,14 +181,17 @@ final class ProcessingViewModel: ObservableObject {
                 Task { @MainActor in
                     do {
                         if let detector {
+                            logger.info("Starting subtitle detection")
                             try await withThrowingTaskGroup(of: Void.self) { group in
                                 group.addTask {
                                     try await detector.detectText()
                                 }
                                 _ = try await group.next()
                             }
+                            logger.info("Subtitle detection completed")
                             continuation.resume()
                         } else {
+                            logger.error("Detector not initialized before detection")
                             continuation.resume(throwing: NSError(
                                 domain: "VideoProcessing",
                                 code: -1,
@@ -160,12 +199,14 @@ final class ProcessingViewModel: ObservableObject {
                             ))
                         }
                     } catch {
+                        logger.error("Subtitle detection failed: \(error.localizedDescription)")
                         continuation.resume(throwing: error)
                     }
                 }
             }
 
         } catch {
+            logger.error("Video processing failed: \(error.localizedDescription)")
             showError = true
             errorMessage = error.localizedDescription
         }
@@ -182,6 +223,7 @@ final class ProcessingViewModel: ObservableObject {
     }
 
     private func handleDetectionComplete(frames: [FrameSegments]) {
+        logger.info("Detection complete with \(frames.count) frames")
         frameSegments = frames
         Task { @MainActor in
             do {
@@ -194,6 +236,7 @@ final class ProcessingViewModel: ObservableObject {
                         Task { @MainActor in
                             do {
                                 if let translator {
+                                    logger.info("Starting translation of detected frames")
                                     let result = try await withThrowingTaskGroup(
                                         of: [UUID: [TranslatedSegment]]?
                                             .self
@@ -203,16 +246,20 @@ final class ProcessingViewModel: ObservableObject {
                                         }
                                         return try await group.next() ?? nil
                                     }
+                                    logger.info("Translation completed successfully")
                                     continuation.resume(returning: result)
                                 } else {
+                                    logger.error("Translation failed - translator not initialized")
                                     continuation.resume(returning: nil)
                                 }
                             } catch {
+                                logger.error("Translation failed with error: \(error.localizedDescription)")
                                 continuation.resume(throwing: error)
                             }
                         }
                     }) {
                     let translatedSegments = Array(translatedByFrame.values.joined())
+                    logger.info("Created \(translatedSegments.count) translated segments")
                     processedVideo = ProcessedVideo(
                         url: processedVideo?.url ?? URL(fileURLWithPath: ""),
                         frameSegments: frames,
@@ -221,6 +268,7 @@ final class ProcessingViewModel: ObservableObject {
                     processingComplete = true
                 }
             } catch {
+                logger.error("Failed to process translation results: \(error.localizedDescription)")
                 showError = true
                 errorMessage = error.localizedDescription
             }

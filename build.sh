@@ -1,8 +1,6 @@
 #!/bin/zsh
 set -uo pipefail
 
-NSUnbufferedIO=YES
-
 echo "--- Tools ---"
 set -e
 (cd BuildTools && swift package resolve && swift build -c release --product xcbeautify && swift build -c release --product swiftformat)
@@ -26,7 +24,7 @@ NUM_CORES=$(sysctl -n hw.ncpu)
 
 echo "--- Clean ---"
 set +e
-xcodebuild clean -workspace TranslateVideoSubtitles.xcworkspace -scheme TranslateVideoSubtitles -configuration Debug -destination 'generic/platform=iOS Simulator' 2>&1  | $XCBEAUTIFY --disable-logging
+NSUnbufferedIO=YES xcodebuild clean -workspace TranslateVideoSubtitles.xcworkspace -scheme TranslateVideoSubtitles -configuration Debug -destination 'generic/platform=iOS Simulator' 2>&1  | $XCBEAUTIFY --disable-logging
 if [ $? -ne 0 ]; then
   echo "`xcodebuild clean` failed with exit code $?"
   exit 1
@@ -41,7 +39,7 @@ $SWIFTFORMAT .
 
 echo "--- Debug ---"
 set +e
-xcodebuild -workspace TranslateVideoSubtitles.xcworkspace -scheme TranslateVideoSubtitles -configuration Debug -destination 'generic/platform=iOS Simulator' -jobs $NUM_CORES 2>&1 | $XCBEAUTIFY --disable-logging
+NSUnbufferedIO=YES xcodebuild -workspace TranslateVideoSubtitles.xcworkspace -scheme TranslateVideoSubtitles -configuration Debug -destination 'generic/platform=iOS Simulator' -jobs $NUM_CORES 2>&1 | $XCBEAUTIFY --disable-logging
 if [ $? -ne 0 ]; then
   echo "`xcodebuild` failed with exit code $?"
   exit 1
@@ -49,7 +47,7 @@ fi
 
 echo "--- Test ---"
 set +e
-(cd VideoSubtitlesLib && swift test)
+(cd VideoSubtitlesLib && NSUnbufferedIO=YES swift test 2>&1)
 if [ $? -ne 0 ]; then
   echo "`swift test` failed with exit code $?"
   exit 1

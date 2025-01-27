@@ -1,6 +1,9 @@
 import Foundation
+import os
 import SwiftUI
 import Translation
+
+private let logger = Logger(subsystem: "VideoSubtitlesLib", category: "TranslationService")
 
 /// Protocol for reporting translation progress
 public protocol TranslationProgressDelegate: AnyObject {
@@ -15,7 +18,8 @@ public class TranslationService {
 
     private weak var delegate: TranslationProgressDelegate?
     private var translationSession: TranslationSession?
-    private var configuration: TranslationSession.Configuration?
+    private let targetLanguage: Locale.Language
+    private var initializationContinuation: CheckedContinuation<Void, Error>?
 
     // MARK: - Initialization
 
@@ -23,21 +27,50 @@ public class TranslationService {
     /// - Parameters:
     ///   - hostView: A SwiftUI view that will host the translation session
     ///   - delegate: Optional delegate to receive progress updates
-    public init(hostView: some View, delegate: TranslationProgressDelegate? = nil) {
+    ///   - source: Source language (optional, will be auto-detected if nil)
+    ///   - target: Target language to translate into
+    public init(
+        hostView: some View,
+        delegate: TranslationProgressDelegate? = nil,
+        source: Locale.Language? = nil,
+        target: Locale.Language
+    ) {
+        logger
+            .info(
+                "Initializing TranslationService with target language: \(target.languageCode?.identifier ?? "unknown")"
+            )
         self.delegate = delegate
+        targetLanguage = target
 
-        // Set up translation task on host view
+        let configuration = TranslationSession.Configuration(source: source, target: target)
+        logger
+            .debug(
+                "Created translation configuration - source: \(source?.languageCode?.identifier ?? "auto"), target: \(target.languageCode?.identifier ?? "unknown")"
+            )
+
+        logger.info("Setting up translation task with host view")
         _ = hostView.translationTask(configuration) { [weak self] session in
-            self?.translationSession = session
+            guard let self else { return }
+
+            self.translationSession = session
+            logger.info("Translation session successfully initialized")
+            self.initializationContinuation?.resume()
+            self.initializationContinuation = nil
         }
+        logger.debug("Translation task created successfully")
     }
 
-    /// Start a translation session with specified languages
-    /// - Parameters:
-    ///   - source: Source language (optional, will be auto-detected if nil)
-    ///   - target: Target language
-    public func startSession(source: Locale.Language? = nil, target: Locale.Language) {
-        configuration = TranslationSession.Configuration(source: source, target: target)
+    /// Wait for the translation session to be initialized
+    private func waitForInitialization() async throws {
+        if translationSession != nil {
+            logger.debug("Translation session already initialized")
+            return
+        }
+
+        logger.info("Waiting for translation session initialization")
+        try await withCheckedThrowingContinuation { continuation in
+            self.initializationContinuation = continuation
+        }
     }
 
     /// Translate a collection of frame segments
@@ -45,7 +78,13 @@ public class TranslationService {
     ///   - frameSegments: Array of frame segments to translate
     /// - Returns: Dictionary mapping frame IDs to arrays of translated segments
     public func translate(_ frameSegments: [FrameSegments]) async throws -> [UUID: [TranslatedSegment]] {
+        logger.info("Starting translation of \(frameSegments.count) frame segments")
+
+        // Wait for session initialization if needed
+        try await waitForInitialization()
+
         guard let session = translationSession else {
+            logger.error("Translation failed - session not initialized")
             throw NSError(
                 domain: "TranslationService",
                 code: 1,
@@ -64,18 +103,23 @@ public class TranslationService {
                 }
             }
         }
+        logger.debug("Found \(uniqueSegments.count) unique text segments to translate")
 
         // Step 2: Create translation requests
         let requests = uniqueSegments.map { text, _ in
             TranslationSession.Request(sourceText: text, clientIdentifier: text)
         }
+        logger.debug("Created \(requests.count) translation requests")
 
         // Step 3: Translate all segments at once
         let responses: [TranslationSession.Response]
         do {
+            logger.info("Sending translation requests to service")
             responses = try await session.translations(from: requests)
+            logger.info("Successfully received \(responses.count) translation responses")
             delegate?.translationDidComplete()
         } catch {
+            logger.error("Translation failed with error: \(error.localizedDescription)")
             delegate?.translationDidFail(with: error)
             throw error
         }
@@ -85,13 +129,16 @@ public class TranslationService {
 
         for response in responses {
             guard let clientId = response.clientIdentifier,
-                  let (originalSegment, frameIds) = uniqueSegments[clientId] else { continue }
+                  let (originalSegment, frameIds) = uniqueSegments[clientId] else {
+                logger.warning("Missing client ID or original segment for response")
+                continue
+            }
 
             let translatedSegment = TranslatedSegment(
                 originalSegmentId: originalSegment.id,
                 originalText: originalSegment.text,
                 translatedText: response.targetText,
-                targetLanguage: "es", // TODO: Get actual language code from configuration
+                targetLanguage: targetLanguage.languageCode?.identifier ?? "unknown",
                 position: originalSegment.position
             )
 
@@ -104,6 +151,7 @@ public class TranslationService {
             }
         }
 
+        logger.info("Translation complete - processed \(translatedByFrame.count) frames")
         return translatedByFrame
     }
 }
