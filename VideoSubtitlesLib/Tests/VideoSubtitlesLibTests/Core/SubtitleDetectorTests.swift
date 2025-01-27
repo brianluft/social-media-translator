@@ -51,7 +51,7 @@ final class SubtitleDetectorTests: XCTestCase {
             return
         }
 
-        let videoAsset = AVAsset(url: videoURL)
+        let videoAsset = AVURLAsset(url: videoURL)
         detector = SubtitleDetector(videoAsset: videoAsset, delegate: mockDelegate, recognitionLanguages: ["en-US"])
 
         // Perform detection
@@ -113,7 +113,7 @@ final class SubtitleDetectorTests: XCTestCase {
     func testErrorHandling() async throws {
         // Create an invalid asset to test error handling
         let invalidURL = URL(fileURLWithPath: "/nonexistent/path/video.mp4")
-        let invalidAsset = AVAsset(url: invalidURL)
+        let invalidAsset = AVURLAsset(url: invalidURL)
 
         detector = SubtitleDetector(videoAsset: invalidAsset, delegate: mockDelegate, recognitionLanguages: ["en-US"])
 
@@ -133,7 +133,7 @@ final class SubtitleDetectorTests: XCTestCase {
             return
         }
 
-        let videoAsset = AVAsset(url: videoURL)
+        let videoAsset = AVURLAsset(url: videoURL)
         detector = SubtitleDetector(videoAsset: videoAsset, delegate: mockDelegate, recognitionLanguages: ["en-US"])
 
         // Extract and test a single frame at 0.5 seconds (middle of first text)
@@ -186,7 +186,7 @@ final class SubtitleDetectorTests: XCTestCase {
             return
         }
 
-        let videoAsset = AVAsset(url: videoURL)
+        let videoAsset = AVURLAsset(url: videoURL)
         detector = SubtitleDetector(videoAsset: videoAsset, delegate: mockDelegate, recognitionLanguages: ["en-US"])
 
         // Perform detection
@@ -253,7 +253,7 @@ final class SubtitleDetectorTests: XCTestCase {
             return
         }
 
-        let videoAsset = AVAsset(url: videoURL)
+        let videoAsset = AVURLAsset(url: videoURL)
         detector = SubtitleDetector(videoAsset: videoAsset, delegate: mockDelegate, recognitionLanguages: ["zh-Hans"])
 
         // Perform detection
