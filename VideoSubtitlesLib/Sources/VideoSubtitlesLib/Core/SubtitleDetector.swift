@@ -99,7 +99,24 @@ public class SubtitleDetector {
             for frameIndex in 0 ..< frameCount {
                 let time = CMTime(seconds: Double(frameIndex) / Double(samplingRate), preferredTimescale: 600)
 
-                let image = try imageGenerator.copyCGImage(at: time, actualTime: nil)
+                let image = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<
+                    CGImage,
+                    Error
+                >) in
+                    imageGenerator.generateCGImageAsynchronously(for: time) { cgImage, _, error in
+                        if let error {
+                            continuation.resume(throwing: error)
+                        } else if let cgImage {
+                            continuation.resume(returning: cgImage)
+                        } else {
+                            continuation.resume(throwing: NSError(
+                                domain: "SubtitleDetector",
+                                code: -1,
+                                userInfo: [NSLocalizedDescriptionKey: "Failed to generate image"]
+                            ))
+                        }
+                    }
+                }
                 let frameSegments = try await detectText(in: image, at: time)
                 frames.append(frameSegments)
 

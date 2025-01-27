@@ -140,7 +140,17 @@ final class SubtitleDetectorTests: XCTestCase {
         let imageGenerator = AVAssetImageGenerator(asset: videoAsset)
         imageGenerator.appliesPreferredTrackTransform = true
         let time = CMTime(seconds: 0.5, preferredTimescale: 600)
-        let image = try imageGenerator.copyCGImage(at: time, actualTime: nil)
+        let image = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<CGImage, Error>) in
+            imageGenerator.generateCGImageAsynchronously(for: time) { cgImage, _, error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else if let cgImage {
+                    continuation.resume(returning: cgImage)
+                } else {
+                    continuation.resume(throwing: NSError(domain: "SubtitleDetectorTests", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to generate image"]))
+                }
+            }
+        }
 
         let frameSegments = try await detector.detectText(in: image, at: time)
 
