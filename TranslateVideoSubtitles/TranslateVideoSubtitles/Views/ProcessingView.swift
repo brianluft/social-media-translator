@@ -87,6 +87,7 @@ final class ProcessingViewModel: ObservableObject {
     private var isCancelled = false
     private var detector: SubtitleDetector?
     private var translator: TranslationService?
+    private var videoURL: URL? // Store the temporary video URL
 
     var translationHostView: some View {
         VStack {
@@ -122,6 +123,7 @@ final class ProcessingViewModel: ObservableObject {
             // Save to temporary file
             let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".mov")
             try videoData.write(to: tempURL)
+            videoURL = tempURL // Store the URL
             logger.debug("Saved video to temporary file: \(tempURL.lastPathComponent)")
 
             // Create AVAsset
@@ -260,8 +262,17 @@ final class ProcessingViewModel: ObservableObject {
                     }) {
                     let translatedSegments = Array(translatedByFrame.values.joined())
                     logger.info("Created \(translatedSegments.count) translated segments")
+
+                    guard let videoURL else {
+                        throw NSError(
+                            domain: "VideoProcessing",
+                            code: -1,
+                            userInfo: [NSLocalizedDescriptionKey: "Video URL not available"]
+                        )
+                    }
+
                     processedVideo = ProcessedVideo(
-                        url: processedVideo?.url ?? URL(fileURLWithPath: ""),
+                        url: videoURL,
                         frameSegments: frames,
                         translatedSegments: translatedSegments
                     )

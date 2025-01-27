@@ -39,19 +39,27 @@ public class SubtitleOverlayRenderer {
     }
 
     public func createSubtitleOverlay(for segments: [TranslatedSegment]) -> some View {
-        ZStack {
-            ForEach(segments) { [self] segment in
-                Text(segment.translatedText)
-                    .font(style.font)
-                    .foregroundColor(style.textColor)
-                    .padding(style.padding)
-                    .background(style.backgroundColor)
-                    .cornerRadius(style.cornerRadius)
-                    .position(
-                        x: segment.position.midX,
-                        y: segment.position.midY
+        GeometryReader { geometry in
+            ZStack {
+                ForEach(segments) { [self] segment in
+                    let screenPosition = CGPoint(
+                        x: segment.position.midX * geometry.size.width,
+                        y: segment.position.midY * geometry.size.height
                     )
+
+                    Text(segment.translatedText)
+                        .font(style.font)
+                        .foregroundColor(style.textColor)
+                        .padding(style.padding)
+                        .background(style.backgroundColor)
+                        .cornerRadius(style.cornerRadius)
+                        .position(screenPosition)
+                        .onAppear {
+                            print("Rendering subtitle at: \(screenPosition) from normalized: \(segment.position)")
+                        }
+                }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
 }

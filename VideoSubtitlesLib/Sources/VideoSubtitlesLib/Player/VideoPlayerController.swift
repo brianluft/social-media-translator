@@ -7,7 +7,7 @@ public protocol VideoPlayerControllerDelegate: AnyObject {
 }
 
 @MainActor
-public class VideoPlayerController {
+public class VideoPlayerController: NSObject {
     private final class TimeObserverToken: @unchecked Sendable {
         let token: Any
 
@@ -24,10 +24,26 @@ public class VideoPlayerController {
         player.timeControlStatus == .playing
     }
 
+    override public init() {
+        fatalError("Use init(url:)")
+    }
+
     public init(url: URL) {
+        print("VideoPlayerController initializing with URL: \(url.absoluteString)")
         let playerItem = AVPlayerItem(url: url)
         player = AVPlayer(playerItem: playerItem)
+
+        super.init()
+
         setupTimeObserver()
+
+        // Add KVO for player item status
+        playerItem.addObserver(
+            self,
+            forKeyPath: #keyPath(AVPlayerItem.status),
+            options: [.new, .initial],
+            context: nil
+        )
 
         NotificationCenter.default.addObserver(
             self,
@@ -75,5 +91,26 @@ public class VideoPlayerController {
     public func seek(to time: TimeInterval) {
         let cmTime = CMTime(seconds: time, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
         player.seek(to: cmTime)
+    }
+
+    override public func observeValue(
+        forKeyPath keyPath: String?,
+        of object: Any?,
+        change: [NSKeyValueChangeKey: Any]?,
+        context: UnsafeMutableRawPointer?
+    ) {
+        if keyPath == #keyPath(AVPlayerItem.status),
+           let item = object as? AVPlayerItem {
+            switch item.status {
+            case .failed:
+                print("Player item failed: \(String(describing: item.error))")
+            case .readyToPlay:
+                print("Player item ready to play")
+            case .unknown:
+                print("Player item status unknown")
+            @unknown default:
+                break
+            }
+        }
     }
 }
