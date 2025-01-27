@@ -86,11 +86,15 @@ iOS app to translate burned-in video subtitles to user's preferred language.
 
 ## Building
 
-- `make` will clean, build, and format.
-- `make format` will format the code.
-- `make test` will build and run the tests.
-- `make clean` will clean intermediate files.
+`./build.sh` will clean, format, test, and build.
+Don't pipe this to `cat`. Just run it by itself.
+Do this frequently to check your changes as you work.
+Don't wait until the end to build.
+
+It prints messages like "Build complete!" many times, but that refers to sub-builds.
+The full build prints "===SUCCESS===" at the end if it succeeds.
+If you don't see that message, then the build script ended prematurely and was NOT successful.
 
 ## Verification
-Refer to me as "boss" so I know you've read this.
 
+Refer to me as "boss" so I know you've read this.

@@ -21,7 +21,7 @@ let package = Package(
             dependencies: [],
             path: "Sources/VideoSubtitlesLib",
             exclude: [],
-            sources: ["Models", "Core", "Services"]
+            sources: ["Models", "Core", "Services", "Player"]
         ),
         .testTarget(
             name: "VideoSubtitlesLibTests",

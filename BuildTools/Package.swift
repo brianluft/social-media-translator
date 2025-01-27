@@ -6,6 +6,7 @@ let package = Package(
     platforms: [.macOS(.v10_11)],
     dependencies: [
         .package(url: "https://github.com/nicklockwood/SwiftFormat", from: "0.55.0"),
+        .package(url: "https://github.com/cpisciotta/xcbeautify", from: "2.23.0"),
     ],
     targets: [.target(name: "BuildTools", path: "")]
 )

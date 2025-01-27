@@ -99,10 +99,6 @@ class ProcessingViewModel: ObservableObject {
     }
 }
 
-struct ProcessedVideo {
-    // TODO: Add properties for processed video
-}
-
 #Preview {
     NavigationStack {
         ProcessingView(videoItem: PhotosPickerItem(itemIdentifier: "preview-identifier"))

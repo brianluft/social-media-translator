@@ -147,7 +147,11 @@ final class SubtitleDetectorTests: XCTestCase {
                 } else if let cgImage {
                     continuation.resume(returning: cgImage)
                 } else {
-                    continuation.resume(throwing: NSError(domain: "SubtitleDetectorTests", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to generate image"]))
+                    continuation.resume(throwing: NSError(
+                        domain: "SubtitleDetectorTests",
+                        code: -1,
+                        userInfo: [NSLocalizedDescriptionKey: "Failed to generate image"]
+                    ))
                 }
             }
         }
