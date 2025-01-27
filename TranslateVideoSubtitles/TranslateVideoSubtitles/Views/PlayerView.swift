@@ -1,4 +1,5 @@
 import AVKit
+import os
 import SwiftUI
 import VideoSubtitlesLib
 
@@ -95,21 +96,24 @@ struct VideoPlayerView: UIViewControllerRepresentable {
 }
 
 @MainActor
-class PlayerViewModel: ObservableObject {
+class PlayerViewModel: NSObject, ObservableObject {
     private let videoPlayerController: VideoPlayerController
     private let subtitleRenderer: SubtitleOverlayRenderer
     private let video: ProcessedVideo
     private var currentSegments: [TranslatedSegment] = []
+    private let logger = Logger(subsystem: "TranslateVideoSubtitles", category: "PlayerViewModel")
+    private var observedPlayerItem: AVPlayerItem? // Store reference to observed item
+    @Published private(set) var duration: Double = 1.0 // Default to 1.0 to avoid slider issues
 
     @Published var currentTime: Double = 0
     @Published var isPlaying: Bool = false
 
     var player: AVPlayer { videoPlayerController.player }
-    var duration: Double { player.currentItem?.duration.seconds ?? 0 }
 
     var timeString: String {
         let current = Int(currentTime)
         let total = Int(duration)
+        logger.debug("Current time: \(current), Total: \(total)")
         return String(
             format: "%d:%02d / %d:%02d",
             current / 60, current % 60,
@@ -125,10 +129,47 @@ class PlayerViewModel: ObservableObject {
         self.video = video
         videoPlayerController = VideoPlayerController(url: video.url)
         subtitleRenderer = SubtitleOverlayRenderer()
+        super.init()
+
         videoPlayerController.delegate = self
+        logger.debug("PlayerViewModel initialized with video URL: \(video.url.lastPathComponent)")
 
         // Initial subtitle update
         updateSubtitles(at: 0)
+
+        // Observe player item status
+        if let playerItem = player.currentItem {
+            observedPlayerItem = playerItem
+            playerItem.addObserver(
+                self,
+                forKeyPath: #keyPath(AVPlayerItem.status),
+                options: [.new, .initial],
+                context: nil
+            )
+        }
+    }
+
+    deinit {
+        // Remove observer when view model is deallocated
+        observedPlayerItem?.removeObserver(self, forKeyPath: #keyPath(AVPlayerItem.status))
+    }
+
+    override func observeValue(
+        forKeyPath keyPath: String?,
+        of object: Any?,
+        change: [NSKeyValueChangeKey: Any]?,
+        context: UnsafeMutableRawPointer?
+    ) {
+        if keyPath == #keyPath(AVPlayerItem.status),
+           let item = object as? AVPlayerItem {
+            if item.status == .readyToPlay {
+                let newDuration = item.duration.seconds
+                logger.debug("Player item ready - duration: \(newDuration) seconds")
+                if !newDuration.isNaN && newDuration > 0 {
+                    duration = newDuration
+                }
+            }
+        }
     }
 
     func play() {

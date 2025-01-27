@@ -60,40 +60,14 @@ iOS app to translate burned-in video subtitles to user's preferred language.
 4. Play video with translated overlays
 5. Use delegates for progress updates 
 
-## Directory Structure
-```/VideoSubtitlesLib/
-/VideoSubtitlesLib/Sources/
-/VideoSubtitlesLib/Sources/VideoSubtitlesLib/
-/VideoSubtitlesLib/Sources/VideoSubtitlesLib/Models/
-/VideoSubtitlesLib/Sources/VideoSubtitlesLib/Core/
-/VideoSubtitlesLib/Sources/VideoSubtitlesLib/Output/
-/VideoSubtitlesLib/Sources/VideoSubtitlesLib/Player/
-/VideoSubtitlesLib/Tests/
-/VideoSubtitlesLib/Tests/VideoSubtitlesLibTests/
-/VideoSubtitlesLib/Tests/VideoSubtitlesLibTests/TestAssets/
-/VideoSubtitlesLib/Tests/VideoSubtitlesLibTests/TestAssets/Videos/
-/VideoSubtitlesLib/Tests/VideoSubtitlesLibTests/TestAssets/Expected/
-/VideoSubtitlesLib/Tests/VideoSubtitlesLibTests/Models/
-/VideoSubtitlesLib/Tests/VideoSubtitlesLibTests/Core/
-/VideoSubtitlesLib/Tests/VideoSubtitlesLibTests/Output/
-/VideoSubtitlesLib/Tests/VideoSubtitlesLibTests/TestUtils/
-/TranslateVideoSubtitles/
-/TranslateVideoSubtitles/TranslateVideoSubtitles/
-/TranslateVideoSubtitles/TranslateVideoSubtitles/Views/
-/TranslateVideoSubtitles/TranslateVideoSubtitles/ViewModels/
-/TranslateVideoSubtitles/TranslateVideoSubtitlesTests/
-```
-
 ## Building
 
 `./build.sh` will clean, format, test, and build.
 
-If you made changes, then ALWAYS run the build before returning control to me.
-Often, you will make mistakes that the build will identify.
-Don't return control to me until you've fixed any build errors/warnings.
+If you edit the code, then always run the build before returning control to me.
+You won't know whether your code is correct until you build it.
 
-It prints messages like "Build complete!" many times, but that refers to sub-builds.
-The full build prints "===SUCCESS===" at the end if it succeeds.
+The build prints "===SUCCESS===" at the end if it succeeds.
 If you don't see "===SUCCESS===", then the build script was NOT successful!
 
 ## Debugging

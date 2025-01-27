@@ -5,6 +5,12 @@ import Translation
 
 private let logger = Logger(subsystem: "VideoSubtitlesLib", category: "TranslationService")
 
+#if targetEnvironment(simulator)
+private let isSimulator = true
+#else
+private let isSimulator = false
+#endif
+
 /// Protocol for reporting translation progress
 public protocol TranslationProgressDelegate: AnyObject {
     func translationDidProgress(_ progress: Float)
@@ -79,6 +85,26 @@ public class TranslationService {
     /// - Returns: Dictionary mapping frame IDs to arrays of translated segments
     public func translate(_ frameSegments: [FrameSegments]) async throws -> [UUID: [TranslatedSegment]] {
         logger.info("Starting translation of \(frameSegments.count) frame segments")
+
+        if isSimulator {
+            logger.info("Running in simulator - returning mock translations")
+            var translatedByFrame: [UUID: [TranslatedSegment]] = [:]
+
+            for frame in frameSegments {
+                translatedByFrame[frame.id] = frame.segments.map { segment in
+                    TranslatedSegment(
+                        originalSegmentId: segment.id,
+                        originalText: segment.text,
+                        translatedText: "[TR] \(segment.text)",
+                        targetLanguage: targetLanguage.languageCode?.identifier ?? "unknown",
+                        position: segment.position
+                    )
+                }
+            }
+
+            delegate?.translationDidComplete()
+            return translatedByFrame
+        }
 
         // Wait for session initialization if needed
         try await waitForInitialization()
