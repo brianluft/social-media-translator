@@ -52,11 +52,6 @@
    - Progress reporting
    - Error handling
 
-2. Write translation tests
-   - Test progress reporting
-   - Test error handling
-   - Debug logging for translation steps
-
 ## Phase 4: iOS App Development
 1. Create SwiftUI project
    - 👤 Create new iOS app target in Xcode
