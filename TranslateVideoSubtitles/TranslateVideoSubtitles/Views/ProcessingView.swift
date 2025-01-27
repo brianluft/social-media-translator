@@ -3,7 +3,7 @@ import SwiftUI
 import VideoSubtitlesLib
 
 struct ProcessingView: View {
-    let videoAsset: PHPickerResult
+    let videoItem: PhotosPickerItem
     @StateObject private var viewModel = ProcessingViewModel()
     @Environment(\.dismiss) private var dismiss
 
@@ -54,7 +54,7 @@ struct ProcessingView: View {
             }
         }
         .task {
-            await viewModel.processVideo(videoAsset)
+            await viewModel.processVideo(videoItem)
         }
     }
 }
@@ -71,7 +71,7 @@ class ProcessingViewModel: ObservableObject {
 
     private var isCancelled = false
 
-    func processVideo(_ asset: PHPickerResult) async {
+    func processVideo(_ item: PhotosPickerItem) async {
         // TODO: Implement video processing using VideoSubtitlesLib
         // This is a placeholder for now
         for i in 0 ... 100 {
@@ -105,6 +105,6 @@ struct ProcessedVideo {
 
 #Preview {
     NavigationStack {
-        ProcessingView(videoAsset: PHPickerResult())
+        ProcessingView(videoItem: PhotosPickerItem(itemIdentifier: "preview-identifier"))
     }
 }

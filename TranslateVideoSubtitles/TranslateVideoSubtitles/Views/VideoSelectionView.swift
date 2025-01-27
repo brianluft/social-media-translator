@@ -6,7 +6,7 @@ struct VideoSelectionView: View {
     @StateObject private var viewModel = VideoSelectionViewModel()
     @State private var isShowingPhotoPicker = false
     @State private var navigateToProcessing = false
-    @State private var selectedVideo: PHPickerResult?
+    @State private var selectedItem: PhotosPickerItem?
 
     var body: some View {
         NavigationStack {
@@ -45,27 +45,22 @@ struct VideoSelectionView: View {
                 Spacer()
             }
             .navigationDestination(isPresented: $navigateToProcessing) {
-                if let selectedVideo {
-                    ProcessingView(videoAsset: selectedVideo)
+                if let selectedItem {
+                    ProcessingView(videoItem: selectedItem)
                 }
             }
             .photosPicker(
                 isPresented: $isShowingPhotoPicker,
-                selection: $viewModel.selectedItem,
+                selection: $selectedItem,
                 matching: .videos
             )
-            .onChange(of: viewModel.selectedItem) { newValue in
-                if let newValue {
-                    selectedVideo = newValue
+            .onChange(of: selectedItem) { _, newValue in
+                if newValue != nil {
                     navigateToProcessing = true
                 }
             }
         }
     }
-}
-
-class VideoSelectionViewModel: ObservableObject {
-    @Published var selectedItem: PHPickerResult?
 }
 
 #Preview {
