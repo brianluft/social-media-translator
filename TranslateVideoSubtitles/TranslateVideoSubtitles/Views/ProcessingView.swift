@@ -180,7 +180,11 @@ final class ProcessingViewModel: ObservableObject {
             )
 
             logger.info("Initializing SubtitleDetector")
-            detector = SubtitleDetector(videoAsset: asset, delegate: detectionDelegate)
+            detector = SubtitleDetector(
+                videoAsset: asset,
+                delegate: detectionDelegate,
+                recognitionLanguages: [sourceLanguage.languageCode?.identifier ?? "en-US"]
+            )
 
             logger.info("Initializing TranslationService")
             translator = TranslationService(
