@@ -69,13 +69,20 @@ struct VideoSelectionView: View {
             ProgressView()
                 .padding()
         } else if !viewModel.supportedSourceLanguages.isEmpty {
-            Picker("Source Language", selection: $viewModel.selectedSourceLanguage) {
-                ForEach(viewModel.supportedSourceLanguages, id: \.self) { language in
-                    Text(viewModel.displayName(for: language))
-                        .tag(Optional(language))
+            VStack(spacing: 8) {
+                Text("Source Language")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                Picker("", selection: $viewModel.selectedSourceLanguage) {
+                    ForEach(viewModel.supportedSourceLanguages, id: \.self) { language in
+                        Text(viewModel.displayName(for: language))
+                            .tag(Optional(language))
+                    }
                 }
+                .pickerStyle(.menu)
+                .frame(maxWidth: .infinity)
             }
-            .pickerStyle(.menu)
             .padding()
         } else if let error = viewModel.error {
             Text(error)
