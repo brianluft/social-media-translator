@@ -59,7 +59,7 @@ class VideoSelectionViewModel: ObservableObject {
         }
 
         supportedSourceLanguages = supported.sorted {
-            ($0.languageCode?.identifier ?? "") < ($1.languageCode?.identifier ?? "")
+            displayName(for: $0) < displayName(for: $1)
         }
 
         // Default to Simplified Chinese if available, otherwise first language
