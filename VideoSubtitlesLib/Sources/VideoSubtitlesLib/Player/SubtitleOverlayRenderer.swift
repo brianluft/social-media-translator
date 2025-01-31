@@ -130,14 +130,14 @@ public class SubtitleOverlayRenderer {
         return position
     }
 
-    public func createSubtitleOverlay(for segments: [TranslatedSegment]) -> some View {
+    public func createSubtitleOverlay(for segments: [(segment: TextSegment, text: String)]) -> some View {
         GeometryReader { geometry in
             ZStack {
-                ForEach(segments) { [self] segment in
-                    let textSize = measureText(segment.translatedText)
+                ForEach(segments, id: \.segment.id) { [self] segment in
+                    let textSize = measureText(segment.text)
                     let originalPosition = CGPoint(
-                        x: segment.position.midX * geometry.size.width,
-                        y: segment.position.midY * geometry.size.height
+                        x: segment.segment.position.midX * geometry.size.width,
+                        y: segment.segment.position.midY * geometry.size.height
                     )
 
                     // Store and adjust positions to prevent overlaps
@@ -149,7 +149,7 @@ public class SubtitleOverlayRenderer {
                         avoiding: &occupiedRects
                     )
 
-                    Text(segment.translatedText)
+                    Text(segment.text)
                         .font(style.font)
                         .foregroundColor(style.textColor)
                         .padding(style.padding)

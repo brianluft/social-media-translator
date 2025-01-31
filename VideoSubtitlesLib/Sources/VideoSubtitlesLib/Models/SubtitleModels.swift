@@ -2,7 +2,7 @@ import CoreGraphics
 import Foundation
 
 /// Represents a single text segment detected in a video frame
-public struct TextSegment: Codable, Identifiable, Equatable {
+public struct TextSegment: Codable, Identifiable, Equatable, Sendable {
     /// Unique identifier for the text segment
     public let id: UUID
     /// The detected text content
@@ -13,12 +13,20 @@ public struct TextSegment: Codable, Identifiable, Equatable {
     public let confidence: Float
 
     public init(
-        id: UUID = UUID(),
+        id: UUID? = nil,
         text: String,
         position: CGRect,
         confidence: Float
     ) {
-        self.id = id
+        if let id {
+            self.id = id
+        } else {
+            // Generate stable ID based on content and position for static text
+            let idString =
+                "\(text)_\(position.origin.x)_\(position.origin.y)_\(position.size.width)_\(position.size.height)"
+            let stableId = UUID(uuidString: UUID5.generate(namespace: UUID5.Namespace.url, name: idString)) ?? UUID()
+            self.id = stableId
+        }
         self.text = text
         self.position = position
         self.confidence = confidence
@@ -26,7 +34,7 @@ public struct TextSegment: Codable, Identifiable, Equatable {
 }
 
 /// Collection of text segments for a specific frame/timestamp
-public struct FrameSegments: Codable, Identifiable, Equatable {
+public struct FrameSegments: Codable, Identifiable, Equatable, Sendable {
     /// Unique identifier for the frame segments collection
     public let id: UUID
     /// Timestamp of the frame in seconds from video start
@@ -45,35 +53,27 @@ public struct FrameSegments: Codable, Identifiable, Equatable {
     }
 }
 
-/// Represents a translated text segment with preserved positioning
-public struct TranslatedSegment: Codable, Identifiable, Equatable, Sendable {
-    /// Unique identifier for the translated segment
-    public let id: UUID
-    /// Reference to the original text segment
-    public let originalSegmentId: UUID
-    /// The original text content
-    public let originalText: String
-    /// The translated text content
-    public let translatedText: String
-    /// The language code of the translation (e.g., "en", "es", "fr")
-    public let targetLanguage: String
-    /// Position inherited from original segment
-    public let position: CGRect
+/// UUID5 namespace generator for stable IDs
+private enum UUID5 {
+    private static let dns = UUID(uuidString: "6ba7b810-9dad-11d1-80b4-00c04fd430c8")!
+    private static let url = UUID(uuidString: "6ba7b811-9dad-11d1-80b4-00c04fd430c8")!
 
-    public init(
-        id: UUID = UUID(),
-        originalSegmentId: UUID,
-        originalText: String,
-        translatedText: String,
-        targetLanguage: String,
-        position: CGRect
-    ) {
-        self.id = id
-        self.originalSegmentId = originalSegmentId
-        self.originalText = originalText
-        self.translatedText = translatedText
-        self.targetLanguage = targetLanguage
-        self.position = position
+    static func generate(namespace: UUID, name: String) -> String {
+        let nameBytes = [UInt8](name.utf8)
+        let namespaceBytes = namespace.uuid
+        var hash = [UInt8](repeating: 0, count: 16)
+
+        // Simple hash combining namespace and name
+        for i in 0 ..< min(16, nameBytes.count) {
+            hash[i] = namespaceBytes.3 ^ nameBytes[i]
+        }
+
+        // Format as UUID string
+        return hash.reduce("") { $0 + String(format: "%02x", $1) }
+    }
+
+    enum Namespace {
+        static let url = UUID5.url
     }
 }
 
@@ -98,18 +98,6 @@ extension FrameSegments: CustomStringConvertible {
             id: \(id),
             timestamp: \(String(format: "%.2f", timestamp)),
             segments: [\(segments.map(\.description).joined(separator: ", "))]
-        )
-        """
-    }
-}
-
-extension TranslatedSegment: CustomStringConvertible {
-    public var description: String {
-        """
-        TranslatedSegment(
-            id: \(id),
-            original: "\(originalText)",
-            translated: "\(translatedText)" (\(targetLanguage))
         )
         """
     }

@@ -130,7 +130,7 @@ class PlayerViewModel: NSObject, ObservableObject {
     private let videoPlayerController: VideoPlayerController
     private let subtitleRenderer: SubtitleOverlayRenderer
     private let video: ProcessedVideo
-    private var currentSegments: [TranslatedSegment] = []
+    private var currentSegments: [(segment: TextSegment, text: String)] = []
     private let logger = Logger(subsystem: "TranslateVideoSubtitles", category: "PlayerViewModel")
     private var observedPlayerItem: AVPlayerItem? // Store reference to observed item
     @Published private(set) var duration: Double = 1.0 // Default to 1.0 to avoid slider issues
@@ -143,7 +143,6 @@ class PlayerViewModel: NSObject, ObservableObject {
     var timeString: String {
         let current = Int(currentTime)
         let total = Int(duration)
-        logger.debug("Current time: \(current), Total: \(total)")
         return String(
             format: "%d:%02d / %d:%02d",
             current / 60, current % 60,
@@ -226,7 +225,11 @@ class PlayerViewModel: NSObject, ObservableObject {
     }
 
     private func updateSubtitles(at time: TimeInterval) {
-        currentSegments = video.segments(at: time)
+        let segmentsWithTranslations = video.segments(at: time)
+        currentSegments = segmentsWithTranslations.compactMap { segment, translation in
+            guard let translation else { return nil }
+            return (segment: segment, text: translation)
+        }
     }
 }
 

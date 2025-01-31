@@ -12,19 +12,79 @@ private let isSimulator = false
 #endif
 
 /// Protocol for reporting translation progress
-public protocol TranslationProgressDelegate: AnyObject {
-    func translationDidProgress(_ progress: Float)
-    func translationDidComplete()
-    func translationDidFail(with error: Error)
+public protocol TranslationProgressDelegate: AnyObject, Sendable {
+    func translationDidProgress(_ progress: Float) async
+    func translationDidComplete() async
+    func translationDidFail(with error: Error) async
+}
+
+/// A Sendable wrapper around TranslationSession
+private struct SendableTranslationSession: @unchecked Sendable {
+    let session: TranslationSession
+
+    func translate(requests: [TranslationSession.Request]) async throws -> [TranslationSession.Response] {
+        try await session.translations(from: requests)
+    }
 }
 
 /// Service that handles translation of subtitle segments using Apple's Translation framework
-public class TranslationService {
+@MainActor
+public final class TranslationService: Sendable {
     // MARK: - Properties
 
     private weak var delegate: TranslationProgressDelegate?
-    private let session: TranslationSession
-    private let targetLanguage: Locale.Language
+    private let translationActor: TranslationActor
+
+    // Create an actor to safely handle translation
+    private actor TranslationActor {
+        private let session: SendableTranslationSession
+        private let targetLanguage: Locale.Language
+        private let isSimulator: Bool
+
+        init(session: TranslationSession, targetLanguage: Locale.Language, isSimulator: Bool) {
+            self.session = SendableTranslationSession(session: session)
+            self.targetLanguage = targetLanguage
+            self.isSimulator = isSimulator
+        }
+
+        func translate(_ frameSegments: [FrameSegments]) async throws -> [String: String] {
+            if isSimulator {
+                var translations: [String: String] = [:]
+                for frame in frameSegments {
+                    for segment in frame.segments {
+                        translations[segment.text] = "[TR] \(segment.text)"
+                    }
+                }
+                return translations
+            }
+
+            // Collect unique texts
+            var uniqueTexts = Set<String>()
+            for frame in frameSegments {
+                for segment in frame.segments {
+                    uniqueTexts.insert(segment.text)
+                }
+            }
+
+            // Create requests
+            let requests = uniqueTexts.map { text in
+                TranslationSession.Request(sourceText: text, clientIdentifier: text)
+            }
+
+            // Translate
+            let responses = try await session.translate(requests: requests)
+
+            // Create translations dictionary
+            var translations: [String: String] = [:]
+            for response in responses {
+                if let sourceText = response.clientIdentifier {
+                    translations[sourceText] = response.targetText
+                }
+            }
+
+            return translations
+        }
+    }
 
     // MARK: - Initialization
 
@@ -42,98 +102,50 @@ public class TranslationService {
             .info(
                 "Initializing TranslationService with target language: \(target.languageCode?.identifier ?? "unknown")"
             )
-        self.session = session
+        // Create a local copy of session to avoid data races
+        let sendableSession = SendableTranslationSession(session: session)
+        translationActor = TranslationActor(
+            session: sendableSession.session,
+            targetLanguage: target,
+            isSimulator: isSimulator
+        )
         self.delegate = delegate
-        targetLanguage = target
     }
 
     /// Translate a collection of frame segments
     /// - Parameters:
     ///   - frameSegments: Array of frame segments to translate
-    /// - Returns: Dictionary mapping frame IDs to arrays of translated segments
-    public func translate(_ frameSegments: [FrameSegments]) async throws -> [UUID: [TranslatedSegment]] {
+    /// - Returns: Dictionary mapping original text to translated text
+    public nonisolated func translate(_ frameSegments: [FrameSegments]) async throws -> [String: String] {
         logger.info("Starting translation of \(frameSegments.count) frame segments")
 
-        if isSimulator {
-            logger.info("Running in simulator - returning mock translations")
-            var translatedByFrame: [UUID: [TranslatedSegment]] = [:]
-
-            for frame in frameSegments {
-                translatedByFrame[frame.id] = frame.segments.map { segment in
-                    TranslatedSegment(
-                        originalSegmentId: segment.id,
-                        originalText: segment.text,
-                        translatedText: "[TR] \(segment.text)",
-                        targetLanguage: targetLanguage.languageCode?.identifier ?? "unknown",
-                        position: segment.position
-                    )
-                }
-            }
-
-            delegate?.translationDidComplete()
-            return translatedByFrame
-        }
-
-        // Step 1: Collect unique text segments
-        var uniqueSegments: [String: (TextSegment, Set<UUID>)] = [:]
+        // Log input frame segments
         for frame in frameSegments {
+            logger
+                .debug(
+                    "Input frame at \(frame.timestamp, format: .fixed(precision: 3)): \(frame.segments.count) segments"
+                )
             for segment in frame.segments {
-                if uniqueSegments[segment.text] == nil {
-                    uniqueSegments[segment.text] = (segment, [frame.id])
-                } else {
-                    uniqueSegments[segment.text]?.1.insert(frame.id)
-                }
+                logger
+                    .debug(
+                        "  - Text: '\(segment.text)' at (\(segment.position.origin.x), \(segment.position.origin.y))"
+                    )
             }
         }
-        logger.debug("Found \(uniqueSegments.count) unique text segments to translate")
 
-        // Step 2: Create translation requests
-        let requests = uniqueSegments.map { text, _ in
-            TranslationSession.Request(sourceText: text, clientIdentifier: text)
-        }
-        logger.debug("Created \(requests.count) translation requests")
-
-        // Step 3: Translate all segments at once
-        let responses: [TranslationSession.Response]
         do {
-            logger.info("Sending translation requests to service")
-            responses = try await session.translations(from: requests)
-            logger.info("Successfully received \(responses.count) translation responses")
-            delegate?.translationDidComplete()
+            let translations = try await translationActor.translate(frameSegments)
+            logger.info("Translation complete - processed \(translations.count) translations")
+            // Log output translations
+            for (source, target) in translations {
+                logger.debug("  - '\(source)' -> '\(target)'")
+            }
+            await delegate?.translationDidComplete()
+            return translations
         } catch {
             logger.error("Translation failed with error: \(error.localizedDescription)")
-            delegate?.translationDidFail(with: error)
+            await delegate?.translationDidFail(with: error)
             throw error
         }
-
-        // Step 4: Create translated segments and organize by frame ID
-        var translatedByFrame: [UUID: [TranslatedSegment]] = [:]
-
-        for response in responses {
-            guard let clientId = response.clientIdentifier,
-                  let (originalSegment, frameIds) = uniqueSegments[clientId] else {
-                logger.warning("Missing client ID or original segment for response")
-                continue
-            }
-
-            let translatedSegment = TranslatedSegment(
-                originalSegmentId: originalSegment.id,
-                originalText: originalSegment.text,
-                translatedText: response.targetText,
-                targetLanguage: targetLanguage.languageCode?.identifier ?? "unknown",
-                position: originalSegment.position
-            )
-
-            // Add translated segment to each frame it appears in
-            for frameId in frameIds {
-                if translatedByFrame[frameId] == nil {
-                    translatedByFrame[frameId] = []
-                }
-                translatedByFrame[frameId]?.append(translatedSegment)
-            }
-        }
-
-        logger.info("Translation complete - processed \(translatedByFrame.count) frames")
-        return translatedByFrame
     }
 }

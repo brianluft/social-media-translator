@@ -19,22 +19,6 @@ final class ProcessedVideoTests: XCTestCase {
         FrameSegments(id: id, timestamp: timestamp, segments: segments)
     }
 
-    func makeTranslatedSegment(
-        id: UUID,
-        originalId: UUID,
-        originalText: String,
-        translatedText: String
-    ) -> TranslatedSegment {
-        TranslatedSegment(
-            id: id,
-            originalSegmentId: originalId,
-            originalText: originalText,
-            translatedText: translatedText,
-            targetLanguage: "es",
-            position: .zero
-        )
-    }
-
     // MARK: - Tests
 
     func testInitSortsFrameSegments() {
@@ -50,7 +34,8 @@ final class ProcessedVideoTests: XCTestCase {
         let video = ProcessedVideo(
             url: testURL,
             frameSegments: [frame1, frame2, frame3],
-            translatedSegments: []
+            translations: ["Hello": "Hola"],
+            targetLanguage: "es"
         )
 
         // Then
@@ -61,18 +46,14 @@ final class ProcessedVideoTests: XCTestCase {
         // Given
         let seg1Id = UUID()
         let seg1 = makeTestSegment(id: seg1Id, text: "Hello")
-        let translated1 = makeTranslatedSegment(
-            id: UUID(),
-            originalId: seg1Id,
-            originalText: "Hello",
-            translatedText: "Hola"
-        )
+        let translations = ["Hello": "Hola"]
 
         let frame = makeFrameSegments(id: UUID(), timestamp: 1.0, segments: [seg1])
         let video = ProcessedVideo(
             url: testURL,
             frameSegments: [frame],
-            translatedSegments: [translated1]
+            translations: translations,
+            targetLanguage: "es"
         )
 
         // When
@@ -80,68 +61,58 @@ final class ProcessedVideoTests: XCTestCase {
 
         // Then
         XCTAssertEqual(segments.count, 1)
-        XCTAssertEqual(segments.first?.translatedText, "Hola")
+        XCTAssertEqual(segments.first?.translation, "Hola")
+        XCTAssertEqual(segments.first?.segment.text, "Hello")
     }
 
     func testSegmentsAtTimeWithClosestMatch() {
         // Given
         let seg1Id = UUID()
         let seg1 = makeTestSegment(id: seg1Id, text: "Hello")
-        let translated1 = makeTranslatedSegment(
-            id: UUID(),
-            originalId: seg1Id,
-            originalText: "Hello",
-            translatedText: "Hola"
-        )
+        let translations = ["Hello": "Hola"]
 
         let frame1 = makeFrameSegments(id: UUID(), timestamp: 1.0, segments: [seg1])
         let frame2 = makeFrameSegments(id: UUID(), timestamp: 2.0, segments: [seg1])
         let video = ProcessedVideo(
             url: testURL,
             frameSegments: [frame1, frame2],
-            translatedSegments: [translated1]
+            translations: translations,
+            targetLanguage: "es"
         )
 
         // When/Then
         let segments1 = video.segments(at: 1.2)
         XCTAssertEqual(segments1.count, 1)
-        XCTAssertEqual(segments1.first?.translatedText, "Hola")
+        XCTAssertEqual(segments1.first?.translation, "Hola")
+        XCTAssertEqual(segments1.first?.segment.text, "Hello")
 
         let segments2 = video.segments(at: 1.8)
         XCTAssertEqual(segments2.count, 1)
-        XCTAssertEqual(segments2.first?.translatedText, "Hola")
+        XCTAssertEqual(segments2.first?.translation, "Hola")
+        XCTAssertEqual(segments2.first?.segment.text, "Hello")
     }
 
-    func testSegmentsAtTimeWithMultipleTranslations() {
+    func testSegmentsAtTimeWithMissingTranslation() {
         // Given
         let seg1Id = UUID()
         let seg1 = makeTestSegment(id: seg1Id, text: "Hello")
-        let translated1 = makeTranslatedSegment(
-            id: UUID(),
-            originalId: seg1Id,
-            originalText: "Hello",
-            translatedText: "Hola"
-        )
-        let translated2 = makeTranslatedSegment(
-            id: UUID(),
-            originalId: seg1Id,
-            originalText: "Hello",
-            translatedText: "Bonjour"
-        )
+        let translations: [String: String] = [:]
 
         let frame = makeFrameSegments(id: UUID(), timestamp: 1.0, segments: [seg1])
         let video = ProcessedVideo(
             url: testURL,
             frameSegments: [frame],
-            translatedSegments: [translated1, translated2]
+            translations: translations,
+            targetLanguage: "es"
         )
 
         // When
         let segments = video.segments(at: 1.0)
 
         // Then
-        XCTAssertEqual(segments.count, 2)
-        XCTAssertEqual(Set(segments.map(\.translatedText)), Set(["Hola", "Bonjour"]))
+        XCTAssertEqual(segments.count, 1)
+        XCTAssertNil(segments.first?.translation)
+        XCTAssertEqual(segments.first?.segment.text, "Hello")
     }
 
     func testSegmentsAtTimeWithEmptyResults() {
@@ -149,7 +120,8 @@ final class ProcessedVideoTests: XCTestCase {
         let video = ProcessedVideo(
             url: testURL,
             frameSegments: [],
-            translatedSegments: []
+            translations: [:],
+            targetLanguage: "es"
         )
 
         // When
@@ -163,30 +135,28 @@ final class ProcessedVideoTests: XCTestCase {
         // Given
         let seg1Id = UUID()
         let seg1 = makeTestSegment(id: seg1Id, text: "Hello")
-        let translated1 = makeTranslatedSegment(
-            id: UUID(),
-            originalId: seg1Id,
-            originalText: "Hello",
-            translatedText: "Hola"
-        )
+        let translations = ["Hello": "Hola"]
 
         let frame1 = makeFrameSegments(id: UUID(), timestamp: 1.0, segments: [seg1])
         let frame2 = makeFrameSegments(id: UUID(), timestamp: 2.0, segments: [seg1])
         let video = ProcessedVideo(
             url: testURL,
             frameSegments: [frame1, frame2],
-            translatedSegments: [translated1]
+            translations: translations,
+            targetLanguage: "es"
         )
 
         // When/Then
         // Before first frame
         let segments1 = video.segments(at: 0.5)
         XCTAssertEqual(segments1.count, 1)
-        XCTAssertEqual(segments1.first?.translatedText, "Hola")
+        XCTAssertEqual(segments1.first?.translation, "Hola")
+        XCTAssertEqual(segments1.first?.segment.text, "Hello")
 
         // After last frame
         let segments2 = video.segments(at: 2.5)
         XCTAssertEqual(segments2.count, 1)
-        XCTAssertEqual(segments2.first?.translatedText, "Hola")
+        XCTAssertEqual(segments2.first?.translation, "Hola")
+        XCTAssertEqual(segments2.first?.segment.text, "Hello")
     }
 }

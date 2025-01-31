@@ -245,40 +245,39 @@ final class ProcessingViewModel: ObservableObject {
         Task { @MainActor in
             do {
                 detailedStatus = "Translating subtitles..."
-                if let translatedByFrame =
-                    try await withCheckedThrowingContinuation({ (continuation: CheckedContinuation<
-                        [UUID: [TranslatedSegment]]?,
-                        Error
-                    >) in
-                        Task { @MainActor in
-                            do {
-                                if let translator {
-                                    logger.info("Starting translation of detected frames")
-                                    let result = try await withThrowingTaskGroup(
-                                        of: [UUID: [TranslatedSegment]]?
-                                            .self
-                                    ) { group in
-                                        group.addTask {
-                                            try await translator.translate(frames)
-                                        }
-                                        return try await group.next() ?? nil
+                if let translations = try await withCheckedThrowingContinuation({ (continuation: CheckedContinuation<
+                    [String: String]?,
+                    Error
+                >) in
+                    Task { @MainActor in
+                        do {
+                            if let translator {
+                                // Create a local copy of translator to avoid capture
+                                let translatorCopy = translator
+                                Task.detached {
+                                    do {
+                                        let translations = try await translatorCopy.translate(frames)
+                                        continuation.resume(returning: translations)
+                                    } catch {
+                                        continuation.resume(throwing: error)
                                     }
-                                    logger.info("Translation completed successfully")
-                                    continuation.resume(returning: result)
-                                } else {
-                                    logger.error("Translation failed - translator not initialized")
-                                    continuation.resume(returning: nil)
                                 }
-                            } catch {
-                                logger.error("Translation failed with error: \(error.localizedDescription)")
-                                continuation.resume(throwing: error)
+                            } else {
+                                logger.error("Translator not initialized before translation")
+                                continuation.resume(throwing: NSError(
+                                    domain: "VideoProcessing",
+                                    code: -1,
+                                    userInfo: [NSLocalizedDescriptionKey: "Translator not initialized"]
+                                ))
                             }
+                        } catch {
+                            logger.error("Translation failed: \(error.localizedDescription)")
+                            continuation.resume(throwing: error)
                         }
-                    }) {
-                    let translatedSegments = Array(translatedByFrame.values.joined())
-                    logger.info("Created \(translatedSegments.count) translated segments")
-
+                    }
+                }) {
                     guard let videoURL else {
+                        logger.error("Video URL not available")
                         throw NSError(
                             domain: "VideoProcessing",
                             code: -1,
@@ -289,12 +288,12 @@ final class ProcessingViewModel: ObservableObject {
                     processedVideo = ProcessedVideo(
                         url: videoURL,
                         frameSegments: frames,
-                        translatedSegments: translatedSegments
+                        translations: translations,
+                        targetLanguage: destinationLanguage.languageCode?.identifier ?? "unknown"
                     )
                     processingComplete = true
                 }
             } catch {
-                logger.error("Failed to process translation results: \(error.localizedDescription)")
                 showError = true
                 errorMessage = error.localizedDescription
             }
@@ -367,15 +366,15 @@ private final class TranslationDelegate: TranslationProgressDelegate, @unchecked
         failureHandler = didFail
     }
 
-    func translationDidProgress(_ progress: Float) {
+    func translationDidProgress(_ progress: Float) async {
         progressHandler(progress)
     }
 
-    func translationDidComplete() {
+    func translationDidComplete() async {
         completionHandler()
     }
 
-    func translationDidFail(with error: Error) {
+    func translationDidFail(with error: Error) async {
         failureHandler(error)
     }
 }
