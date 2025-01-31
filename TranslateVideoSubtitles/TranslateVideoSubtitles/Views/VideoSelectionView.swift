@@ -71,11 +71,8 @@ struct VideoSelectionView: View {
         } else if !viewModel.supportedSourceLanguages.isEmpty {
             Picker("Source Language", selection: $viewModel.selectedSourceLanguage) {
                 ForEach(viewModel.supportedSourceLanguages, id: \.self) { language in
-                    if let languageCode = language.languageCode?.identifier,
-                       let localizedName = Locale.current.localizedString(forLanguageCode: languageCode) {
-                        Text(localizedName)
-                            .tag(Optional(language))
-                    }
+                    Text(viewModel.displayName(for: language))
+                        .tag(Optional(language))
                 }
             }
             .pickerStyle(.menu)

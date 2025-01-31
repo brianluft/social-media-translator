@@ -66,6 +66,10 @@ If you don't see "===SUCCESS===", then the build script was NOT successful!
 
 ## Debugging
 
+If you need any documentation, ask me, and I will provide it.
+Apple has extensive documentation on all APIs.
+If you run into compiler errors, don't guess, instead ask me for the relevant documentation.
+
 I can use the Xcode IDE and debugger, but you'll have to tell me what to do.
 If an action is best performed in the UI, let me do it.
 

@@ -14,6 +14,27 @@ class VideoSelectionViewModel: ObservableObject {
 
     private let destinationLanguage: Locale.Language
 
+    func displayName(for language: Locale.Language) -> String {
+        let currentLocale = Locale.current
+
+        if let languageCode = language.languageCode?.identifier,
+           let baseName = currentLocale.localizedString(forLanguageCode: languageCode) {
+            // Only show script if there are multiple scripts for this language
+            let sameLanguageVariants = supportedSourceLanguages.filter {
+                $0.languageCode?.identifier == languageCode
+            }
+
+            if sameLanguageVariants.count > 1,
+               let script = language.script,
+               let scriptName = currentLocale.localizedString(forScriptCode: script.identifier) {
+                return "\(baseName) (\(scriptName))"
+            }
+            return baseName
+        }
+
+        return language.maximalIdentifier
+    }
+
     init() {
         // Get system language as destination
         destinationLanguage = Locale.current.language
