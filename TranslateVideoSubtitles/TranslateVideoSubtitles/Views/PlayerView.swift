@@ -19,7 +19,9 @@ struct PlayerView: View {
                 // Video player
                 VideoPlayerView(player: viewModel.player)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+                #if os(iOS)
                     .edgesIgnoringSafeArea(.all)
+                #endif
 
                 // Subtitle overlay
                 viewModel.subtitleOverlay
@@ -62,13 +64,23 @@ struct PlayerView: View {
                 }
             }
         }
+        #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
+        #endif
         .toolbar {
+            #if os(iOS)
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button("Done") {
                     dismiss()
                 }
             }
+            #else
+            ToolbarItem(placement: .automatic) {
+                Button("Done") {
+                    dismiss()
+                }
+            }
+            #endif
         }
         .onAppear {
             viewModel.play()
@@ -80,6 +92,7 @@ struct PlayerView: View {
 }
 
 // Custom AVPlayerView to support subtitle overlay
+#if os(iOS)
 struct VideoPlayerView: UIViewControllerRepresentable {
     let player: AVPlayer
 
@@ -94,6 +107,23 @@ struct VideoPlayerView: UIViewControllerRepresentable {
         // Update if needed
     }
 }
+
+#elseif os(macOS)
+struct VideoPlayerView: NSViewRepresentable {
+    let player: AVPlayer
+
+    func makeNSView(context: Context) -> AVPlayerView {
+        let playerView = AVPlayerView()
+        playerView.player = player
+        playerView.controlsStyle = .none
+        return playerView
+    }
+
+    func updateNSView(_ nsView: AVPlayerView, context: Context) {
+        // Update if needed
+    }
+}
+#endif
 
 @MainActor
 class PlayerViewModel: NSObject, ObservableObject {
