@@ -23,60 +23,28 @@ public class TranslationService {
     // MARK: - Properties
 
     private weak var delegate: TranslationProgressDelegate?
-    private var translationSession: TranslationSession?
+    private let session: TranslationSession
     private let targetLanguage: Locale.Language
-    private var initializationContinuation: CheckedContinuation<Void, Error>?
 
     // MARK: - Initialization
 
-    /// Initialize the translation service with a SwiftUI view that will host the translation session
+    /// Initialize the translation service with an existing translation session
     /// - Parameters:
-    ///   - hostView: A SwiftUI view that will host the translation session
+    ///   - session: The translation session to use for translations
     ///   - delegate: Optional delegate to receive progress updates
-    ///   - source: Source language (optional, will be auto-detected if nil)
-    ///   - target: Target language to translate into
+    ///   - target: Target language being translated into
     public init(
-        hostView: some View,
+        session: TranslationSession,
         delegate: TranslationProgressDelegate? = nil,
-        source: Locale.Language? = nil,
         target: Locale.Language
     ) {
         logger
             .info(
                 "Initializing TranslationService with target language: \(target.languageCode?.identifier ?? "unknown")"
             )
+        self.session = session
         self.delegate = delegate
         targetLanguage = target
-
-        let configuration = TranslationSession.Configuration(source: source, target: target)
-        logger
-            .debug(
-                "Created translation configuration - source: \(source?.languageCode?.identifier ?? "auto"), target: \(target.languageCode?.identifier ?? "unknown")"
-            )
-
-        logger.info("Setting up translation task with host view")
-        _ = hostView.translationTask(configuration) { [weak self] session in
-            guard let self else { return }
-
-            self.translationSession = session
-            logger.info("Translation session successfully initialized")
-            self.initializationContinuation?.resume()
-            self.initializationContinuation = nil
-        }
-        logger.debug("Translation task created successfully")
-    }
-
-    /// Wait for the translation session to be initialized
-    private func waitForInitialization() async throws {
-        if translationSession != nil {
-            logger.debug("Translation session already initialized")
-            return
-        }
-
-        logger.info("Waiting for translation session initialization")
-        try await withCheckedThrowingContinuation { continuation in
-            self.initializationContinuation = continuation
-        }
     }
 
     /// Translate a collection of frame segments
@@ -104,18 +72,6 @@ public class TranslationService {
 
             delegate?.translationDidComplete()
             return translatedByFrame
-        }
-
-        // Wait for session initialization if needed
-        try await waitForInitialization()
-
-        guard let session = translationSession else {
-            logger.error("Translation failed - session not initialized")
-            throw NSError(
-                domain: "TranslationService",
-                code: 1,
-                userInfo: [NSLocalizedDescriptionKey: "Translation session not initialized"]
-            )
         }
 
         // Step 1: Collect unique text segments

@@ -61,13 +61,6 @@ struct ProcessingView: View {
                 .padding(.horizontal)
                 .padding(.bottom)
             }
-
-            // Translation host view - positioned as an overlay to ensure it's in the view hierarchy
-            viewModel.translationHostView
-                .frame(width: 50, height: 50) // Give it a real size
-                .opacity(0.01) // Almost invisible but still "shown"
-                .allowsHitTesting(false)
-                .accessibilityHidden(true)
         }
         .navigationBarBackButtonHidden()
         .navigationDestination(isPresented: $viewModel.processingComplete) {
@@ -75,8 +68,15 @@ struct ProcessingView: View {
                 PlayerView(video: processedVideo)
             }
         }
-        .task {
-            await viewModel.processVideo(videoItem)
+        // Attach translation task to the main view
+        .translationTask(TranslationSession.Configuration(
+            source: sourceLanguage,
+            target: viewModel.destinationLanguage
+        )) { session in
+            Task { @MainActor in
+                viewModel.translationSessionCreated(session)
+                await viewModel.processVideo(videoItem)
+            }
         }
     }
 }
@@ -96,31 +96,29 @@ final class ProcessingViewModel: ObservableObject {
     private var translator: TranslationService?
     private var videoURL: URL?
     private let sourceLanguage: Locale.Language
-    private let destinationLanguage = Locale.current.language
+    let destinationLanguage = Locale.current.language
+    private var translationSession: TranslationSession?
 
     init(sourceLanguage: Locale.Language) {
         self.sourceLanguage = sourceLanguage
     }
 
-    var translationHostView: some View {
-        VStack {
-            // Empty view with frame to ensure it's properly laid out
-            Color.clear
-                .frame(width: 50, height: 50) // Match the frame size in parent
-                .onAppear {
-                    logger.info("Translation host view appeared in hierarchy")
-                }
-                .onDisappear {
-                    logger.info("Translation host view disappeared from hierarchy")
-                }
-        }
-        .background(Color.clear) // Add a background to ensure view is rendered
+    func translationSessionCreated(_ session: TranslationSession) {
+        logger.info("Translation session created")
+        translationSession = session
     }
-
-    private var frameSegments: [FrameSegments] = []
 
     func processVideo(_ item: PhotosPickerItem) async {
         logger.info("Starting video processing")
+
+        // Wait for translation session
+        guard let translationSession else {
+            logger.error("Translation session not available")
+            showError = true
+            errorMessage = "Translation service not initialized"
+            return
+        }
+
         do {
             // Load video from PhotosPickerItem
             guard let videoData = try await item.loadTransferable(type: Data.self) else {
@@ -131,12 +129,13 @@ final class ProcessingViewModel: ObservableObject {
                     userInfo: [NSLocalizedDescriptionKey: "Failed to load video data"]
                 )
             }
+
             logger.debug("Successfully loaded video data")
 
             // Save to temporary file
             let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".mov")
             try videoData.write(to: tempURL)
-            videoURL = tempURL // Store the URL
+            videoURL = tempURL
             logger.debug("Saved video to temporary file: \(tempURL.lastPathComponent)")
 
             // Create AVAsset
@@ -183,11 +182,10 @@ final class ProcessingViewModel: ObservableObject {
             logger.info("Initializing SubtitleDetector")
             detector = SubtitleDetector(videoAsset: asset, delegate: detectionDelegate)
 
-            logger.info("Initializing TranslationService with host view")
+            logger.info("Initializing TranslationService")
             translator = TranslationService(
-                hostView: translationHostView,
+                session: translationSession,
                 delegate: translationDelegate,
-                source: sourceLanguage,
                 target: destinationLanguage
             )
 
@@ -240,7 +238,6 @@ final class ProcessingViewModel: ObservableObject {
 
     private func handleDetectionComplete(frames: [FrameSegments]) {
         logger.info("Detection complete with \(frames.count) frames")
-        frameSegments = frames
         Task { @MainActor in
             do {
                 detailedStatus = "Translating subtitles..."
