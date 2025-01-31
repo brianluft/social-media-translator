@@ -9,8 +9,15 @@ private let logger = Logger(subsystem: "TranslateVideoSubtitles", category: "Pro
 
 struct ProcessingView: View {
     let videoItem: PhotosPickerItem
-    @StateObject private var viewModel = ProcessingViewModel()
+    let sourceLanguage: Locale.Language
+    @StateObject private var viewModel: ProcessingViewModel
     @Environment(\.dismiss) private var dismiss
+
+    init(videoItem: PhotosPickerItem, sourceLanguage: Locale.Language) {
+        self.videoItem = videoItem
+        self.sourceLanguage = sourceLanguage
+        _viewModel = StateObject(wrappedValue: ProcessingViewModel(sourceLanguage: sourceLanguage))
+    }
 
     var body: some View {
         ZStack {
@@ -87,7 +94,13 @@ final class ProcessingViewModel: ObservableObject {
     private var isCancelled = false
     private var detector: SubtitleDetector?
     private var translator: TranslationService?
-    private var videoURL: URL? // Store the temporary video URL
+    private var videoURL: URL?
+    private let sourceLanguage: Locale.Language
+    private let destinationLanguage = Locale.current.language
+
+    init(sourceLanguage: Locale.Language) {
+        self.sourceLanguage = sourceLanguage
+    }
 
     var translationHostView: some View {
         VStack {
@@ -174,7 +187,8 @@ final class ProcessingViewModel: ObservableObject {
             translator = TranslationService(
                 hostView: translationHostView,
                 delegate: translationDelegate,
-                target: .init(identifier: "en")
+                source: sourceLanguage,
+                target: destinationLanguage
             )
 
             // Detect subtitles
@@ -367,6 +381,9 @@ private final class TranslationDelegate: TranslationProgressDelegate, @unchecked
 
 #Preview {
     NavigationStack {
-        ProcessingView(videoItem: PhotosPickerItem(itemIdentifier: "preview-identifier"))
+        ProcessingView(
+            videoItem: PhotosPickerItem(itemIdentifier: "preview-identifier"),
+            sourceLanguage: Locale.Language(identifier: "en")
+        )
     }
 }

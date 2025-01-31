@@ -10,56 +10,99 @@ struct VideoSelectionView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 20) {
-                Spacer()
-
-                Image(systemName: "film")
-                    .font(.system(size: 60))
-                    .foregroundColor(.accentColor)
-
-                Text("Translate Video Subtitles")
-                    .font(.title2)
-                    .bold()
-
-                Text("Choose a video from your photo library to translate its subtitles")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
-
-                Spacer()
-
-                Button(action: {
-                    isShowingPhotoPicker = true
-                }) {
-                    HStack {
-                        Image(systemName: "photo.on.rectangle")
-                        Text("Choose from Photo Library")
+            mainContent
+                .navigationDestination(isPresented: $navigateToProcessing) {
+                    if let selectedItem,
+                       let sourceLanguage = viewModel.selectedSourceLanguage {
+                        ProcessingView(
+                            videoItem: selectedItem,
+                            sourceLanguage: sourceLanguage
+                        )
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding()
                 }
-                .buttonStyle(.borderedProminent)
+                .photosPicker(
+                    isPresented: $isShowingPhotoPicker,
+                    selection: $selectedItem,
+                    matching: .videos
+                )
+                .onChange(of: selectedItem) { _, newValue in
+                    if newValue != nil {
+                        navigateToProcessing = true
+                    }
+                }
+        }
+    }
+
+    private var mainContent: some View {
+        VStack(spacing: 20) {
+            Spacer()
+
+            Image(systemName: "film")
+                .font(.system(size: 60))
+                .foregroundColor(.accentColor)
+
+            Text("Translate Video Subtitles")
+                .font(.title2)
+                .bold()
+
+            Text("Choose a video from your photo library to translate its subtitles")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
                 .padding(.horizontal)
 
-                Spacer()
-            }
-            .navigationDestination(isPresented: $navigateToProcessing) {
-                if let selectedItem {
-                    ProcessingView(videoItem: selectedItem)
-                }
-            }
-            .photosPicker(
-                isPresented: $isShowingPhotoPicker,
-                selection: $selectedItem,
-                matching: .videos
-            )
-            .onChange(of: selectedItem) { _, newValue in
-                if newValue != nil {
-                    navigateToProcessing = true
-                }
-            }
+            languageSelectionContent
+
+            Spacer()
+
+            selectVideoButton
+
+            Spacer()
         }
+    }
+
+    @ViewBuilder
+    private var languageSelectionContent: some View {
+        if viewModel.isLoading {
+            ProgressView()
+                .padding()
+        } else if !viewModel.supportedSourceLanguages.isEmpty {
+            Picker("Source Language", selection: $viewModel.selectedSourceLanguage) {
+                ForEach(viewModel.supportedSourceLanguages, id: \.self) { language in
+                    if let languageCode = language.languageCode?.identifier,
+                       let localizedName = Locale.current.localizedString(forLanguageCode: languageCode) {
+                        Text(localizedName)
+                            .tag(Optional(language))
+                    }
+                }
+            }
+            .pickerStyle(.menu)
+            .padding()
+        } else if let error = viewModel.error {
+            Text(error)
+                .foregroundColor(.red)
+                .padding()
+        } else {
+            Text("No supported languages found")
+                .foregroundColor(.red)
+                .padding()
+        }
+    }
+
+    private var selectVideoButton: some View {
+        Button(action: {
+            isShowingPhotoPicker = true
+        }) {
+            HStack {
+                Image(systemName: "photo.on.rectangle")
+                Text("Choose from Photo Library")
+            }
+            .frame(maxWidth: .infinity)
+            .padding()
+        }
+        .buttonStyle(.borderedProminent)
+        .padding(.horizontal)
+        .disabled(!viewModel.canSelectVideo)
     }
 }
 
