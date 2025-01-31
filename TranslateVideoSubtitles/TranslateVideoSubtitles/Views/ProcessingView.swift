@@ -250,29 +250,24 @@ final class ProcessingViewModel: ObservableObject {
                     Error
                 >) in
                     Task { @MainActor in
-                        do {
-                            if let translator {
-                                // Create a local copy of translator to avoid capture
-                                let translatorCopy = translator
-                                Task.detached {
-                                    do {
-                                        let translations = try await translatorCopy.translate(frames)
-                                        continuation.resume(returning: translations)
-                                    } catch {
-                                        continuation.resume(throwing: error)
-                                    }
+                        if let translator {
+                            // Create a local copy of translator to avoid capture
+                            let translatorCopy = translator
+                            Task.detached {
+                                do {
+                                    let translations = try await translatorCopy.translate(frames)
+                                    continuation.resume(returning: translations)
+                                } catch {
+                                    continuation.resume(throwing: error)
                                 }
-                            } else {
-                                logger.error("Translator not initialized before translation")
-                                continuation.resume(throwing: NSError(
-                                    domain: "VideoProcessing",
-                                    code: -1,
-                                    userInfo: [NSLocalizedDescriptionKey: "Translator not initialized"]
-                                ))
                             }
-                        } catch {
-                            logger.error("Translation failed: \(error.localizedDescription)")
-                            continuation.resume(throwing: error)
+                        } else {
+                            logger.error("Translator not initialized before translation")
+                            continuation.resume(throwing: NSError(
+                                domain: "VideoProcessing",
+                                code: -1,
+                                userInfo: [NSLocalizedDescriptionKey: "Translator not initialized"]
+                            ))
                         }
                     }
                 }) {
