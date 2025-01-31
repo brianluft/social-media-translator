@@ -10,28 +10,23 @@ iOS app to translate burned-in video subtitles to user's preferred language.
 
 ## Core Components
 
-1. **VideoManager**
-   - PhotosKit/AVFoundation for video selection/loading
-   - PHPickerViewController for UI
-   - Memory management for large files
-
-2. **SubtitleDetector**
+- **SubtitleDetector**
    - Vision + Metal for GPU-accelerated OCR with rectangle detection
    - Text segment classification and tracking
    - Outputs FrameSegments list with position data
    - Progress reporting during detection
 
-3. **TranslationService**
+- **TranslationService**
    - Apple Translation framework
    - Batch processing of text segments
    - Maintains segment positions and types
    - Progress reporting
 
-4. **VideoPlayerController**
+- **VideoPlayerController**
    - AVKit player with multi-segment overlay support
    - Basic playback controls
 
-5. **SubtitleOverlayRenderer**
+- **SubtitleOverlayRenderer**
    - Core Animation/Text for multi-segment display
    - Position-aware rendering
    - Style management per segment type
@@ -64,8 +59,7 @@ iOS app to translate burned-in video subtitles to user's preferred language.
 
 `./build.sh` will clean, format, test, and build.
 
-If you edit the code, then always run the build before returning control to me.
-You won't know whether your code is correct until you build it.
+ALWAYS run the build before returning control to me.
 
 The build prints "===SUCCESS===" at the end if it succeeds.
 If you don't see "===SUCCESS===", then the build script was NOT successful!
