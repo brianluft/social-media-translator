@@ -24,3 +24,4 @@
 --enable isEmpty
 --disable andOperator
 --disable wrapMultilineStatementBraces 
+--disable redundantSelf 
