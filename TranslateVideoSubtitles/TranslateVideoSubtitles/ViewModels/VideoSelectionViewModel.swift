@@ -1,5 +1,6 @@
 import AVFoundation
 import Foundation
+import os
 import PhotosUI
 import SwiftUI
 import Translation
@@ -7,12 +8,48 @@ import VideoSubtitlesLib
 
 @MainActor
 class VideoSelectionViewModel: ObservableObject {
-    @Published var selectedSourceLanguage: Locale.Language?
+    private let logger = Logger(subsystem: "com.brianluft.TranslateVideoSubtitles", category: "VideoSelectionViewModel")
+
+    @Published var selectedSourceLanguage: Locale.Language? {
+        didSet {
+            if let language = selectedSourceLanguage {
+                saveSelectedLanguage(language)
+            }
+        }
+    }
+
     @Published var supportedSourceLanguages: [Locale.Language] = []
     @Published var isLoading = true
     @Published var error: String?
 
     private let destinationLanguage: Locale.Language
+    private let userDefaults = UserDefaults.standard
+    private let selectedLanguageKey = "SelectedSourceLanguage"
+
+    private func saveSelectedLanguage(_ language: Locale.Language) {
+        let identifier = language.maximalIdentifier
+        logger.info("Saving selected language: \(identifier)")
+        userDefaults.set(identifier, forKey: selectedLanguageKey)
+        // Force synchronize to ensure it's written immediately
+        userDefaults.synchronize()
+
+        // Verify it was saved
+        if let saved = userDefaults.string(forKey: selectedLanguageKey) {
+            logger.info("Verified saved language: \(saved)")
+        } else {
+            logger.error("Failed to save language!")
+        }
+    }
+
+    private func loadSavedLanguage() -> Locale.Language? {
+        logger.info("Attempting to load saved language...")
+        guard let identifier = userDefaults.string(forKey: selectedLanguageKey) else {
+            logger.info("No saved language found")
+            return nil
+        }
+        logger.info("Found saved language identifier: \(identifier)")
+        return Locale.Language(identifier: identifier)
+    }
 
     func displayName(for language: Locale.Language) -> String {
         let currentLocale = Locale.current
@@ -62,11 +99,19 @@ class VideoSelectionViewModel: ObservableObject {
             displayName(for: $0) < displayName(for: $1)
         }
 
-        // Default to Simplified Chinese if available, otherwise first language
-        if let chineseSimp = supportedSourceLanguages.first(where: { $0.maximalIdentifier.contains("zh-Hans") }) {
-            selectedSourceLanguage = chineseSimp
-        } else {
-            if let first = supportedSourceLanguages.first {
+        // Try to restore saved language first
+        if let savedLanguage = loadSavedLanguage() {
+            if let matchingLanguage = supportedSourceLanguages
+                .first(where: { $0.maximalIdentifier == savedLanguage.maximalIdentifier }) {
+                selectedSourceLanguage = matchingLanguage
+            }
+        }
+
+        // Otherwise use default logic
+        if selectedSourceLanguage == nil {
+            if let chineseSimp = supportedSourceLanguages.first(where: { $0.maximalIdentifier.contains("zh-Hans") }) {
+                selectedSourceLanguage = chineseSimp
+            } else if let first = supportedSourceLanguages.first {
                 selectedSourceLanguage = first
             }
         }
