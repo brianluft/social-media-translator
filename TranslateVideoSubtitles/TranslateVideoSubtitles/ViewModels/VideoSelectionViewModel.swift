@@ -63,10 +63,12 @@ class VideoSelectionViewModel: ObservableObject {
         }
 
         // Default to Simplified Chinese if available, otherwise first language
-        if let chineseSimp = supported.first(where: { $0.languageCode?.identifier == "zh-Hans" }) {
+        if let chineseSimp = supportedSourceLanguages.first(where: { $0.maximalIdentifier.contains("zh-Hans") }) {
             selectedSourceLanguage = chineseSimp
-        } else if let first = supported.first {
-            selectedSourceLanguage = first
+        } else {
+            if let first = supportedSourceLanguages.first {
+                selectedSourceLanguage = first
+            }
         }
 
         isLoading = false
@@ -74,13 +76,5 @@ class VideoSelectionViewModel: ObservableObject {
 
     var canSelectVideo: Bool {
         selectedSourceLanguage != nil && !supportedSourceLanguages.isEmpty && !isLoading
-    }
-
-    func selectVideo() {
-        // TODO: Implement PHPickerViewController presentation
-    }
-
-    func processVideo(_ asset: AVAsset) {
-        // TODO: Implement video processing using VideoSubtitlesLib
     }
 }
