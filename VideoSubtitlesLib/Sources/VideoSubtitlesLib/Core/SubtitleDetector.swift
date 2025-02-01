@@ -47,6 +47,7 @@ public class SubtitleDetector {
     private let imageGenerator: AVAssetImageGenerator
     private weak var delegate: TextDetectionDelegate?
     private let recognitionLanguages: [String]
+    private var isCancelled = false
 
     /// Sampling rate in frames per second
     public let samplingRate: Float = 7.5 // Sample at video frame rate
@@ -92,11 +93,19 @@ public class SubtitleDetector {
 
     // MARK: - Public Methods
 
+    /// Cancels any ongoing detection
+    public func cancelDetection() {
+        isCancelled = true
+    }
+
     /// Processes the video asset to detect text in frames
-    /// - Throws: Error if video processing fails
+    /// - Throws: Error if video processing fails or if cancelled
     /// - Returns: Void, but calls delegate methods with progress and results
     public func detectText() async throws {
         do {
+            // Reset cancellation state
+            isCancelled = false
+
             // Get video duration
             let duration = try await videoAsset.load(.duration)
             let durationSeconds = CMTimeGetSeconds(duration)
@@ -105,6 +114,11 @@ public class SubtitleDetector {
 
             // Process frames
             for frameIndex in 0 ..< frameCount {
+                // Check for cancellation
+                if isCancelled {
+                    throw CancellationError()
+                }
+
                 let time = CMTime(seconds: Double(frameIndex) / Double(samplingRate), preferredTimescale: 600)
 
                 let image = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<
@@ -125,12 +139,23 @@ public class SubtitleDetector {
                         }
                     }
                 }
+
+                // Check for cancellation again after image generation
+                if isCancelled {
+                    throw CancellationError()
+                }
+
                 let frameSegments = try await detectText(in: image, at: time)
                 frames.append(frameSegments)
 
                 // Report progress
                 let progress = Float(frameIndex + 1) / Float(frameCount)
                 delegate?.detectionDidProgress(progress)
+            }
+
+            // Final cancellation check before completing
+            if isCancelled {
+                throw CancellationError()
             }
 
             delegate?.detectionDidComplete(frames: frames)

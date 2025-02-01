@@ -34,12 +34,14 @@ public final class TranslationService {
 
     private weak var delegate: TranslationProgressDelegate?
     private let translationActor: TranslationActor
+    private var isCancelled = false
 
     // Create an actor to safely handle translation
     private actor TranslationActor {
         private let session: SendableTranslationSession
         private let targetLanguage: Locale.Language
         private let isSimulator: Bool
+        private var isCancelled = false
 
         init(session: TranslationSession, targetLanguage: Locale.Language, isSimulator: Bool) {
             self.session = SendableTranslationSession(session: session)
@@ -47,10 +49,23 @@ public final class TranslationService {
             self.isSimulator = isSimulator
         }
 
+        func cancel() {
+            isCancelled = true
+        }
+
         func translate(_ frameSegments: [FrameSegments]) async throws -> [String: String] {
+            // Check for cancellation
+            if isCancelled {
+                throw CancellationError()
+            }
+
             if isSimulator {
                 var translations: [String: String] = [:]
                 for frame in frameSegments {
+                    // Check for cancellation during simulation
+                    if isCancelled {
+                        throw CancellationError()
+                    }
                     for segment in frame.segments {
                         translations[segment.text] = "[TR] \(segment.text)"
                     }
@@ -61,6 +76,10 @@ public final class TranslationService {
             // Collect unique texts
             var uniqueTexts = Set<String>()
             for frame in frameSegments {
+                // Check for cancellation during text collection
+                if isCancelled {
+                    throw CancellationError()
+                }
                 for segment in frame.segments {
                     uniqueTexts.insert(segment.text)
                 }
@@ -71,8 +90,18 @@ public final class TranslationService {
                 TranslationSession.Request(sourceText: text, clientIdentifier: text)
             }
 
+            // Check for cancellation before translation
+            if isCancelled {
+                throw CancellationError()
+            }
+
             // Translate
             let responses = try await session.translate(requests: requests)
+
+            // Check for cancellation after translation
+            if isCancelled {
+                throw CancellationError()
+            }
 
             // Create translations dictionary
             var translations: [String: String] = [:]
@@ -112,12 +141,27 @@ public final class TranslationService {
         self.delegate = delegate
     }
 
+    // MARK: - Public Methods
+
+    /// Cancels any ongoing translation
+    public func cancelTranslation() {
+        isCancelled = true
+        Task {
+            await translationActor.cancel()
+        }
+    }
+
     /// Translate a collection of frame segments
     /// - Parameters:
     ///   - frameSegments: Array of frame segments to translate
     /// - Returns: Dictionary mapping original text to translated text
     public nonisolated func translate(_ frameSegments: [FrameSegments]) async throws -> [String: String] {
         logger.info("Starting translation of \(frameSegments.count) frame segments")
+
+        // Reset cancellation state
+        await MainActor.run {
+            isCancelled = false
+        }
 
         // Log input frame segments
         for frame in frameSegments {

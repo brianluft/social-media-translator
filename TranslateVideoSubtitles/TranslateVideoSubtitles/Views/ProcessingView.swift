@@ -13,6 +13,7 @@ struct ProcessingView: View {
     let onProcessingComplete: (ProcessedVideo) -> Void
     @StateObject private var viewModel: ProcessingViewModel
     @Environment(\.dismiss) private var dismiss
+    @State private var isCancelling = false
 
     init(
         videoItem: PhotosPickerItem,
@@ -58,11 +59,14 @@ struct ProcessingView: View {
                 Button(
                     role: .destructive,
                     action: {
-                        viewModel.cancelProcessing()
-                        dismiss()
+                        Task {
+                            isCancelling = true
+                            await viewModel.cancelProcessing()
+                            dismiss()
+                        }
                     },
                     label: {
-                        Text("Cancel")
+                        Text(isCancelling ? "Cancelling..." : "Cancel")
                             .frame(maxWidth: .infinity)
                     }
                 )
@@ -70,6 +74,7 @@ struct ProcessingView: View {
                 .tint(.red)
                 .padding(.horizontal)
                 .padding(.bottom)
+                .disabled(isCancelling)
             }
         }
         .navigationBarBackButtonHidden()
@@ -103,10 +108,17 @@ final class ProcessingViewModel: ObservableObject {
     @Published var processingComplete: Bool = false
     @Published var processedVideo: ProcessedVideo?
 
-    private var isCancelled = false
+    private var _isCancelled = false
+    var isCancelled: Bool {
+        get async {
+            await MainActor.run { _isCancelled }
+        }
+    }
+
     private var detector: SubtitleDetector?
     private var translator: TranslationService?
     private var videoURL: URL?
+    private var cancellationTask: Task<Void, Never>?
     private let sourceLanguage: Locale.Language
     let destinationLanguage = Locale.current.language
 
@@ -115,117 +127,155 @@ final class ProcessingViewModel: ObservableObject {
     }
 
     func processVideo(_ item: PhotosPickerItem, translationSession: TranslationSession) async {
-        logger.info("Starting video processing")
+        // Create a task we can wait on during cancellation
+        cancellationTask = Task { @MainActor in
+            logger.info("Starting video processing")
 
-        do {
-            // Load video from PhotosPickerItem
-            guard let videoData = try await item.loadTransferable(type: Data.self) else {
-                logger.error("Failed to load video data from PhotosPickerItem")
-                throw NSError(
-                    domain: "VideoProcessing",
-                    code: -1,
-                    userInfo: [NSLocalizedDescriptionKey: "Failed to load video data"]
-                )
-            }
-
-            // Save to temporary file
-            let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".mov")
-            try videoData.write(to: tempURL)
-            videoURL = tempURL
-
-            // Create AVAsset
-            let asset = AVURLAsset(url: tempURL)
-
-            // Initialize processing components with Sendable closures
-            let detectionDelegate = DetectionDelegate(
-                progressHandler: { [weak self] progress in
-                    Task { @MainActor [weak self] in
-                        self?.handleDetectionProgress(progress: progress)
-                    }
-                },
-                didComplete: { [weak self] frames in
-                    Task { @MainActor [weak self] in
-                        self?.handleDetectionComplete(frames: frames)
-                    }
-                },
-                didFail: { [weak self] error in
-                    Task { @MainActor [weak self] in
-                        self?.handleDetectionFail(error: error)
-                    }
+            do {
+                // Check for cancellation before starting
+                if await isCancelled {
+                    logger.info("Processing cancelled before starting")
+                    return
                 }
-            )
 
-            let translationDelegate = TranslationDelegate(
-                progressHandler: { [weak self] progress in
-                    Task { @MainActor [weak self] in
-                        self?.handleTranslationProgress(progress: progress)
-                    }
-                },
-                didComplete: { [weak self] in
-                    Task { @MainActor [weak self] in
-                        self?.handleTranslationComplete()
-                    }
-                },
-                didFail: { [weak self] error in
-                    Task { @MainActor [weak self] in
-                        self?.handleTranslationFail(error: error)
-                    }
+                // Load video from PhotosPickerItem
+                guard let videoData = try await item.loadTransferable(type: Data.self) else {
+                    logger.error("Failed to load video data from PhotosPickerItem")
+                    throw NSError(
+                        domain: "VideoProcessing",
+                        code: -1,
+                        userInfo: [NSLocalizedDescriptionKey: "Failed to load video data"]
+                    )
                 }
-            )
 
-            logger.info("Initializing SubtitleDetector")
-            detector = SubtitleDetector(
-                videoAsset: asset,
-                delegate: detectionDelegate,
-                recognitionLanguages: [sourceLanguage.languageCode?.identifier ?? "en-US"]
-            )
+                // Save to temporary file
+                let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".mov")
+                try videoData.write(to: tempURL)
+                videoURL = tempURL
 
-            logger.info("Initializing TranslationService")
-            translator = TranslationService(
-                session: translationSession,
-                delegate: translationDelegate,
-                target: destinationLanguage
-            )
+                // Create AVAsset
+                let asset = AVURLAsset(url: tempURL)
 
-            // Detect subtitles
-            detailedStatus = "Detecting subtitles..."
-            try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-                Task { @MainActor in
-                    do {
-                        if let detector {
-                            logger.info("Starting subtitle detection")
-                            try await withThrowingTaskGroup(of: Void.self) { group in
-                                group.addTask {
-                                    try await detector.detectText()
-                                }
-                                _ = try await group.next()
-                            }
-                            logger.info("Subtitle detection completed")
-                            continuation.resume()
-                        } else {
-                            logger.error("Detector not initialized before detection")
-                            continuation.resume(throwing: NSError(
-                                domain: "VideoProcessing",
-                                code: -1,
-                                userInfo: [NSLocalizedDescriptionKey: "Detector not initialized"]
-                            ))
+                // Initialize processing components with Sendable closures
+                let detectionDelegate = DetectionDelegate(
+                    progressHandler: { [weak self] progress in
+                        Task { @MainActor [weak self] in
+                            self?.handleDetectionProgress(progress: progress)
                         }
-                    } catch {
-                        logger.error("Subtitle detection failed: \(error.localizedDescription)")
-                        continuation.resume(throwing: error)
+                    },
+                    didComplete: { [weak self] frames in
+                        Task { @MainActor [weak self] in
+                            self?.handleDetectionComplete(frames: frames)
+                        }
+                    },
+                    didFail: { [weak self] error in
+                        Task { @MainActor [weak self] in
+                            self?.handleDetectionFail(error: error)
+                        }
+                    }
+                )
+
+                let translationDelegate = TranslationDelegate(
+                    progressHandler: { [weak self] progress in
+                        Task { @MainActor [weak self] in
+                            self?.handleTranslationProgress(progress: progress)
+                        }
+                    },
+                    didComplete: { [weak self] in
+                        Task { @MainActor [weak self] in
+                            self?.handleTranslationComplete()
+                        }
+                    },
+                    didFail: { [weak self] error in
+                        Task { @MainActor [weak self] in
+                            self?.handleTranslationFail(error: error)
+                        }
+                    }
+                )
+
+                logger.info("Initializing SubtitleDetector")
+                detector = SubtitleDetector(
+                    videoAsset: asset,
+                    delegate: detectionDelegate,
+                    recognitionLanguages: [sourceLanguage.languageCode?.identifier ?? "en-US"]
+                )
+
+                logger.info("Initializing TranslationService")
+                translator = TranslationService(
+                    session: translationSession,
+                    delegate: translationDelegate,
+                    target: destinationLanguage
+                )
+
+                // Detect subtitles
+                detailedStatus = "Detecting subtitles..."
+                try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+                    Task { @MainActor in
+                        do {
+                            if let detector {
+                                logger.info("Starting subtitle detection")
+                                try await withThrowingTaskGroup(of: Void.self) { group in
+                                    group.addTask {
+                                        let shouldContinue = await !(self.isCancelled)
+                                        if shouldContinue {
+                                            try await detector.detectText()
+                                        }
+                                    }
+                                    _ = try await group.next()
+                                }
+
+                                let shouldComplete = await !(self.isCancelled)
+                                if shouldComplete {
+                                    logger.info("Subtitle detection completed")
+                                    continuation.resume()
+                                } else {
+                                    logger.info("Subtitle detection cancelled")
+                                    continuation.resume(throwing: CancellationError())
+                                }
+                            } else {
+                                logger.error("Detector not initialized before detection")
+                                continuation.resume(throwing: NSError(
+                                    domain: "VideoProcessing",
+                                    code: -1,
+                                    userInfo: [NSLocalizedDescriptionKey: "Detector not initialized"]
+                                ))
+                            }
+                        } catch {
+                            logger.error("Subtitle detection failed: \(error.localizedDescription)")
+                            continuation.resume(throwing: error)
+                        }
                     }
                 }
-            }
 
-        } catch {
-            logger.error("Video processing failed: \(error.localizedDescription)")
-            showError = true
-            errorMessage = error.localizedDescription
+            } catch {
+                logger.error("Video processing failed: \(error.localizedDescription)")
+                showError = true
+                errorMessage = error.localizedDescription
+            }
         }
+
+        // Wait for the processing task to complete
+        await cancellationTask?.value
     }
 
-    func cancelProcessing() {
-        isCancelled = true
+    func cancelProcessing() async {
+        await MainActor.run { _isCancelled = true }
+
+        // Cancel any ongoing detection
+        detector?.cancelDetection()
+
+        // Cancel any ongoing translation
+        translator?.cancelTranslation()
+
+        // Wait for any ongoing tasks to complete
+        if let task = cancellationTask {
+            await task.value
+        }
+
+        // Clean up temporary video file
+        if let videoURL {
+            try? FileManager.default.removeItem(at: videoURL)
+        }
     }
 
     // MARK: - Detection Delegate Handlers

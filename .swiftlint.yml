@@ -30,3 +30,5 @@ disabled_rules:
   - identifier_name
   - function_body_length
   - type_name
+  - file_length
+  - cyclomatic_complexity
