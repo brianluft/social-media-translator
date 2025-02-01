@@ -1,0 +1,46 @@
+included:
+  - TranslateVideoSubtitles
+  - VideoSubtitlesLib
+excluded:
+  - "**/BuildTools"
+  - "**/.build"
+  - "**/*.generated.swift"
+
+# Rule customization
+line_length:
+  warning: 120
+  error: 150
+
+type_body_length:
+  warning: 300
+  error: 400
+
+file_length:
+  warning: 500
+  error: 700
+
+# Opt-in rules
+opt_in_rules:
+  - empty_count
+  - empty_string
+  - closure_spacing
+  - contains_over_first_not_nil
+  - convenience_type
+  - fatal_error_message
+  - first_where
+  #- missing_docs
+  - multiline_parameters
+  - operator_usage_whitespace
+  - overridden_super_call
+  - private_outlet
+  - prohibited_super_call
+  - redundant_nil_coalescing
+
+# Disabled rules
+disabled_rules:
+  - trailing_whitespace
+  - trailing_comma
+  - todo
+  - identifier_name
+  - function_body_length
+  - type_name

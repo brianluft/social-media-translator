@@ -36,3 +36,4 @@ Thumbs.db
 build/
 DerivedData/
 assets/mac_icons/
+/log
