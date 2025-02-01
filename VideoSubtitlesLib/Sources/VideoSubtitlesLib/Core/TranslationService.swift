@@ -29,7 +29,7 @@ private struct SendableTranslationSession: @unchecked Sendable {
 
 /// Service that handles translation of subtitle segments using Apple's Translation framework
 @MainActor
-public final class TranslationService: Sendable {
+public final class TranslationService {
     // MARK: - Properties
 
     private weak var delegate: TranslationProgressDelegate?
