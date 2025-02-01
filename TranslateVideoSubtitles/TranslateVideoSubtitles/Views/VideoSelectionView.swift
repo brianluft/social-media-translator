@@ -27,6 +27,11 @@ struct VideoSelectionView: View {
                 }
                 .navigationDestination(item: $processedVideo) { video in
                     PlayerView(video: video)
+                        .onDisappear {
+                            // Reset state when returning from player
+                            selectedItem = nil
+                            processedVideo = nil
+                        }
                 }
             #if os(iOS)
                 .photosPicker(
@@ -37,6 +42,8 @@ struct VideoSelectionView: View {
             #endif
                 .onChange(of: selectedItem) { _, newValue in
                     if newValue != nil {
+                        // Always navigate to processing when a video is selected
+                        processedVideo = nil
                         navigateToProcessing = true
                     }
                 }
