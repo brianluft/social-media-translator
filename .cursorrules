@@ -46,6 +46,12 @@ iOS app to translate burned-in video subtitles to user's preferred language.
 4. Play video with translated overlays
 5. Use delegates for progress updates 
 
+## Facts about the Apple APIs
+
+- A `TranslationSession` can ONLY be created through a `translationTask` on a SwiftUI view.
+  The lifetime of the session will be tied to the lifetime of the view.
+  There is absolutely no other way to do it. You cannot create a `TranslationSession` yourself.
+
 ## Building
 
 `./build.sh` will clean, format, test, and build.

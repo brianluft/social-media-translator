@@ -86,8 +86,7 @@ struct ProcessingView: View {
             ),
             action: { session in
                 Task { @MainActor in
-                    viewModel.translationSessionCreated(session)
-                    await viewModel.processVideo(videoItem)
+                    await viewModel.processVideo(videoItem, translationSession: session)
                 }
             }
         )
@@ -110,27 +109,13 @@ final class ProcessingViewModel: ObservableObject {
     private var videoURL: URL?
     private let sourceLanguage: Locale.Language
     let destinationLanguage = Locale.current.language
-    private var translationSession: TranslationSession?
 
     init(sourceLanguage: Locale.Language) {
         self.sourceLanguage = sourceLanguage
     }
 
-    func translationSessionCreated(_ session: TranslationSession) {
-        logger.info("Translation session created")
-        translationSession = session
-    }
-
-    func processVideo(_ item: PhotosPickerItem) async {
+    func processVideo(_ item: PhotosPickerItem, translationSession: TranslationSession) async {
         logger.info("Starting video processing")
-
-        // Wait for translation session
-        guard let translationSession else {
-            logger.error("Translation session not available")
-            showError = true
-            errorMessage = "Translation service not initialized"
-            return
-        }
 
         do {
             // Load video from PhotosPickerItem
