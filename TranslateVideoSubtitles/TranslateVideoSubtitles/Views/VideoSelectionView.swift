@@ -97,16 +97,19 @@ struct VideoSelectionView: View {
 
     private var selectVideoButton: some View {
         #if os(iOS)
-        Button(action: {
-            isShowingPhotoPicker = true
-        }) {
-            HStack {
-                Image(systemName: "photo.on.rectangle")
-                Text("Choose from Photo Library")
+        Button(
+            action: {
+                isShowingPhotoPicker = true
+            },
+            label: {
+                HStack {
+                    Image(systemName: "photo.on.rectangle")
+                    Text("Choose from Photo Library")
+                }
+                .frame(maxWidth: .infinity)
+                .padding()
             }
-            .frame(maxWidth: .infinity)
-            .padding()
-        }
+        )
         .buttonStyle(.borderedProminent)
         .padding(.horizontal)
         .disabled(!viewModel.canSelectVideo)
