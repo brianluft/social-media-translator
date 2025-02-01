@@ -281,13 +281,14 @@ final class ProcessingViewModel: ObservableObject {
     // MARK: - Detection Delegate Handlers
 
     private func handleDetectionProgress(progress: Float) {
-        self.progress = Double(progress) * 0.6 // 60% of total progress
+        self.progress = Double(progress) // Use full progress range for detection
     }
 
     private func handleDetectionComplete(frames: [FrameSegments]) {
         logger.info("Detection complete with \(frames.count) frames")
         Task { @MainActor in
             do {
+                progress = 1.0 // Set to 100% while translation happens
                 detailedStatus = "Translating subtitles..."
                 if let translations = try await withCheckedThrowingContinuation({ (continuation: CheckedContinuation<
                     [String: String]?,
@@ -347,7 +348,7 @@ final class ProcessingViewModel: ObservableObject {
     // MARK: - Translation Delegate Handlers
 
     private func handleTranslationProgress(progress: Float) {
-        self.progress = 0.6 + Double(progress) * 0.4 // Remaining 40% of progress
+        // Translation progress no longer affects the progress bar
     }
 
     private func handleTranslationComplete() {
