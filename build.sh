@@ -2,9 +2,6 @@
 set -uo pipefail
 set +e
 
-# Log the start time
-echo "=== Build started at $(date) ===" > log
-
 NUM_CORES=$(sysctl -n hw.ncpu)
 if [ -z "$NUM_CORES" ]; then
   echo "sysctl failed to get number of cores"
@@ -12,31 +9,19 @@ if [ -z "$NUM_CORES" ]; then
 fi
 
 echo "--- BuildTools Resolve ---"
-(cd BuildTools && NSUnbufferedIO=YES swift package resolve 2>&1) >> log
+(cd BuildTools && NSUnbufferedIO=YES swift package resolve 2>&1) > log
 EXIT_CODE=$?
 if [ $EXIT_CODE -ne 0 ]; then
+  cat log
   echo "swift package resolve failed with exit code $EXIT_CODE"
   exit 1
 fi
 
-echo "--- Build xcbeautify ---"
-(cd BuildTools && NSUnbufferedIO=YES swift build -q -c release --product xcbeautify 2>&1) >> log
-EXIT_CODE=$?
-if [ $EXIT_CODE -ne 0 ]; then
-  echo "swift build failed with exit code $EXIT_CODE"
-  exit 1
-fi
-
-XCBEAUTIFY=$(find BuildTools/.build -type f -name xcbeautify | grep -v dSYM | grep release)
-if [ -z "$XCBEAUTIFY" ]; then
-  echo "xcbeautify not found"
-  exit 1
-fi
-
 echo "--- Build SwiftFormat ---"
-(cd BuildTools && NSUnbufferedIO=YES swift build -q -c release --product swiftformat 2>&1) >> log
+(cd BuildTools && NSUnbufferedIO=YES swift build -q -c release --product swiftformat 2>&1) > log
 EXIT_CODE=$?
 if [ $EXIT_CODE -ne 0 ]; then
+  cat log
   echo "swift build failed with exit code $EXIT_CODE"
   exit 1
 fi
@@ -48,16 +33,18 @@ if [ -z "$SWIFTFORMAT" ]; then
 fi
 
 echo "--- Clean ---"
-NSUnbufferedIO=YES xcodebuild clean -quiet -workspace TranslateVideoSubtitles.xcworkspace -scheme TranslateVideoSubtitles -configuration Debug -destination 'generic/platform=iOS Simulator' 2>&1 | $XCBEAUTIFY --disable-logging
+NSUnbufferedIO=YES xcodebuild clean -quiet -workspace TranslateVideoSubtitles.xcworkspace -scheme TranslateVideoSubtitles -configuration Debug -destination 'generic/platform=iOS' 2>&1 > log
 EXIT_CODE=$?
 if [ $EXIT_CODE -ne 0 ]; then
+  cat log
   echo "xcodebuild clean failed with exit code $EXIT_CODE"
   exit 1
 fi
 
-NSUnbufferedIO=YES xcodebuild clean -quiet -workspace TranslateVideoSubtitles.xcworkspace -scheme TranslateVideoSubtitles-macOS -configuration Debug -destination 'platform=macOS,arch=arm64' 2>&1  | $XCBEAUTIFY --disable-logging
+NSUnbufferedIO=YES xcodebuild clean -quiet -workspace TranslateVideoSubtitles.xcworkspace -scheme TranslateVideoSubtitles-macOS -configuration Debug -destination 'platform=macOS,arch=arm64' 2>&1 > log
 EXIT_CODE=$?
 if [ $EXIT_CODE -ne 0 ]; then
+  cat log
   echo "xcodebuild clean failed with exit code $EXIT_CODE"
   exit 1
 fi
@@ -65,15 +52,16 @@ fi
 (cd VideoSubtitlesLib && rm -rf .build)
 
 echo "--- Format ---"
-($SWIFTFORMAT . 2>&1) >> log
+($SWIFTFORMAT . 2>&1) > log
 EXIT_CODE=$?
 if [ $EXIT_CODE -ne 0 ]; then
+  cat log
   echo "swiftformat failed with exit code $EXIT_CODE"
   exit 1
 fi
 
 echo "--- Build (iOS Debug) ---"
-NSUnbufferedIO=YES xcodebuild -quiet -workspace TranslateVideoSubtitles.xcworkspace -scheme TranslateVideoSubtitles -configuration Debug -destination 'generic/platform=iOS Simulator' -jobs $NUM_CORES 2>&1 | $XCBEAUTIFY --disable-logging
+NSUnbufferedIO=YES xcodebuild -quiet -workspace TranslateVideoSubtitles.xcworkspace -scheme TranslateVideoSubtitles -configuration Debug -destination 'platform=iOS' -jobs $NUM_CORES 2>&1
 EXIT_CODE=$?
 if [ $EXIT_CODE -ne 0 ]; then
   echo "xcodebuild failed with exit code $EXIT_CODE"
@@ -81,7 +69,7 @@ if [ $EXIT_CODE -ne 0 ]; then
 fi
 
 echo "--- Build (macOS Debug) ---"
-NSUnbufferedIO=YES xcodebuild -quiet -workspace TranslateVideoSubtitles.xcworkspace -scheme TranslateVideoSubtitles-macOS -configuration Debug -destination 'platform=macOS,arch=arm64' -jobs $NUM_CORES 2>&1 | $XCBEAUTIFY --disable-logging
+NSUnbufferedIO=YES xcodebuild -quiet -workspace TranslateVideoSubtitles.xcworkspace -scheme TranslateVideoSubtitles-macOS -configuration Debug -destination 'platform=macOS,arch=arm64' -jobs $NUM_CORES 2>&1
 EXIT_CODE=$?
 if [ $EXIT_CODE -ne 0 ]; then
   echo "xcodebuild failed with exit code $EXIT_CODE"

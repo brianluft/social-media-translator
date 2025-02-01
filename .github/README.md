@@ -27,7 +27,7 @@ open TranslateVideoSubtitles/TranslateVideoSubtitles.xcodeproj
 ```
 
 3. Build the project in Xcode:
-- Select your target device/simulator
+- Select your target device
 - Press ⌘B or select Product > Build
 
 ### Running Tests

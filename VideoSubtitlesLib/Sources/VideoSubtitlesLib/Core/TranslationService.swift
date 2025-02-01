@@ -5,10 +5,9 @@ import Translation
 
 private let logger = Logger(subsystem: "com.brianluft.VideoSubtitlesLib", category: "TranslationService")
 
+
 #if targetEnvironment(simulator)
-private let isSimulator = true
-#else
-private let isSimulator = false
+#error("Translation Framework is not available in the simulator.")
 #endif
 
 /// Protocol for reporting translation progress
@@ -40,13 +39,11 @@ public final class TranslationService {
     private actor TranslationActor {
         private let session: SendableTranslationSession
         private let targetLanguage: Locale.Language
-        private let isSimulator: Bool
         private var isCancelled = false
 
-        init(session: TranslationSession, targetLanguage: Locale.Language, isSimulator: Bool) {
+        init(session: TranslationSession, targetLanguage: Locale.Language) {
             self.session = SendableTranslationSession(session: session)
             self.targetLanguage = targetLanguage
-            self.isSimulator = isSimulator
         }
 
         func cancel() {
@@ -57,20 +54,6 @@ public final class TranslationService {
             // Check for cancellation
             if isCancelled {
                 throw CancellationError()
-            }
-
-            if isSimulator {
-                var translations: [String: String] = [:]
-                for frame in frameSegments {
-                    // Check for cancellation during simulation
-                    if isCancelled {
-                        throw CancellationError()
-                    }
-                    for segment in frame.segments {
-                        translations[segment.text] = "[TR] \(segment.text)"
-                    }
-                }
-                return translations
             }
 
             // Collect unique texts
@@ -135,8 +118,7 @@ public final class TranslationService {
         let sendableSession = SendableTranslationSession(session: session)
         translationActor = TranslationActor(
             session: sendableSession.session,
-            targetLanguage: target,
-            isSimulator: isSimulator
+            targetLanguage: target
         )
         self.delegate = delegate
     }
