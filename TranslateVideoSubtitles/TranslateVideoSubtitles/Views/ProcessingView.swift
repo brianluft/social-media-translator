@@ -29,6 +29,7 @@ struct CircularProgressViewStyle: ProgressViewStyle {
 struct ProcessingView: View {
     let videoItem: PhotosPickerItem
     let sourceLanguage: Locale.Language
+    let processedVideo: ProcessedVideo
     let onProcessingComplete: (ProcessedVideo) -> Void
     @StateObject private var viewModel: ProcessingViewModel
     @Environment(\.dismiss) private var dismiss
@@ -37,12 +38,17 @@ struct ProcessingView: View {
     init(
         videoItem: PhotosPickerItem,
         sourceLanguage: Locale.Language,
+        processedVideo: ProcessedVideo,
         onProcessingComplete: @escaping (ProcessedVideo) -> Void
     ) {
         self.videoItem = videoItem
         self.sourceLanguage = sourceLanguage
+        self.processedVideo = processedVideo
         self.onProcessingComplete = onProcessingComplete
-        _viewModel = StateObject(wrappedValue: ProcessingViewModel(sourceLanguage: sourceLanguage))
+        _viewModel = StateObject(wrappedValue: ProcessingViewModel(
+            sourceLanguage: sourceLanguage,
+            processedVideo: processedVideo
+        ))
     }
 
     var body: some View {
@@ -90,8 +96,8 @@ struct ProcessingView: View {
         }
         .navigationBarBackButtonHidden()
         .onChange(of: viewModel.processingComplete) { _, isComplete in
-            if isComplete, let video = viewModel.processedVideo {
-                onProcessingComplete(video)
+            if isComplete {
+                onProcessingComplete(viewModel.processedVideo)
             }
         }
         // Attach translation task to the main view
@@ -115,7 +121,7 @@ final class ProcessingViewModel: ObservableObject {
     @Published var showError: Bool = false
     @Published var errorMessage: String = ""
     @Published var processingComplete: Bool = false
-    @Published var processedVideo: ProcessedVideo?
+    var processedVideo: ProcessedVideo
 
     private var _isCancelled = false
     var isCancelled: Bool {
@@ -131,8 +137,9 @@ final class ProcessingViewModel: ObservableObject {
     private let sourceLanguage: Locale.Language
     let destinationLanguage = Locale.current.language
 
-    init(sourceLanguage: Locale.Language) {
+    init(sourceLanguage: Locale.Language, processedVideo: ProcessedVideo) {
         self.sourceLanguage = sourceLanguage
+        self.processedVideo = processedVideo
     }
 
     func processVideo(_ item: PhotosPickerItem, translationSession: TranslationSession) async {
@@ -161,6 +168,7 @@ final class ProcessingViewModel: ObservableObject {
                 let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".mov")
                 try videoData.write(to: tempURL)
                 videoURL = tempURL
+                processedVideo.updateURL(tempURL)
 
                 // Create AVAsset
                 let asset = AVURLAsset(url: tempURL)
@@ -296,26 +304,8 @@ final class ProcessingViewModel: ObservableObject {
     private func handleDetectionComplete(frames: [FrameSegments]) {
         logger.info("Detection complete with \(frames.count) frames")
         Task { @MainActor in
-            do {
-                guard let videoURL else {
-                    logger.error("Video URL not available")
-                    throw NSError(
-                        domain: "VideoProcessing",
-                        code: -1,
-                        userInfo: [NSLocalizedDescriptionKey: "Video URL not available"]
-                    )
-                }
-
-                processedVideo = ProcessedVideo(
-                    url: videoURL,
-                    targetLanguage: destinationLanguage.languageCode?.identifier ?? "unknown"
-                )
-                processedVideo?.appendFrameSegments(frames)
-                processingComplete = true
-            } catch {
-                showError = true
-                errorMessage = error.localizedDescription
-            }
+            processedVideo.appendFrameSegments(frames)
+            processingComplete = true
         }
     }
 
@@ -403,6 +393,9 @@ private final class TranslationDelegate: TranslationProgressDelegate, @unchecked
         ProcessingView(
             videoItem: PhotosPickerItem(itemIdentifier: "preview-identifier"),
             sourceLanguage: Locale.Language(identifier: "en"),
+            processedVideo: ProcessedVideo(
+                targetLanguage: Locale.current.language.languageCode?.identifier ?? "en"
+            ),
             onProcessingComplete: { _ in }
         )
     }

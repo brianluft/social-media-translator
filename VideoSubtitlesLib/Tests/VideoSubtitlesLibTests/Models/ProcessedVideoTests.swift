@@ -38,7 +38,6 @@ final class ProcessedVideoTests: XCTestCase {
         let frame3 = makeFrameSegments(id: UUID(), timestamp: 3.0, segments: [seg1])
 
         var video = ProcessedVideo(
-            url: testURL,
             targetLanguage: "es"
         )
 
@@ -63,7 +62,6 @@ final class ProcessedVideoTests: XCTestCase {
         let frame = makeFrameSegments(id: UUID(), timestamp: 1.0, segments: [seg1])
 
         var video = ProcessedVideo(
-            url: testURL,
             targetLanguage: "es"
         )
         video.appendFrameSegments([frame])
@@ -86,7 +84,6 @@ final class ProcessedVideoTests: XCTestCase {
         let frame2 = makeFrameSegments(id: UUID(), timestamp: 2.0, segments: [seg1])
 
         var video = ProcessedVideo(
-            url: testURL,
             targetLanguage: "es"
         )
         video.appendFrameSegments([frame1, frame2])
@@ -110,7 +107,6 @@ final class ProcessedVideoTests: XCTestCase {
         let frame = makeFrameSegments(id: UUID(), timestamp: 1.0, segments: [seg1])
 
         var video = ProcessedVideo(
-            url: testURL,
             targetLanguage: "es"
         )
         video.appendFrameSegments([frame])
@@ -127,7 +123,6 @@ final class ProcessedVideoTests: XCTestCase {
     func testSegmentsAtTimeWithEmptyResults() {
         // Given
         let video = ProcessedVideo(
-            url: testURL,
             targetLanguage: "es"
         )
 
@@ -147,7 +142,6 @@ final class ProcessedVideoTests: XCTestCase {
         let frame2 = makeFrameSegments(id: UUID(), timestamp: 2.0, segments: [seg1])
 
         var video = ProcessedVideo(
-            url: testURL,
             targetLanguage: "es"
         )
         video.appendFrameSegments([frame1, frame2])

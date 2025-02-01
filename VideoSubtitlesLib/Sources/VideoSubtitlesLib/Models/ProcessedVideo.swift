@@ -4,7 +4,7 @@ import os
 /// Represents a video that has been processed for subtitle translation
 public struct ProcessedVideo: Hashable {
     /// The URL of the video file
-    public let url: URL
+    public private(set) var url: URL
 
     /// All frame segments with their timestamps, sorted by timestamp
     private var _frameSegments: [FrameSegments]
@@ -22,16 +22,19 @@ public struct ProcessedVideo: Hashable {
     }
 
     /// Creates a new ProcessedVideo instance
-    /// - Parameters:
-    ///   - url: The URL of the source video file
-    ///   - targetLanguage: The language code of the translated text
-    public init(
-        url: URL,
-        targetLanguage: String
-    ) {
-        self.url = url
+    /// - Parameter targetLanguage: The language code of the translated text
+    public init(targetLanguage: String) {
+        self.url = URL(fileURLWithPath: "")
         self._frameSegments = []
         self.targetLanguage = targetLanguage
+    }
+
+    /// Updates the video URL
+    /// - Parameter newURL: The new URL for the video file
+    public mutating func updateURL(_ newURL: URL) {
+        lock.lock()
+        defer { lock.unlock() }
+        url = newURL
     }
 
     /// Appends new frame segments to the video

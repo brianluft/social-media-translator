@@ -19,6 +19,9 @@ struct VideoSelectionView: View {
                         ProcessingView(
                             videoItem: selectedItem,
                             sourceLanguage: sourceLanguage,
+                            processedVideo: ProcessedVideo(
+                                targetLanguage: Locale.current.language.languageCode?.identifier ?? "en"
+                            ),
                             onProcessingComplete: { video in
                                 processedVideo = video
                                 navigateToProcessing = false
