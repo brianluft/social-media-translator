@@ -18,6 +18,7 @@ public class VideoPlayerController: NSObject {
 
     public let player: AVPlayer
     private var timeObserver: TimeObserverToken?
+    private var statusObserver: NSKeyValueObservation?
     public weak var delegate: VideoPlayerControllerDelegate?
 
     public var isPlaying: Bool {
@@ -37,13 +38,19 @@ public class VideoPlayerController: NSObject {
 
         setupTimeObserver()
 
-        // Add KVO for player item status
-        playerItem.addObserver(
-            self,
-            forKeyPath: #keyPath(AVPlayerItem.status),
-            options: [.new, .initial],
-            context: nil
-        )
+        // Add block-based KVO for player item status
+        statusObserver = playerItem.observe(\.status, options: [.new, .initial]) { item, _ in
+            switch item.status {
+            case .failed:
+                print("Player item failed: \(String(describing: item.error))")
+            case .readyToPlay:
+                print("Player item ready to play")
+            case .unknown:
+                print("Player item status unknown")
+            @unknown default:
+                break
+            }
+        }
 
         NotificationCenter.default.addObserver(
             self,
@@ -57,6 +64,7 @@ public class VideoPlayerController: NSObject {
         if let observer = timeObserver {
             player.removeTimeObserver(observer.token)
         }
+        statusObserver?.invalidate()
         NotificationCenter.default.removeObserver(self)
     }
 
@@ -97,26 +105,5 @@ public class VideoPlayerController: NSObject {
         let cmTime = CMTime(seconds: time, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
         // Use exact seeking for better precision
         player.seek(to: cmTime, toleranceBefore: .zero, toleranceAfter: .zero)
-    }
-
-    override public func observeValue(
-        forKeyPath keyPath: String?,
-        of object: Any?,
-        change: [NSKeyValueChangeKey: Any]?,
-        context: UnsafeMutableRawPointer?
-    ) {
-        if keyPath == #keyPath(AVPlayerItem.status),
-           let item = object as? AVPlayerItem {
-            switch item.status {
-            case .failed:
-                print("Player item failed: \(String(describing: item.error))")
-            case .readyToPlay:
-                print("Player item ready to play")
-            case .unknown:
-                print("Player item status unknown")
-            @unknown default:
-                break
-            }
-        }
     }
 }
