@@ -3,6 +3,7 @@
 iOS app to translate burned-in video subtitles to user's preferred language.
 
 ## Features
+
 - Import videos from photo library
 - Vision-powered OCR subtitle detection
 - Translation using Apple's API
@@ -31,26 +32,19 @@ iOS app to translate burned-in video subtitles to user's preferred language.
    - Position-aware rendering with overlap avoidance
    - Style management with customizable appearance
 
-## Data Models
-
-1. **TextSegment**
+- **TextSegment**
    - Text content and position
-   - Confidence score from OCR
    - Rectangle in normalized coordinates
    - Unique identifier for tracking
 
-## Workflow
-1. Select video → VideoManager loads
-2. SubtitleDetector processes video
-3. TranslationService translates all subtitles
-4. Play video with translated overlays
-5. Use delegates for progress updates 
-
-## Facts about the Apple APIs
+## Tips
 
 - A `TranslationSession` can ONLY be created through a `translationTask` on a SwiftUI view.
   The lifetime of the session will be tied to the lifetime of the view.
   There is absolutely no other way to do it. You cannot create a `TranslationSession` yourself.
+
+- Don't use print(). Use os.Logger instead. Create a file-level logger.
+  Use `com.brianluft.TranslateVideoSubtitles` as the logger subsystem.
 
 ## Building
 
