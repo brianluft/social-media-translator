@@ -1,25 +1,12 @@
 included:
   - TranslateVideoSubtitles
   - VideoSubtitlesLib
+
 excluded:
   - "**/BuildTools"
   - "**/.build"
   - "**/*.generated.swift"
 
-# Rule customization
-line_length:
-  warning: 120
-  error: 150
-
-type_body_length:
-  warning: 300
-  error: 400
-
-file_length:
-  warning: 500
-  error: 700
-
-# Opt-in rules
 opt_in_rules:
   - empty_count
   - empty_string
@@ -36,7 +23,6 @@ opt_in_rules:
   - prohibited_super_call
   - redundant_nil_coalescing
 
-# Disabled rules
 disabled_rules:
   - trailing_whitespace
   - trailing_comma

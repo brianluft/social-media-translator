@@ -97,7 +97,7 @@ if [ $EXIT_CODE -ne 0 ]; then
 fi
 
 echo "--- Lint ---"
-swift package --package-path BuildTools --allow-writing-to-package-directory swiftlint --quiet --config ../.swiftlint.yml ../TranslateVideoSubtitles/TranslateVideoSubtitles/ ../VideoSubtitlesLib/Sources/
+swift package --package-path BuildTools --allow-writing-to-package-directory swiftlint --quiet --config ../.swiftlint.yml ..
 EXIT_CODE=$?
 if [ $EXIT_CODE -ne 0 ]; then
   echo "swiftlint failed with exit code $EXIT_CODE"
