@@ -7,7 +7,7 @@ import Vision
 /// The SubtitleDetector processes videos to extract text through the following steps:
 ///
 /// 1. Frame Extraction:
-///    - Samples video at 2 frames per second using AVFoundation
+///    - Samples video at a low rate using AVFoundation
 ///    - Uses AVAssetImageGenerator for high-quality frame extraction
 ///    - Maintains precise timing information for each frame
 ///
@@ -50,7 +50,7 @@ public class SubtitleDetector {
     private var isCancelled = false
 
     /// Sampling rate in frames per second
-    public let samplingRate: Float = 7.5 // Sample at video frame rate
+    public let samplingRate: Float = 2 // Sample at video frame rate
 
     /// Minimum confidence score for text detection
     private let minimumConfidence: Float = 0.4
