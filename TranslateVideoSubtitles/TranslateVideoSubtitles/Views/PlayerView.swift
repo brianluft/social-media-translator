@@ -29,28 +29,6 @@ struct PlayerView: View {
                 // Subtitle overlay
                 viewModel.subtitleOverlay
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-                // Playback controls overlay
-                VStack {
-                    Spacer()
-
-                    // Progress slider
-                    VStack(spacing: 4) {
-                        Slider(
-                            value: $viewModel.currentTime,
-                            in: 0 ... viewModel.duration,
-                            onEditingChanged: viewModel.onSliderEditingChanged
-                        )
-                        .padding(.horizontal)
-                    }
-                    .padding(.bottom, 8)
-                    .background {
-                        Rectangle()
-                            .fill(.black.opacity(0.6))
-                            .blur(radius: 8)
-                            .allowsHitTesting(false)
-                    }
-                }
             }
         }
         #if os(iOS)
@@ -150,24 +128,12 @@ class PlayerViewModel: NSObject, ObservableObject {
     private let subtitleRenderer: SubtitleOverlayRenderer
     private let video: ProcessedVideo
     private var currentSegments: [(segment: TextSegment, text: String)] = []
-    private let logger = Logger(subsystem: "TranslateVideoSubtitles", category: "PlayerViewModel")
-    private var observedPlayerItem: AVPlayerItem? // Store reference to observed item
-    @Published private(set) var duration: Double = 1.0 // Default to 1.0 to avoid slider issues
-
-    @Published var currentTime: Double = 0
-    @Published var isPlaying: Bool = false
+    let logger = Logger(subsystem: "TranslateVideoSubtitles", category: "PlayerViewModel")
+    private var observedPlayerItem: AVPlayerItem?
+    @Published private(set) var currentTime: Double = 0
+    @Published private(set) var isPlaying: Bool = false
 
     var player: AVPlayer { videoPlayerController.player }
-
-    var timeString: String {
-        let current = Int(currentTime)
-        let total = Int(duration)
-        return String(
-            format: "%d:%02d / %d:%02d",
-            current / 60, current % 60,
-            total / 60, total % 60
-        )
-    }
 
     var subtitleOverlay: some View {
         subtitleRenderer.createSubtitleOverlay(for: currentSegments)
@@ -185,39 +151,24 @@ class PlayerViewModel: NSObject, ObservableObject {
         // Initial subtitle update
         updateSubtitles(at: 0)
 
-        // Observe player item status
-        if let playerItem = player.currentItem {
-            observedPlayerItem = playerItem
-            playerItem.addObserver(
-                self,
-                forKeyPath: #keyPath(AVPlayerItem.status),
-                options: [.new, .initial],
-                context: nil
-            )
-        }
+        // Configure player for looping
+        player.actionAtItemEnd = .none
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(playerItemDidReachEnd),
+            name: .AVPlayerItemDidPlayToEndTime,
+            object: player.currentItem
+        )
     }
 
     deinit {
-        // Remove observer when view model is deallocated
-        observedPlayerItem?.removeObserver(self, forKeyPath: #keyPath(AVPlayerItem.status))
+        NotificationCenter.default.removeObserver(self)
     }
 
-    override func observeValue(
-        forKeyPath keyPath: String?,
-        of object: Any?,
-        change: [NSKeyValueChangeKey: Any]?,
-        context: UnsafeMutableRawPointer?
-    ) {
-        if keyPath == #keyPath(AVPlayerItem.status),
-           let item = object as? AVPlayerItem {
-            if item.status == .readyToPlay {
-                let newDuration = item.duration.seconds
-                logger.debug("Player item ready - duration: \(newDuration) seconds")
-                if !newDuration.isNaN && newDuration > 0 {
-                    duration = newDuration
-                }
-            }
-        }
+    @objc private func playerItemDidReachEnd() {
+        // Seek back to start and continue playing
+        player.seek(to: .zero)
+        player.play()
     }
 
     func play() {
@@ -236,13 +187,6 @@ class PlayerViewModel: NSObject, ObservableObject {
         }
     }
 
-    func onSliderEditingChanged(_ isEditing: Bool) {
-        if !isEditing {
-            videoPlayerController.seek(to: currentTime)
-            updateSubtitles(at: currentTime)
-        }
-    }
-
     private func updateSubtitles(at time: TimeInterval) {
         let segmentsWithTranslations = video.segments(at: time)
         currentSegments = segmentsWithTranslations.compactMap { segment, translation in
@@ -255,6 +199,7 @@ class PlayerViewModel: NSObject, ObservableObject {
 extension PlayerViewModel: VideoPlayerControllerDelegate {
     nonisolated func playerController(_ controller: VideoPlayerController, didUpdateTime time: TimeInterval) {
         Task { @MainActor in
+            logger.debug("⏱️ Player time updated to \(time)")
             currentTime = time
             updateSubtitles(at: time)
         }
@@ -262,6 +207,7 @@ extension PlayerViewModel: VideoPlayerControllerDelegate {
 
     nonisolated func playerController(_ controller: VideoPlayerController, didChangePlaybackState isPlaying: Bool) {
         Task { @MainActor in
+            logger.debug("▶️ Playback state changed to \(isPlaying ? "playing" : "paused")")
             self.isPlaying = isPlaying
         }
     }

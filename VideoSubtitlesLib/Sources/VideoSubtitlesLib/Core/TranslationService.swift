@@ -135,11 +135,6 @@ public final class TranslationService: Sendable {
 
         do {
             let translations = try await translationActor.translate(frameSegments)
-            logger.info("Translation complete - processed \(translations.count) translations")
-            // Log output translations
-            for (source, target) in translations {
-                logger.debug("  - '\(source)' -> '\(target)'")
-            }
             await delegate?.translationDidComplete()
             return translations
         } catch {

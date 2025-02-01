@@ -130,17 +130,13 @@ final class ProcessingViewModel: ObservableObject {
                 )
             }
 
-            logger.debug("Successfully loaded video data")
-
             // Save to temporary file
             let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".mov")
             try videoData.write(to: tempURL)
             videoURL = tempURL
-            logger.debug("Saved video to temporary file: \(tempURL.lastPathComponent)")
 
             // Create AVAsset
             let asset = AVURLAsset(url: tempURL)
-            logger.debug("Created AVAsset from video")
 
             // Initialize processing components with Sendable closures
             let detectionDelegate = DetectionDelegate(

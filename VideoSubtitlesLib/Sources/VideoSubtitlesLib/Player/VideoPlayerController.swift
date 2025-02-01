@@ -66,6 +66,7 @@ public class VideoPlayerController: NSObject {
             Task { @MainActor [weak self] in
                 guard let self else { return }
                 let seconds = CMTimeGetSeconds(time)
+                print("⏱️ VideoPlayerController time observer: \(seconds)")
                 self.delegate?.playerController(self, didUpdateTime: seconds)
             }
         }
@@ -73,24 +74,29 @@ public class VideoPlayerController: NSObject {
     }
 
     @objc private func playerItemDidReachEnd() {
+        print("🔚 VideoPlayerController reached end")
         delegate?.playerController(self, didChangePlaybackState: false)
     }
 
     // MARK: - Playback Controls
 
     public func play() {
+        print("▶️ VideoPlayerController play")
         player.play()
         delegate?.playerController(self, didChangePlaybackState: true)
     }
 
     public func pause() {
+        print("⏸️ VideoPlayerController pause")
         player.pause()
         delegate?.playerController(self, didChangePlaybackState: false)
     }
 
     public func seek(to time: TimeInterval) {
+        print("⏩ VideoPlayerController seeking to \(time)")
         let cmTime = CMTime(seconds: time, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
-        player.seek(to: cmTime)
+        // Use exact seeking for better precision
+        player.seek(to: cmTime, toleranceBefore: .zero, toleranceAfter: .zero)
     }
 
     override public func observeValue(
