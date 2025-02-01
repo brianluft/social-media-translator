@@ -49,13 +49,17 @@ struct ProcessingView: View {
 
                 Spacer()
 
-                Button(role: .destructive, action: {
-                    viewModel.cancelProcessing()
-                    dismiss()
-                }) {
-                    Text("Cancel")
-                        .frame(maxWidth: .infinity)
-                }
+                Button(
+                    role: .destructive,
+                    action: {
+                        viewModel.cancelProcessing()
+                        dismiss()
+                    },
+                    label: {
+                        Text("Cancel")
+                            .frame(maxWidth: .infinity)
+                    }
+                )
                 .buttonStyle(.borderedProminent)
                 .tint(.red)
                 .padding(.horizontal)
