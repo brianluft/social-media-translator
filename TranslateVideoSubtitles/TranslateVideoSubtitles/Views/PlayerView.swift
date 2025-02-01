@@ -146,7 +146,6 @@ class PlayerViewModel: NSObject, ObservableObject {
         super.init()
 
         videoPlayerController.delegate = self
-        logger.debug("PlayerViewModel initialized with video URL: \(video.url.lastPathComponent)")
 
         // Initial subtitle update
         updateSubtitles(at: 0)
@@ -199,7 +198,6 @@ class PlayerViewModel: NSObject, ObservableObject {
 extension PlayerViewModel: VideoPlayerControllerDelegate {
     nonisolated func playerController(_ controller: VideoPlayerController, didUpdateTime time: TimeInterval) {
         Task { @MainActor in
-            logger.debug("⏱️ Player time updated to \(time)")
             currentTime = time
             updateSubtitles(at: time)
         }
@@ -207,7 +205,6 @@ extension PlayerViewModel: VideoPlayerControllerDelegate {
 
     nonisolated func playerController(_ controller: VideoPlayerController, didChangePlaybackState isPlaying: Bool) {
         Task { @MainActor in
-            logger.debug("▶️ Playback state changed to \(isPlaying ? "playing" : "paused")")
             self.isPlaying = isPlaying
         }
     }

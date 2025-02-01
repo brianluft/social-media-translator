@@ -28,26 +28,15 @@ class VideoSelectionViewModel: ObservableObject {
 
     private func saveSelectedLanguage(_ language: Locale.Language) {
         let identifier = language.maximalIdentifier
-        logger.info("Saving selected language: \(identifier)")
         userDefaults.set(identifier, forKey: selectedLanguageKey)
         // Force synchronize to ensure it's written immediately
         userDefaults.synchronize()
-
-        // Verify it was saved
-        if let saved = userDefaults.string(forKey: selectedLanguageKey) {
-            logger.info("Verified saved language: \(saved)")
-        } else {
-            logger.error("Failed to save language!")
-        }
     }
 
     private func loadSavedLanguage() -> Locale.Language? {
-        logger.info("Attempting to load saved language...")
         guard let identifier = userDefaults.string(forKey: selectedLanguageKey) else {
-            logger.info("No saved language found")
             return nil
         }
-        logger.info("Found saved language identifier: \(identifier)")
         return Locale.Language(identifier: identifier)
     }
 
