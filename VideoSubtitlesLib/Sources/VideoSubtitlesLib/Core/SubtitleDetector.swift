@@ -50,7 +50,7 @@ public class SubtitleDetector {
     private var isCancelled = false
 
     /// Sampling rate in frames per second
-    public let samplingRate: Float = 2 // Sample at video frame rate
+    public let samplingRate: Float = 3 // Sample at video frame rate
 
     /// Minimum confidence score for text detection
     private let minimumConfidence: Float = 0.4

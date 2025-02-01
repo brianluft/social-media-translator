@@ -26,13 +26,23 @@ struct PlayerView: View {
                     })
                     #if os(iOS)
                     .edgesIgnoringSafeArea(.all)
+                    #endif
                     .onTapGesture {
                         viewModel.togglePlayback()
                     }
-                    #endif
 
                     // Subtitle overlay
                     viewModel.subtitleOverlay
+
+                    // Play button overlay when paused
+                    if !viewModel.isPlaying {
+                        Image(systemName: "play.circle.fill")
+                            .font(.system(size: 72))
+                            .foregroundColor(.white.opacity(0.8))
+                            .onTapGesture {
+                                viewModel.togglePlayback()
+                            }
+                    }
                 }
                 .aspectRatio(videoSize.width > 0 ? videoSize.width / videoSize.height : nil, contentMode: .fit)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -41,9 +51,6 @@ struct PlayerView: View {
         #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
         #endif
-        .onAppear {
-            viewModel.play()
-        }
         .onDisappear {
             viewModel.pause()
         }
