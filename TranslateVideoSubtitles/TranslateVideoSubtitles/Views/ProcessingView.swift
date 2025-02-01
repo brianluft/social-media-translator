@@ -308,9 +308,9 @@ final class ProcessingViewModel: ObservableObject {
 
                 processedVideo = ProcessedVideo(
                     url: videoURL,
-                    frameSegments: frames,
                     targetLanguage: destinationLanguage.languageCode?.identifier ?? "unknown"
                 )
+                processedVideo?.appendFrameSegments(frames)
                 processingComplete = true
             } catch {
                 showError = true

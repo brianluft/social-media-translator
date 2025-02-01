@@ -7,7 +7,8 @@ public struct ProcessedVideo: Hashable {
     public let url: URL
 
     /// All frame segments with their timestamps, sorted by timestamp
-    public let frameSegments: [FrameSegments]
+    private var _frameSegments: [FrameSegments]
+    private let lock = NSLock()
 
     /// Target language of the translations
     public let targetLanguage: String
@@ -20,20 +21,28 @@ public struct ProcessedVideo: Hashable {
         lhs.url == rhs.url
     }
 
-    /// Creates a new ProcessedVideo instance with detected subtitles and their translations
+    /// Creates a new ProcessedVideo instance
     /// - Parameters:
     ///   - url: The URL of the source video file
-    ///   - frameSegments: Array of detected text segments with their timestamps
     ///   - targetLanguage: The language code of the translated text
     public init(
         url: URL,
-        frameSegments: [FrameSegments],
         targetLanguage: String
     ) {
         self.url = url
-        // Sort frame segments by timestamp for binary search
-        self.frameSegments = frameSegments.sorted(by: { $0.timestamp < $1.timestamp })
+        self._frameSegments = []
         self.targetLanguage = targetLanguage
+    }
+
+    /// Appends new frame segments to the video
+    /// - Parameter newSegments: Array of new frame segments to append
+    /// - Precondition: All timestamps in newSegments must be greater than any existing timestamps,
+    ///                 as this method assumes frames are processed sequentially from start to end
+    public mutating func appendFrameSegments(_ newSegments: [FrameSegments]) {
+        lock.lock()
+        defer { lock.unlock() }
+
+        _frameSegments.append(contentsOf: newSegments)
     }
 
     /// Returns the text segments that should be visible at the given timestamp, with translations if available
@@ -55,17 +64,20 @@ public struct ProcessedVideo: Hashable {
 
     /// Binary search to find the frame segments closest to the given timestamp
     private func binarySearchClosestFrame(at time: TimeInterval) -> FrameSegments? {
-        guard !frameSegments.isEmpty else { return nil }
+        lock.lock()
+        defer { lock.unlock() }
+
+        guard !_frameSegments.isEmpty else { return nil }
 
         var left = 0
-        var right = frameSegments.count - 1
+        var right = _frameSegments.count - 1
 
         while left < right {
             let mid = (left + right) / 2
-            let midTime = frameSegments[mid].timestamp
+            let midTime = _frameSegments[mid].timestamp
 
             if abs(midTime - time) < 0.001 { // Found exact match within tolerance
-                return frameSegments[mid]
+                return _frameSegments[mid]
             }
 
             if midTime < time {
@@ -77,16 +89,16 @@ public struct ProcessedVideo: Hashable {
 
         // Handle edge cases and return closest frame
         if left == 0 {
-            return frameSegments[0]
+            return _frameSegments[0]
         }
-        if left == frameSegments.count {
-            return frameSegments[frameSegments.count - 1]
+        if left == _frameSegments.count {
+            return _frameSegments[_frameSegments.count - 1]
         }
 
-        let leftDiff = abs(frameSegments[left - 1].timestamp - time)
-        let rightDiff = abs(frameSegments[left].timestamp - time)
+        let leftDiff = abs(_frameSegments[left - 1].timestamp - time)
+        let rightDiff = abs(_frameSegments[left].timestamp - time)
 
-        let result = leftDiff < rightDiff ? frameSegments[left - 1] : frameSegments[left]
+        let result = leftDiff < rightDiff ? _frameSegments[left - 1] : _frameSegments[left]
 
         return result
     }

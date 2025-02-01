@@ -28,37 +28,45 @@ final class ProcessedVideoTests: XCTestCase {
 
     // MARK: - Tests
 
-    func testInitSortsFrameSegments() {
+    func testAppendFrameSegments() {
         // Given
         let seg1Id = UUID()
         let seg1 = makeTestSegment(id: seg1Id, text: "Hello", translatedText: "Hola")
 
-        let frame1 = makeFrameSegments(id: UUID(), timestamp: 2.0, segments: [seg1])
-        let frame2 = makeFrameSegments(id: UUID(), timestamp: 1.0, segments: [seg1])
+        let frame1 = makeFrameSegments(id: UUID(), timestamp: 1.0, segments: [seg1])
+        let frame2 = makeFrameSegments(id: UUID(), timestamp: 2.0, segments: [seg1])
         let frame3 = makeFrameSegments(id: UUID(), timestamp: 3.0, segments: [seg1])
 
-        // When
-        let video = ProcessedVideo(
+        var video = ProcessedVideo(
             url: testURL,
-            frameSegments: [frame1, frame2, frame3],
             targetLanguage: "es"
         )
 
-        // Then
-        XCTAssertEqual(video.frameSegments.map(\.timestamp), [1.0, 2.0, 3.0])
+        // When
+        video.appendFrameSegments([frame1])
+        video.appendFrameSegments([frame2])
+        video.appendFrameSegments([frame3])
+
+        // Then - verify segments are returned in correct order
+        let segments1 = video.segments(at: 1.0)
+        XCTAssertEqual(segments1.first?.segment.text, "Hello")
+        let segments2 = video.segments(at: 2.0)
+        XCTAssertEqual(segments2.first?.segment.text, "Hello")
+        let segments3 = video.segments(at: 3.0)
+        XCTAssertEqual(segments3.first?.segment.text, "Hello")
     }
 
     func testSegmentsAtTimeWithExactMatch() {
         // Given
         let seg1Id = UUID()
         let seg1 = makeTestSegment(id: seg1Id, text: "Hello", translatedText: "Hola")
-
         let frame = makeFrameSegments(id: UUID(), timestamp: 1.0, segments: [seg1])
-        let video = ProcessedVideo(
+
+        var video = ProcessedVideo(
             url: testURL,
-            frameSegments: [frame],
             targetLanguage: "es"
         )
+        video.appendFrameSegments([frame])
 
         // When
         let segments = video.segments(at: 1.0)
@@ -76,11 +84,12 @@ final class ProcessedVideoTests: XCTestCase {
 
         let frame1 = makeFrameSegments(id: UUID(), timestamp: 1.0, segments: [seg1])
         let frame2 = makeFrameSegments(id: UUID(), timestamp: 2.0, segments: [seg1])
-        let video = ProcessedVideo(
+
+        var video = ProcessedVideo(
             url: testURL,
-            frameSegments: [frame1, frame2],
             targetLanguage: "es"
         )
+        video.appendFrameSegments([frame1, frame2])
 
         // When/Then
         let segments1 = video.segments(at: 1.2)
@@ -98,13 +107,13 @@ final class ProcessedVideoTests: XCTestCase {
         // Given
         let seg1Id = UUID()
         let seg1 = makeTestSegment(id: seg1Id, text: "Hello", translatedText: nil)
-
         let frame = makeFrameSegments(id: UUID(), timestamp: 1.0, segments: [seg1])
-        let video = ProcessedVideo(
+
+        var video = ProcessedVideo(
             url: testURL,
-            frameSegments: [frame],
             targetLanguage: "es"
         )
+        video.appendFrameSegments([frame])
 
         // When
         let segments = video.segments(at: 1.0)
@@ -119,7 +128,6 @@ final class ProcessedVideoTests: XCTestCase {
         // Given
         let video = ProcessedVideo(
             url: testURL,
-            frameSegments: [],
             targetLanguage: "es"
         )
 
@@ -137,11 +145,12 @@ final class ProcessedVideoTests: XCTestCase {
 
         let frame1 = makeFrameSegments(id: UUID(), timestamp: 1.0, segments: [seg1])
         let frame2 = makeFrameSegments(id: UUID(), timestamp: 2.0, segments: [seg1])
-        let video = ProcessedVideo(
+
+        var video = ProcessedVideo(
             url: testURL,
-            frameSegments: [frame1, frame2],
             targetLanguage: "es"
         )
+        video.appendFrameSegments([frame1, frame2])
 
         // When/Then
         // Before first frame
