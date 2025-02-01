@@ -69,15 +69,18 @@ struct ProcessingView: View {
             }
         }
         // Attach translation task to the main view
-        .translationTask(TranslationSession.Configuration(
-            source: sourceLanguage,
-            target: viewModel.destinationLanguage
-        )) { session in
-            Task { @MainActor in
-                viewModel.translationSessionCreated(session)
-                await viewModel.processVideo(videoItem)
+        .translationTask(
+            TranslationSession.Configuration(
+                source: sourceLanguage,
+                target: viewModel.destinationLanguage
+            ),
+            action: { session in
+                Task { @MainActor in
+                    viewModel.translationSessionCreated(session)
+                    await viewModel.processVideo(videoItem)
+                }
             }
-        }
+        )
     }
 }
 
