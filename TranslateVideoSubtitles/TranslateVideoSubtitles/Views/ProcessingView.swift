@@ -5,7 +5,7 @@ import SwiftUI
 import Translation
 import VideoSubtitlesLib
 
-private let logger = Logger(subsystem: "TranslateVideoSubtitles", category: "ProcessingView")
+private let logger = Logger(subsystem: "com.brianluft.TranslateVideoSubtitles", category: "ProcessingView")
 
 struct ProcessingView: View {
     let videoItem: PhotosPickerItem

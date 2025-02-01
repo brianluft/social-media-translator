@@ -3,7 +3,7 @@ import os
 import SwiftUI
 import Translation
 
-private let logger = Logger(subsystem: "VideoSubtitlesLib", category: "TranslationService")
+private let logger = Logger(subsystem: "com.brianluft.VideoSubtitlesLib", category: "TranslationService")
 
 #if targetEnvironment(simulator)
 private let isSimulator = true
@@ -161,20 +161,6 @@ public final class TranslationService {
         // Reset cancellation state
         await MainActor.run {
             isCancelled = false
-        }
-
-        // Log input frame segments
-        for frame in frameSegments {
-            logger
-                .debug(
-                    "Input frame at \(frame.timestamp, format: .fixed(precision: 3)): \(frame.segments.count) segments"
-                )
-            for segment in frame.segments {
-                logger
-                    .debug(
-                        "  - Text: '\(segment.text)' at (\(segment.position.origin.x), \(segment.position.origin.y))"
-                    )
-            }
         }
 
         do {

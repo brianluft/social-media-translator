@@ -128,7 +128,6 @@ class PlayerViewModel: NSObject, ObservableObject {
     private let subtitleRenderer: SubtitleOverlayRenderer
     private let video: ProcessedVideo
     private var currentSegments: [(segment: TextSegment, text: String)] = []
-    let logger = Logger(subsystem: "TranslateVideoSubtitles", category: "PlayerViewModel")
     private var observedPlayerItem: AVPlayerItem?
     @Published private(set) var currentTime: Double = 0
     @Published private(set) var isPlaying: Bool = false

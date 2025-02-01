@@ -1,3 +1,4 @@
+import os
 import PhotosUI
 import SwiftUI
 import VideoSubtitlesLib
@@ -33,13 +34,11 @@ struct VideoSelectionView: View {
                             processedVideo = nil
                         }
                 }
-            #if os(iOS)
                 .photosPicker(
                     isPresented: $isShowingPhotoPicker,
                     selection: $selectedItem,
                     matching: .videos
                 )
-            #endif
                 .onChange(of: selectedItem) { _, newValue in
                     if newValue != nil {
                         // Always navigate to processing when a video is selected
@@ -111,9 +110,9 @@ struct VideoSelectionView: View {
     }
 
     private var selectVideoButton: some View {
-        #if os(iOS)
         Button(
             action: {
+                selectedItem = nil
                 isShowingPhotoPicker = true
             },
             label: {
@@ -128,19 +127,6 @@ struct VideoSelectionView: View {
         .buttonStyle(.borderedProminent)
         .padding(.horizontal)
         .disabled(!viewModel.canSelectVideo)
-        #else
-        PhotosPicker(selection: $selectedItem, matching: .videos) {
-            HStack {
-                Image(systemName: "photo.on.rectangle")
-                Text("Choose from Photo Library")
-            }
-            .frame(maxWidth: .infinity)
-            .padding()
-        }
-        .buttonStyle(.borderedProminent)
-        .padding(.horizontal)
-        .disabled(!viewModel.canSelectVideo)
-        #endif
     }
 }
 

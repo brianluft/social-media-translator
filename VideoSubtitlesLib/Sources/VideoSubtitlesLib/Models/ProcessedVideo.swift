@@ -1,8 +1,6 @@
 import Foundation
 import os
 
-private let logger = Logger(subsystem: "VideoSubtitlesLib", category: "ProcessedVideo")
-
 /// Represents a video that has been processed for subtitle translation
 public struct ProcessedVideo: Hashable {
     /// The URL of the video file
