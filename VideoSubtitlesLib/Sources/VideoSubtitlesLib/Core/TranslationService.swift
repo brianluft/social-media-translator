@@ -35,6 +35,7 @@ public final class TranslationService {
         private let session: SendableTranslationSession
         private let targetLanguage: Locale.Language
         private var isCancelled = false
+        private var translationCache: [String: String] = [:]
 
         init(session: TranslationSession, targetLanguage: Locale.Language) {
             self.session = SendableTranslationSession(session: session)
@@ -43,6 +44,43 @@ public final class TranslationService {
 
         func cancel() {
             isCancelled = true
+        }
+
+        func translateText(_ text: String) async throws -> String {
+            // Check cache first
+            if let cached = translationCache[text] {
+                return cached
+            }
+
+            // Check for cancellation
+            if isCancelled {
+                throw CancellationError()
+            }
+
+            // Create request
+            let request = TranslationSession.Request(sourceText: text, clientIdentifier: text)
+
+            // Translate
+            let responses = try await session.translate(requests: [request])
+
+            // Check for cancellation after translation
+            if isCancelled {
+                throw CancellationError()
+            }
+
+            guard let response = responses.first,
+                  let translatedText = response.clientIdentifier.map({ _ in response.targetText })
+            else {
+                throw NSError(
+                    domain: "TranslationService",
+                    code: -1,
+                    userInfo: [NSLocalizedDescriptionKey: "Translation failed"]
+                )
+            }
+
+            // Cache the result
+            translationCache[text] = translatedText
+            return translatedText
         }
 
         func translate(_ frameSegments: [FrameSegments]) async throws -> [String: String] {
@@ -149,5 +187,12 @@ public final class TranslationService {
             await delegate?.translationDidFail(with: error)
             throw error
         }
+    }
+
+    /// Translate a single string
+    /// - Parameter text: The string to translate
+    /// - Returns: The translated string
+    public func translateText(_ text: String) async throws -> String {
+        try await translationActor.translateText(text)
     }
 }

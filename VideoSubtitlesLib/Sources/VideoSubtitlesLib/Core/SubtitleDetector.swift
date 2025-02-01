@@ -48,6 +48,7 @@ public class SubtitleDetector {
     private weak var delegate: TextDetectionDelegate?
     private let recognitionLanguages: [String]
     private var isCancelled = false
+    private let translationService: TranslationService?
 
     /// Sampling rate in frames per second
     public let samplingRate: Float = 3 // Sample at video frame rate
@@ -75,14 +76,17 @@ public class SubtitleDetector {
     ///   - videoAsset: The AVAsset to process for text detection
     ///   - delegate: Optional delegate to receive progress updates and results
     ///   - recognitionLanguages: Array of language codes for text recognition (e.g. ["en-US"])
+    ///   - translationService: Optional translation service to translate detected text
     public init(
         videoAsset: AVAsset,
         delegate: TextDetectionDelegate? = nil,
-        recognitionLanguages: [String] = ["en-US"]
+        recognitionLanguages: [String] = ["en-US"],
+        translationService: TranslationService? = nil
     ) {
         self.videoAsset = videoAsset
         self.delegate = delegate
         self.recognitionLanguages = recognitionLanguages
+        self.translationService = translationService
 
         // Configure image generator
         imageGenerator = AVAssetImageGenerator(asset: videoAsset)
@@ -179,24 +183,48 @@ public class SubtitleDetector {
             return FrameSegments(timestamp: CMTimeGetSeconds(time), segments: [])
         }
 
-        let segments = observations
-            .filter { $0.confidence >= minimumConfidence }
-            .map { observation in
-                // Convert Vision coordinates (bottom-left origin) to normalized coordinates (top-left origin)
-                let visionBox = observation.boundingBox
-                let normalizedBox = CGRect(
-                    x: visionBox.origin.x,
-                    y: 1 - visionBox.origin.y - visionBox.height, // Flip Y coordinate
-                    width: visionBox.width,
-                    height: visionBox.height
-                )
+        // Capture translationService before task group to avoid data race
+        let translationService = self.translationService
 
-                return TextSegment(
-                    text: observation.topCandidates(1)[0].string,
-                    position: normalizedBox,
-                    confidence: observation.confidence
-                )
+        let segments = try await withThrowingTaskGroup(of: TextSegment.self) { group in
+            var segments: [TextSegment] = []
+
+            for observation in observations where observation.confidence >= minimumConfidence {
+                // Capture all necessary data from observation before the task
+                let boundingBox = observation.boundingBox
+                let text = observation.topCandidates(1)[0].string
+                let confidence = observation.confidence
+
+                group.addTask {
+                    // Convert Vision coordinates (bottom-left origin) to normalized coordinates (top-left origin)
+                    let normalizedBox = CGRect(
+                        x: boundingBox.origin.x,
+                        y: 1 - boundingBox.origin.y - boundingBox.height, // Flip Y coordinate
+                        width: boundingBox.width,
+                        height: boundingBox.height
+                    )
+
+                    var translatedText: String?
+
+                    if let translationService {
+                        translatedText = try await translationService.translateText(text)
+                    }
+
+                    return TextSegment(
+                        text: text,
+                        translatedText: translatedText,
+                        position: normalizedBox,
+                        confidence: confidence
+                    )
+                }
             }
+
+            for try await segment in group {
+                segments.append(segment)
+            }
+
+            return segments
+        }
 
         return FrameSegments(
             timestamp: CMTimeGetSeconds(time),

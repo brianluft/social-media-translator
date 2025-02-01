@@ -7,6 +7,8 @@ public struct TextSegment: Codable, Identifiable, Equatable, Sendable {
     public let id: UUID
     /// The detected text content
     public let text: String
+    /// The translated text content (if available)
+    public let translatedText: String?
     /// Position of the text in the video frame (normalized coordinates 0-1)
     public let position: CGRect
     /// Confidence score of the OCR detection (0-1)
@@ -15,6 +17,7 @@ public struct TextSegment: Codable, Identifiable, Equatable, Sendable {
     public init(
         id: UUID? = nil,
         text: String,
+        translatedText: String? = nil,
         position: CGRect,
         confidence: Float
     ) {
@@ -28,6 +31,7 @@ public struct TextSegment: Codable, Identifiable, Equatable, Sendable {
             self.id = stableId
         }
         self.text = text
+        self.translatedText = translatedText
         self.position = position
         self.confidence = confidence
     }
@@ -85,6 +89,7 @@ extension TextSegment: CustomStringConvertible {
         TextSegment(
             id: \(id),
             text: "\(text)",
+            translatedText: \(String(describing: translatedText)),
             confidence: \(String(format: "%.2f", confidence))
         )
         """

@@ -210,18 +210,19 @@ final class ProcessingViewModel: ObservableObject {
                     }
                 )
 
-                logger.info("Initializing SubtitleDetector")
-                detector = SubtitleDetector(
-                    videoAsset: asset,
-                    delegate: detectionDelegate,
-                    recognitionLanguages: [sourceLanguage.languageCode?.identifier ?? "en-US"]
-                )
-
                 logger.info("Initializing TranslationService")
                 translator = TranslationService(
                     session: translationSession,
                     delegate: translationDelegate,
                     target: destinationLanguage
+                )
+
+                logger.info("Initializing SubtitleDetector")
+                detector = SubtitleDetector(
+                    videoAsset: asset,
+                    delegate: detectionDelegate,
+                    recognitionLanguages: [sourceLanguage.languageCode?.identifier ?? "en-US"],
+                    translationService: translator
                 )
 
                 // Detect subtitles
@@ -305,51 +306,32 @@ final class ProcessingViewModel: ObservableObject {
         logger.info("Detection complete with \(frames.count) frames")
         Task { @MainActor in
             do {
-                progress = 1.0 // Set to 100% while translation happens
-                detailedStatus = "Translating subtitles..."
-                if let translations = try await withCheckedThrowingContinuation({ (continuation: CheckedContinuation<
-                    [String: String]?,
-                    Error
-                >) in
-                    Task { @MainActor in
-                        if let translator {
-                            // Create a local copy of translator to avoid capture
-                            let translatorCopy = translator
-                            Task.detached {
-                                do {
-                                    let translations = try await translatorCopy.translate(frames)
-                                    continuation.resume(returning: translations)
-                                } catch {
-                                    continuation.resume(throwing: error)
-                                }
-                            }
-                        } else {
-                            logger.error("Translator not initialized before translation")
-                            continuation.resume(throwing: NSError(
-                                domain: "VideoProcessing",
-                                code: -1,
-                                userInfo: [NSLocalizedDescriptionKey: "Translator not initialized"]
-                            ))
+                guard let videoURL else {
+                    logger.error("Video URL not available")
+                    throw NSError(
+                        domain: "VideoProcessing",
+                        code: -1,
+                        userInfo: [NSLocalizedDescriptionKey: "Video URL not available"]
+                    )
+                }
+
+                // Create translations dictionary from the already-translated segments
+                var translations: [String: String] = [:]
+                for frame in frames {
+                    for segment in frame.segments {
+                        if let translatedText = segment.translatedText {
+                            translations[segment.text] = translatedText
                         }
                     }
-                }) {
-                    guard let videoURL else {
-                        logger.error("Video URL not available")
-                        throw NSError(
-                            domain: "VideoProcessing",
-                            code: -1,
-                            userInfo: [NSLocalizedDescriptionKey: "Video URL not available"]
-                        )
-                    }
-
-                    processedVideo = ProcessedVideo(
-                        url: videoURL,
-                        frameSegments: frames,
-                        translations: translations,
-                        targetLanguage: destinationLanguage.languageCode?.identifier ?? "unknown"
-                    )
-                    processingComplete = true
                 }
+
+                processedVideo = ProcessedVideo(
+                    url: videoURL,
+                    frameSegments: frames,
+                    translations: translations,
+                    targetLanguage: destinationLanguage.languageCode?.identifier ?? "unknown"
+                )
+                processingComplete = true
             } catch {
                 showError = true
                 errorMessage = error.localizedDescription
