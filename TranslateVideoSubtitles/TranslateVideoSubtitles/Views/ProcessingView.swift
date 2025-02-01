@@ -57,12 +57,6 @@ struct ProcessingView: View {
                 ProgressView(value: viewModel.progress)
                     .progressViewStyle(CircularProgressViewStyle())
 
-                Text(viewModel.detailedStatus)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
-
                 if viewModel.showError {
                     Text(viewModel.errorMessage)
                         .foregroundColor(.red)
@@ -118,8 +112,6 @@ struct ProcessingView: View {
 @MainActor
 final class ProcessingViewModel: ObservableObject {
     @Published var progress: Double = 0
-    @Published var currentStatus: String = "Processing Video"
-    @Published var detailedStatus: String = "Loading video from library..."
     @Published var showError: Bool = false
     @Published var errorMessage: String = ""
     @Published var processingComplete: Bool = false
@@ -226,7 +218,6 @@ final class ProcessingViewModel: ObservableObject {
                 )
 
                 // Detect subtitles
-                detailedStatus = "Detecting subtitles..."
                 try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
                     Task { @MainActor in
                         do {
