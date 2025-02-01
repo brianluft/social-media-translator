@@ -306,20 +306,9 @@ final class ProcessingViewModel: ObservableObject {
                     )
                 }
 
-                // Create translations dictionary from the already-translated segments
-                var translations: [String: String] = [:]
-                for frame in frames {
-                    for segment in frame.segments {
-                        if let translatedText = segment.translatedText {
-                            translations[segment.text] = translatedText
-                        }
-                    }
-                }
-
                 processedVideo = ProcessedVideo(
                     url: videoURL,
                     frameSegments: frames,
-                    translations: translations,
                     targetLanguage: destinationLanguage.languageCode?.identifier ?? "unknown"
                 )
                 processingComplete = true

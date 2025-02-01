@@ -9,9 +9,6 @@ public struct ProcessedVideo: Hashable {
     /// All frame segments with their timestamps, sorted by timestamp
     public let frameSegments: [FrameSegments]
 
-    /// Dictionary mapping original text to translated text
-    public let translations: [String: String]
-
     /// Target language of the translations
     public let targetLanguage: String
 
@@ -27,18 +24,15 @@ public struct ProcessedVideo: Hashable {
     /// - Parameters:
     ///   - url: The URL of the source video file
     ///   - frameSegments: Array of detected text segments with their timestamps
-    ///   - translations: Dictionary mapping original text to translated text
     ///   - targetLanguage: The language code of the translated text
     public init(
         url: URL,
         frameSegments: [FrameSegments],
-        translations: [String: String],
         targetLanguage: String
     ) {
         self.url = url
         // Sort frame segments by timestamp for binary search
         self.frameSegments = frameSegments.sorted(by: { $0.timestamp < $1.timestamp })
-        self.translations = translations
         self.targetLanguage = targetLanguage
     }
 
@@ -53,8 +47,7 @@ public struct ProcessedVideo: Hashable {
         }
 
         let segmentsWithTranslations = frame.segments.map { segment -> (segment: TextSegment, translation: String?) in
-            let translation = translations[segment.text]
-            return (segment: segment, translation: translation)
+            return (segment: segment, translation: segment.translatedText)
         }
 
         return segmentsWithTranslations

@@ -6,10 +6,17 @@ final class ProcessedVideoTests: XCTestCase {
 
     // MARK: - Test Data
 
-    func makeTestSegment(id: UUID, text: String, x: CGFloat = 0, y: CGFloat = 0) -> TextSegment {
+    func makeTestSegment(
+        id: UUID,
+        text: String,
+        translatedText: String? = nil,
+        x: CGFloat = 0,
+        y: CGFloat = 0
+    ) -> TextSegment {
         TextSegment(
             id: id,
             text: text,
+            translatedText: translatedText,
             position: CGRect(x: x, y: y, width: 0.2, height: 0.1),
             confidence: 0.9
         )
@@ -24,7 +31,7 @@ final class ProcessedVideoTests: XCTestCase {
     func testInitSortsFrameSegments() {
         // Given
         let seg1Id = UUID()
-        let seg1 = makeTestSegment(id: seg1Id, text: "Hello")
+        let seg1 = makeTestSegment(id: seg1Id, text: "Hello", translatedText: "Hola")
 
         let frame1 = makeFrameSegments(id: UUID(), timestamp: 2.0, segments: [seg1])
         let frame2 = makeFrameSegments(id: UUID(), timestamp: 1.0, segments: [seg1])
@@ -34,7 +41,6 @@ final class ProcessedVideoTests: XCTestCase {
         let video = ProcessedVideo(
             url: testURL,
             frameSegments: [frame1, frame2, frame3],
-            translations: ["Hello": "Hola"],
             targetLanguage: "es"
         )
 
@@ -45,14 +51,12 @@ final class ProcessedVideoTests: XCTestCase {
     func testSegmentsAtTimeWithExactMatch() {
         // Given
         let seg1Id = UUID()
-        let seg1 = makeTestSegment(id: seg1Id, text: "Hello")
-        let translations = ["Hello": "Hola"]
+        let seg1 = makeTestSegment(id: seg1Id, text: "Hello", translatedText: "Hola")
 
         let frame = makeFrameSegments(id: UUID(), timestamp: 1.0, segments: [seg1])
         let video = ProcessedVideo(
             url: testURL,
             frameSegments: [frame],
-            translations: translations,
             targetLanguage: "es"
         )
 
@@ -68,15 +72,13 @@ final class ProcessedVideoTests: XCTestCase {
     func testSegmentsAtTimeWithClosestMatch() {
         // Given
         let seg1Id = UUID()
-        let seg1 = makeTestSegment(id: seg1Id, text: "Hello")
-        let translations = ["Hello": "Hola"]
+        let seg1 = makeTestSegment(id: seg1Id, text: "Hello", translatedText: "Hola")
 
         let frame1 = makeFrameSegments(id: UUID(), timestamp: 1.0, segments: [seg1])
         let frame2 = makeFrameSegments(id: UUID(), timestamp: 2.0, segments: [seg1])
         let video = ProcessedVideo(
             url: testURL,
             frameSegments: [frame1, frame2],
-            translations: translations,
             targetLanguage: "es"
         )
 
@@ -95,14 +97,12 @@ final class ProcessedVideoTests: XCTestCase {
     func testSegmentsAtTimeWithMissingTranslation() {
         // Given
         let seg1Id = UUID()
-        let seg1 = makeTestSegment(id: seg1Id, text: "Hello")
-        let translations: [String: String] = [:]
+        let seg1 = makeTestSegment(id: seg1Id, text: "Hello", translatedText: nil)
 
         let frame = makeFrameSegments(id: UUID(), timestamp: 1.0, segments: [seg1])
         let video = ProcessedVideo(
             url: testURL,
             frameSegments: [frame],
-            translations: translations,
             targetLanguage: "es"
         )
 
@@ -120,7 +120,6 @@ final class ProcessedVideoTests: XCTestCase {
         let video = ProcessedVideo(
             url: testURL,
             frameSegments: [],
-            translations: [:],
             targetLanguage: "es"
         )
 
@@ -134,15 +133,13 @@ final class ProcessedVideoTests: XCTestCase {
     func testSegmentsAtTimeWithEdgeCases() {
         // Given
         let seg1Id = UUID()
-        let seg1 = makeTestSegment(id: seg1Id, text: "Hello")
-        let translations = ["Hello": "Hola"]
+        let seg1 = makeTestSegment(id: seg1Id, text: "Hello", translatedText: "Hola")
 
         let frame1 = makeFrameSegments(id: UUID(), timestamp: 1.0, segments: [seg1])
         let frame2 = makeFrameSegments(id: UUID(), timestamp: 2.0, segments: [seg1])
         let video = ProcessedVideo(
             url: testURL,
             frameSegments: [frame1, frame2],
-            translations: translations,
             targetLanguage: "es"
         )
 
