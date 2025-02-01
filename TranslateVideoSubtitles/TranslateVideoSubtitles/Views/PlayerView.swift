@@ -16,11 +16,14 @@ struct PlayerView: View {
     var body: some View {
         GeometryReader { _ in
             ZStack {
-                // Video player
+                // Video player with tap/click gesture
                 VideoPlayerView(player: viewModel.player)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 #if os(iOS)
                     .edgesIgnoringSafeArea(.all)
+                    .onTapGesture {
+                        viewModel.togglePlayback()
+                    }
                 #endif
 
                 // Subtitle overlay
@@ -31,34 +34,20 @@ struct PlayerView: View {
                 VStack {
                     Spacer()
 
-                    // Progress slider and controls
-                    VStack(spacing: 8) {
+                    // Progress slider
+                    VStack(spacing: 4) {
                         Slider(
                             value: $viewModel.currentTime,
                             in: 0 ... viewModel.duration,
                             onEditingChanged: viewModel.onSliderEditingChanged
                         )
                         .padding(.horizontal)
-
-                        HStack {
-                            Button(action: viewModel.togglePlayback) {
-                                Image(systemName: viewModel.isPlaying ? "pause.fill" : "play.fill")
-                                    .font(.title2)
-                            }
-
-                            Text(viewModel.timeString)
-                                .font(.caption)
-                                .monospacedDigit()
-
-                            Spacer()
-                        }
-                        .padding(.horizontal)
                     }
-                    .padding(.bottom)
+                    .padding(.bottom, 8)
                     .background {
                         Rectangle()
-                            .fill(.black.opacity(0.4))
-                            .blur(radius: 10)
+                            .fill(.black.opacity(0.6))
+                            .blur(radius: 8)
                             .allowsHitTesting(false)
                     }
                 }
@@ -112,10 +101,40 @@ struct VideoPlayerView: UIViewControllerRepresentable {
 struct VideoPlayerView: NSViewRepresentable {
     let player: AVPlayer
 
+    class Coordinator: NSObject {
+        let parent: VideoPlayerView
+
+        init(_ parent: VideoPlayerView) {
+            self.parent = parent
+        }
+
+        @objc func handleClick(_ gesture: NSClickGestureRecognizer) {
+            if gesture.view is AVPlayerView {
+                if parent.player.timeControlStatus == .playing {
+                    parent.player.pause()
+                } else {
+                    parent.player.play()
+                }
+            }
+        }
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+
     func makeNSView(context: Context) -> AVPlayerView {
         let playerView = AVPlayerView()
         playerView.player = player
         playerView.controlsStyle = .none
+
+        // Add click gesture recognizer
+        let clickGesture = NSClickGestureRecognizer(
+            target: context.coordinator,
+            action: #selector(Coordinator.handleClick(_:))
+        )
+        playerView.addGestureRecognizer(clickGesture)
+
         return playerView
     }
 
