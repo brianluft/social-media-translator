@@ -1,37 +1,50 @@
 #!/bin/zsh
 set -uo pipefail
-
-echo "--- Resolve ---"
-set -e
-(cd BuildTools && swift package resolve)
-
-echo "--- Xcbeautify ---"
-set -e
-(cd BuildTools && swift build -q -c release --product xcbeautify)
-
 set +e
+
+echo "--- BuildTools Resolve ---"
+(cd BuildTools && NSUnbufferedIO=YES swift package resolve >/dev/null 2>/dev/null)
+EXIT_CODE=$?
+if [ $EXIT_CODE -ne 0 ]; then
+  echo "swift package resolve failed with exit code $EXIT_CODE"
+  exit 1
+fi
+
+echo "--- Build xcbeautify ---"
+(cd BuildTools && NSUnbufferedIO=YES swift build -q -c release --product xcbeautify >/dev/null 2>/dev/null)
+EXIT_CODE=$?
+if [ $EXIT_CODE -ne 0 ]; then
+  echo "swift build failed with exit code $EXIT_CODE"
+  exit 1
+fi
+
 XCBEAUTIFY=$(find BuildTools/.build -type f -name xcbeautify | grep -v dSYM)
 if [ -z "$XCBEAUTIFY" ]; then
   echo "xcbeautify not found"
   exit 1
 fi
 
-echo "--- SwiftFormat ---"
-set -e
-(cd BuildTools && swift build -q -c release --product swiftformat)
+echo "--- Build SwiftFormat ---"
+(cd BuildTools && NSUnbufferedIO=YES swift build -q -c release --product swiftformat >/dev/null 2>/dev/null)
+EXIT_CODE=$?
+if [ $EXIT_CODE -ne 0 ]; then
+  echo "swift build failed with exit code $EXIT_CODE"
+  exit 1
+fi
 
-set +e
 SWIFTFORMAT=$(find BuildTools/.build -type f -name swiftformat | grep apple-macosx | grep -v dSYM)
 if [ -z "$SWIFTFORMAT" ]; then
   echo "swiftformat not found"
   exit 1
 fi
 
-set -e
 NUM_CORES=$(sysctl -n hw.ncpu)
+if [ -z "$NUM_CORES" ]; then
+  echo "sysctl failed to get number of cores"
+  exit 1
+fi
 
 echo "--- Clean ---"
-set +e
 NSUnbufferedIO=YES xcodebuild clean -quiet -workspace TranslateVideoSubtitles.xcworkspace -scheme TranslateVideoSubtitles -configuration Debug -destination 'generic/platform=iOS Simulator' 2>&1  | $XCBEAUTIFY --disable-logging
 EXIT_CODE=$?
 if [ $EXIT_CODE -ne 0 ]; then
@@ -46,15 +59,17 @@ if [ $EXIT_CODE -ne 0 ]; then
   exit 1
 fi
 
-set -e
 (cd VideoSubtitlesLib && rm -rf .build)
 
 echo "--- Format ---"
-set -e
-$SWIFTFORMAT .
+$SWIFTFORMAT . >/dev/null 2>/dev/null
+EXIT_CODE=$?
+if [ $EXIT_CODE -ne 0 ]; then
+  echo "swiftformat failed with exit code $EXIT_CODE"
+  exit 1
+fi
 
-echo "--- Debug (iOS Simulator) ---"
-set +e
+echo "--- Build (iOS Debug) ---"
 NSUnbufferedIO=YES xcodebuild -quiet -workspace TranslateVideoSubtitles.xcworkspace -scheme TranslateVideoSubtitles -configuration Debug -destination 'generic/platform=iOS Simulator' -jobs $NUM_CORES 2>&1 | $XCBEAUTIFY --disable-logging
 EXIT_CODE=$?
 if [ $EXIT_CODE -ne 0 ]; then
@@ -62,8 +77,7 @@ if [ $EXIT_CODE -ne 0 ]; then
   exit 1
 fi
 
-echo "--- Debug (macOS) ---"
-set +e
+echo "--- Build (macOS Debug) ---"
 NSUnbufferedIO=YES xcodebuild -quiet -workspace TranslateVideoSubtitles.xcworkspace -scheme TranslateVideoSubtitles-macOS -configuration Debug -destination 'platform=macOS,arch=arm64' -jobs $NUM_CORES 2>&1 | $XCBEAUTIFY --disable-logging
 EXIT_CODE=$?
 if [ $EXIT_CODE -ne 0 ]; then
@@ -72,8 +86,7 @@ if [ $EXIT_CODE -ne 0 ]; then
 fi
 
 echo "--- Test ---"
-set +e
-(cd VideoSubtitlesLib && NSUnbufferedIO=YES swift test -q -j $NUM_CORES 2>&1)
+(cd VideoSubtitlesLib && NSUnbufferedIO=YES swift test -q -j $NUM_CORES 2>&1) | grep -v '^\[' | grep -v "^Test Case.*started" | grep -v '^Test.*passed'
 EXIT_CODE=$?
 if [ $EXIT_CODE -ne 0 ]; then
   echo "swift test failed with exit code $EXIT_CODE"
