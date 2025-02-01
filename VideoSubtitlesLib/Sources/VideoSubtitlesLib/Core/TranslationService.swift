@@ -5,11 +5,6 @@ import Translation
 
 private let logger = Logger(subsystem: "com.brianluft.VideoSubtitlesLib", category: "TranslationService")
 
-
-#if targetEnvironment(simulator)
-#error("Translation Framework is not available in the simulator.")
-#endif
-
 /// Protocol for reporting translation progress
 public protocol TranslationProgressDelegate: AnyObject, Sendable {
     func translationDidProgress(_ progress: Float) async

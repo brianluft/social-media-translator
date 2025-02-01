@@ -61,7 +61,7 @@ if [ $EXIT_CODE -ne 0 ]; then
 fi
 
 echo "--- Build (iOS Debug) ---"
-NSUnbufferedIO=YES xcodebuild -quiet -workspace TranslateVideoSubtitles.xcworkspace -scheme TranslateVideoSubtitles -configuration Debug -destination 'platform=iOS' -jobs $NUM_CORES 2>&1
+NSUnbufferedIO=YES xcodebuild -quiet -workspace TranslateVideoSubtitles.xcworkspace -scheme TranslateVideoSubtitles -configuration Debug -destination 'generic/platform=iOS Simulator' -jobs $NUM_CORES 2>&1
 EXIT_CODE=$?
 if [ $EXIT_CODE -ne 0 ]; then
   echo "xcodebuild failed with exit code $EXIT_CODE"
