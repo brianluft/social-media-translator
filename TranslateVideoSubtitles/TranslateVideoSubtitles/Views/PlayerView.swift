@@ -41,21 +41,6 @@ struct PlayerView: View {
         #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
         #endif
-        .toolbar {
-            #if os(iOS)
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button("Done") {
-                    dismiss()
-                }
-            }
-            #else
-            ToolbarItem(placement: .automatic) {
-                Button("Done") {
-                    dismiss()
-                }
-            }
-            #endif
-        }
         .onAppear {
             viewModel.play()
         }
