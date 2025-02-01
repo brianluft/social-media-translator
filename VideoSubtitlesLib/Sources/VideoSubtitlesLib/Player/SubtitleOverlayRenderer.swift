@@ -5,8 +5,10 @@ import UIKit
 import AppKit
 #endif
 
+/// Renders subtitle overlays on video frames with customizable styling
 @MainActor
 public class SubtitleOverlayRenderer {
+    /// Defines the visual appearance of subtitle overlays
     public struct Style: Sendable {
         public let font: Font
         public let textColor: Color
@@ -14,6 +16,7 @@ public class SubtitleOverlayRenderer {
         public let cornerRadius: CGFloat
         public let padding: EdgeInsets
 
+        /// Default style for subtitle overlays
         public static let `default` = Style(
             font: .system(size: 16, weight: .medium),
             textColor: .white,
@@ -22,6 +25,13 @@ public class SubtitleOverlayRenderer {
             padding: EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8)
         )
 
+        /// Creates a new subtitle style configuration
+        /// - Parameters:
+        ///   - font: The font to use for subtitle text
+        ///   - textColor: The color of the subtitle text
+        ///   - backgroundColor: The background color behind subtitles
+        ///   - cornerRadius: The corner radius of the subtitle background
+        ///   - padding: The padding around subtitle text
         public init(
             font: Font,
             textColor: Color,
@@ -40,6 +50,8 @@ public class SubtitleOverlayRenderer {
     private let style: Style
     private var textSizeCache: [String: CGSize] = [:]
 
+    /// Creates a new subtitle overlay renderer
+    /// - Parameter style: The style configuration for rendering subtitles
     public init(style: Style = .default) {
         self.style = style
     }
@@ -130,6 +142,9 @@ public class SubtitleOverlayRenderer {
         return position
     }
 
+    /// Creates a SwiftUI view that renders the provided text segments as subtitle overlays
+    /// - Parameter segments: Array of tuples containing text segments and their translated text
+    /// - Returns: A SwiftUI view that can be overlaid on a video player
     public func createSubtitleOverlay(for segments: [(segment: TextSegment, text: String)]) -> some View {
         GeometryReader { geometry in
             ZStack {

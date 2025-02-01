@@ -17,6 +17,12 @@ public struct ProcessedVideo {
     /// Target language of the translations
     public let targetLanguage: String
 
+    /// Creates a new ProcessedVideo instance with detected subtitles and their translations
+    /// - Parameters:
+    ///   - url: The URL of the source video file
+    ///   - frameSegments: Array of detected text segments with their timestamps
+    ///   - translations: Dictionary mapping original text to translated text
+    ///   - targetLanguage: The language code of the translated text
     public init(
         url: URL,
         frameSegments: [FrameSegments],

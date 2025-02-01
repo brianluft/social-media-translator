@@ -69,6 +69,11 @@ public class SubtitleDetector {
 
     // MARK: - Initialization
 
+    /// Creates a new subtitle detector for processing text from video frames
+    /// - Parameters:
+    ///   - videoAsset: The AVAsset to process for text detection
+    ///   - delegate: Optional delegate to receive progress updates and results
+    ///   - recognitionLanguages: Array of language codes for text recognition (e.g. ["en-US"])
     public init(
         videoAsset: AVAsset,
         delegate: TextDetectionDelegate? = nil,
@@ -87,6 +92,9 @@ public class SubtitleDetector {
 
     // MARK: - Public Methods
 
+    /// Processes the video asset to detect text in frames
+    /// - Throws: Error if video processing fails
+    /// - Returns: Void, but calls delegate methods with progress and results
     public func detectText() async throws {
         do {
             // Get video duration
