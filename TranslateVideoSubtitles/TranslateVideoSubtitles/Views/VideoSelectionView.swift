@@ -7,6 +7,7 @@ struct VideoSelectionView: View {
     @State private var isShowingPhotoPicker = false
     @State private var navigateToProcessing = false
     @State private var selectedItem: PhotosPickerItem?
+    @State private var processedVideo: ProcessedVideo?
 
     var body: some View {
         NavigationStack {
@@ -16,9 +17,16 @@ struct VideoSelectionView: View {
                        let sourceLanguage = viewModel.selectedSourceLanguage {
                         ProcessingView(
                             videoItem: selectedItem,
-                            sourceLanguage: sourceLanguage
+                            sourceLanguage: sourceLanguage,
+                            onProcessingComplete: { video in
+                                processedVideo = video
+                                navigateToProcessing = false
+                            }
                         )
                     }
+                }
+                .navigationDestination(item: $processedVideo) { video in
+                    PlayerView(video: video)
                 }
             #if os(iOS)
                 .photosPicker(

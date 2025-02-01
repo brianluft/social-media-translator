@@ -4,7 +4,7 @@ import os
 private let logger = Logger(subsystem: "VideoSubtitlesLib", category: "ProcessedVideo")
 
 /// Represents a video that has been processed for subtitle translation
-public struct ProcessedVideo {
+public struct ProcessedVideo: Hashable {
     /// The URL of the video file
     public let url: URL
 
@@ -16,6 +16,14 @@ public struct ProcessedVideo {
 
     /// Target language of the translations
     public let targetLanguage: String
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(url)
+    }
+
+    public static func == (lhs: ProcessedVideo, rhs: ProcessedVideo) -> Bool {
+        lhs.url == rhs.url
+    }
 
     /// Creates a new ProcessedVideo instance with detected subtitles and their translations
     /// - Parameters:

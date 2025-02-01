@@ -10,12 +10,18 @@ private let logger = Logger(subsystem: "TranslateVideoSubtitles", category: "Pro
 struct ProcessingView: View {
     let videoItem: PhotosPickerItem
     let sourceLanguage: Locale.Language
+    let onProcessingComplete: (ProcessedVideo) -> Void
     @StateObject private var viewModel: ProcessingViewModel
     @Environment(\.dismiss) private var dismiss
 
-    init(videoItem: PhotosPickerItem, sourceLanguage: Locale.Language) {
+    init(
+        videoItem: PhotosPickerItem,
+        sourceLanguage: Locale.Language,
+        onProcessingComplete: @escaping (ProcessedVideo) -> Void
+    ) {
         self.videoItem = videoItem
         self.sourceLanguage = sourceLanguage
+        self.onProcessingComplete = onProcessingComplete
         _viewModel = StateObject(wrappedValue: ProcessingViewModel(sourceLanguage: sourceLanguage))
     }
 
@@ -67,9 +73,9 @@ struct ProcessingView: View {
             }
         }
         .navigationBarBackButtonHidden()
-        .navigationDestination(isPresented: $viewModel.processingComplete) {
-            if let processedVideo = viewModel.processedVideo {
-                PlayerView(video: processedVideo)
+        .onChange(of: viewModel.processingComplete) { _, isComplete in
+            if isComplete, let video = viewModel.processedVideo {
+                onProcessingComplete(video)
             }
         }
         // Attach translation task to the main view
@@ -381,7 +387,8 @@ private final class TranslationDelegate: TranslationProgressDelegate, @unchecked
     NavigationStack {
         ProcessingView(
             videoItem: PhotosPickerItem(itemIdentifier: "preview-identifier"),
-            sourceLanguage: Locale.Language(identifier: "en")
+            sourceLanguage: Locale.Language(identifier: "en"),
+            onProcessingComplete: { _ in }
         )
     }
 }
