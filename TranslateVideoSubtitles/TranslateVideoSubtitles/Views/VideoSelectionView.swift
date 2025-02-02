@@ -132,7 +132,3 @@ struct VideoSelectionView: View {
         .disabled(!viewModel.canSelectVideo)
     }
 }
-
-#Preview {
-    VideoSelectionView()
-}

@@ -387,16 +387,3 @@ private final class TranslationDelegate: TranslationProgressDelegate, @unchecked
         failureHandler(error)
     }
 }
-
-#Preview {
-    NavigationStack {
-        ProcessingView(
-            videoItem: PhotosPickerItem(itemIdentifier: "preview-identifier"),
-            sourceLanguage: Locale.Language(identifier: "en"),
-            processedVideo: ProcessedVideo(
-                targetLanguage: Locale.current.language.languageCode?.identifier ?? "en"
-            ),
-            onProcessingComplete: { _ in }
-        )
-    }
-}
