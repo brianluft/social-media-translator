@@ -33,15 +33,7 @@ if [ -z "$SWIFTFORMAT" ]; then
 fi
 
 echo "--- Clean ---"
-NSUnbufferedIO=YES xcodebuild clean -quiet -workspace TranslateVideoSubtitles.xcworkspace -scheme TranslateVideoSubtitles -configuration Debug -destination 'generic/platform=iOS' 2>&1 > log
-EXIT_CODE=$?
-if [ $EXIT_CODE -ne 0 ]; then
-  cat log
-  echo "xcodebuild clean failed with exit code $EXIT_CODE"
-  exit 1
-fi
-
-NSUnbufferedIO=YES xcodebuild clean -quiet -workspace TranslateVideoSubtitles.xcworkspace -scheme TranslateVideoSubtitles-macOS -configuration Debug -destination 'platform=macOS,arch=arm64' 2>&1 > log
+NSUnbufferedIO=YES xcodebuild clean -quiet -workspace TranslateVideoSubtitles.xcworkspace -scheme TranslateVideoSubtitles -configuration Debug -destination 'generic/platform=iOS Simulator' 2>&1 > log
 EXIT_CODE=$?
 if [ $EXIT_CODE -ne 0 ]; then
   cat log
@@ -60,16 +52,8 @@ if [ $EXIT_CODE -ne 0 ]; then
   exit 1
 fi
 
-echo "--- Build (iOS Debug) ---"
+echo "--- Build ---"
 NSUnbufferedIO=YES xcodebuild -quiet -workspace TranslateVideoSubtitles.xcworkspace -scheme TranslateVideoSubtitles -configuration Debug -destination 'generic/platform=iOS Simulator' -jobs $NUM_CORES 2>&1
-EXIT_CODE=$?
-if [ $EXIT_CODE -ne 0 ]; then
-  echo "xcodebuild failed with exit code $EXIT_CODE"
-  exit 1
-fi
-
-echo "--- Build (macOS Debug) ---"
-NSUnbufferedIO=YES xcodebuild -quiet -workspace TranslateVideoSubtitles.xcworkspace -scheme TranslateVideoSubtitles-macOS -configuration Debug -destination 'platform=macOS,arch=arm64' -jobs $NUM_CORES 2>&1
 EXIT_CODE=$?
 if [ $EXIT_CODE -ne 0 ]; then
   echo "xcodebuild failed with exit code $EXIT_CODE"

@@ -58,7 +58,6 @@ struct PlayerView: View {
 }
 
 // Custom AVPlayerView to support subtitle overlay
-#if os(iOS)
 struct VideoPlayerView: UIViewControllerRepresentable {
     let player: AVPlayer
     let onVideoSizeChange: @MainActor (CGSize) -> Void
@@ -119,87 +118,6 @@ struct VideoPlayerView: UIViewControllerRepresentable {
         }
     }
 }
-
-#elseif os(macOS)
-struct VideoPlayerView: NSViewRepresentable {
-    let player: AVPlayer
-    let onVideoSizeChange: @MainActor (CGSize) -> Void
-
-    class Coordinator: NSObject {
-        let parent: VideoPlayerView
-        private var observation: NSKeyValueObservation?
-
-        init(_ parent: VideoPlayerView) {
-            self.parent = parent
-            super.init()
-        }
-
-        @objc func handleClick(_ gesture: NSClickGestureRecognizer) {
-            if gesture.view is AVPlayerView {
-                if parent.player.timeControlStatus == .playing {
-                    parent.player.pause()
-                } else {
-                    parent.player.play()
-                }
-            }
-        }
-
-        func observe(_ playerItem: AVPlayerItem) {
-            observation = playerItem.observe(\.status, options: [.new]) { [weak self] playerItem, _ in
-                guard let self,
-                      playerItem.status == .readyToPlay else { return }
-
-                // Get video track dimensions
-                Task {
-                    if let tracks = try? await playerItem.asset.loadTracks(withMediaType: .video),
-                       let track = tracks.first {
-                        let size = try? await track.load(.naturalSize)
-                        let transform = try? await track.load(.preferredTransform)
-
-                        if let size {
-                            // Apply transform to get correct orientation
-                            let videoSize = transform.map { size.applying($0) } ?? size
-                            // Use absolute values since transform can make dimensions negative
-                            await self.parent.onVideoSizeChange(CGSize(
-                                width: abs(videoSize.width),
-                                height: abs(videoSize.height)
-                            ))
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    func makeCoordinator() -> Coordinator {
-        Coordinator(self)
-    }
-
-    func makeNSView(context: Context) -> AVPlayerView {
-        let playerView = AVPlayerView()
-        playerView.player = player
-        playerView.controlsStyle = .none
-
-        // Observe when the player item becomes ready
-        if let playerItem = player.currentItem {
-            context.coordinator.observe(playerItem)
-        }
-
-        // Add click gesture recognizer
-        let clickGesture = NSClickGestureRecognizer(
-            target: context.coordinator,
-            action: #selector(Coordinator.handleClick(_:))
-        )
-        playerView.addGestureRecognizer(clickGesture)
-
-        return playerView
-    }
-
-    func updateNSView(_ nsView: AVPlayerView, context: Context) {
-        // Update if needed
-    }
-}
-#endif
 
 @MainActor
 class PlayerViewModel: NSObject, ObservableObject {

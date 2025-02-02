@@ -8,11 +8,6 @@ An iOS app that translates burned-in video subtitles to your preferred language.
 
 ## Building from Source
 
-### Requirements
-- Xcode 13.0 or later
-- iOS 15.0+ / macOS 12.0+
-- Swift 5.5+
-
 ### Steps
 
 1. Clone the repository:
@@ -27,19 +22,5 @@ open TranslateVideoSubtitles/TranslateVideoSubtitles.xcodeproj
 ```
 
 3. Build the project in Xcode:
-- Select your target device
+- Select your target device (it must be a real iPhone, not a simulator)
 - Press ⌘B or select Product > Build
-
-### Running Tests
-
-1. Run the library tests:
-```bash
-cd VideoSubtitlesLib
-swift test
-```
-
-2. Run the app tests in Xcode:
-- Press ⌘U or select Product > Test
-- This will run both unit tests and UI tests
-
-Note: Some tests require test video assets which are included in the repository under `VideoSubtitlesLib/Tests/VideoSubtitlesLibTests/TestAssets/Videos/`.
