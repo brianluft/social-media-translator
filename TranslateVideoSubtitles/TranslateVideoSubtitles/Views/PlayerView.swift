@@ -47,20 +47,21 @@ struct PlayerView: View {
                                 viewModel.subtitleOverlay
                                     .frame(width: size.width, height: size.height)
                             }
-
-                            if !viewModel.isPlaying && viewModel.processingComplete {
-                                Image(systemName: "play.circle.fill")
-                                    .font(.system(size: 72))
-                                    .foregroundColor(.white.opacity(0.8))
-                                    .onTapGesture {
-                                        viewModel.togglePlayback()
-                                    }
-                            }
                         }
                         .frame(width: size.width, height: size.height)
                     }
                     .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
                 }
+            }
+
+            // Play button overlay
+            if viewModel.readyToPlay && !viewModel.isPlaying {
+                Image(systemName: "play.circle.fill")
+                    .font(.system(size: 72))
+                    .foregroundColor(.white.opacity(0.8))
+                    .onTapGesture {
+                        viewModel.togglePlayback()
+                    }
             }
 
             VStack {
