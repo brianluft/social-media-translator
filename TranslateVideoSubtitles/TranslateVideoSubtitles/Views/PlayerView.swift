@@ -63,22 +63,16 @@ struct PlayerView: View {
                         viewModel.togglePlayback()
                     }
             }
-
-            VStack {
-                Spacer()
-                HStack {
-                    Spacer()
-                    if !viewModel.readyToPlay || !viewModel.processingComplete {
-                        ProgressView(value: viewModel.progress)
-                            .progressViewStyle(CircularProgressViewStyle())
-                            .padding()
-                    }
+        }
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                if !viewModel.readyToPlay || !viewModel.processingComplete {
+                    ProgressView(value: viewModel.progress)
+                        .progressViewStyle(CircularProgressViewStyle())
                 }
             }
         }
-        #if os(iOS)
-        .navigationBarTitleDisplayMode(.inline)
-        #endif
         .onDisappear {
             Task {
                 await viewModel.cancelProcessing()
@@ -126,17 +120,17 @@ struct CircularProgressViewStyle: ProgressViewStyle {
     func makeBody(configuration: Configuration) -> some View {
         Circle()
             .trim(from: 0.0, to: CGFloat(configuration.fractionCompleted ?? 0))
-            .stroke(style: StrokeStyle(lineWidth: 4.0, lineCap: .round, lineJoin: .round))
+            .stroke(style: StrokeStyle(lineWidth: 3.0, lineCap: .round, lineJoin: .round))
             .foregroundColor(.blue)
             .rotationEffect(.degrees(-90))
-            .frame(width: 40, height: 40)
+            .frame(width: 24, height: 24)
             .animation(.linear, value: configuration.fractionCompleted)
             .background(
                 Circle()
-                    .stroke(lineWidth: 4.0)
+                    .stroke(lineWidth: 3.0)
                     .opacity(0.3)
                     .foregroundColor(.blue)
-                    .frame(width: 40, height: 40)
+                    .frame(width: 24, height: 24)
             )
     }
 }
