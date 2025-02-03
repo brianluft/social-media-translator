@@ -10,6 +10,37 @@ import VideoSubtitlesLib
 /// It is responsible for detecting subtitles, translating them, and saving the processed video.
 @MainActor
 final class VideoProcessor {
+    // MARK: - Static Methods
+
+    /// Returns the app's temporary directory for video files
+    static var temporaryVideoDirectory: URL {
+        FileManager.default.temporaryDirectory.appendingPathComponent("VideoSubtitles", isDirectory: true)
+    }
+
+    /// Cleans up any orphaned temporary video files
+    static func cleanupTemporaryFiles() {
+        do {
+            let fileManager = FileManager.default
+            // Create directory if it doesn't exist
+            try? fileManager.createDirectory(at: temporaryVideoDirectory, withIntermediateDirectories: true)
+
+            // Get all files in the directory
+            let files = try fileManager.contentsOfDirectory(
+                at: temporaryVideoDirectory,
+                includingPropertiesForKeys: nil
+            )
+
+            // Remove each file
+            for file in files {
+                try? fileManager.removeItem(at: file)
+            }
+        } catch {
+            print("Failed to cleanup temporary files: \(error)")
+        }
+    }
+
+    // MARK: - Instance Properties
+
     @Published var progress: Double = 0
     @Published var showError: Bool = false
     @Published var errorMessage: String = ""
@@ -59,8 +90,14 @@ final class VideoProcessor {
                     )
                 }
 
+                // Create directory if needed
+                try? FileManager.default.createDirectory(
+                    at: Self.temporaryVideoDirectory,
+                    withIntermediateDirectories: true
+                )
+
                 // Save to temporary file
-                let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".mov")
+                let tempURL = Self.temporaryVideoDirectory.appendingPathComponent(UUID().uuidString + ".mov")
                 try videoData.write(to: tempURL)
 
                 // Create AVAsset

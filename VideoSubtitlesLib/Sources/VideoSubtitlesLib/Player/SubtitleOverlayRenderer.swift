@@ -156,7 +156,7 @@ public class SubtitleOverlayRenderer {
                     }
                     return first.segment.position.midY < second.segment.position.midY
                 }
-                
+
                 ForEach(sortedSegments, id: \.segment.id) { [self] segment in
                     let textSize = measureText(segment.text)
                     let originalPosition = CGPoint(
