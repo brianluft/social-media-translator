@@ -83,6 +83,7 @@ struct PlayerView: View {
                 await viewModel.cancelProcessing()
             }
             viewModel.pause()
+            viewModel.cleanup()
         }
         .translationTask(
             TranslationSession.Configuration(
@@ -269,7 +270,7 @@ class PlayerViewModel: NSObject, ObservableObject, VideoPlayerControllerDelegate
 
     @objc private func playerItemDidReachEnd() {
         player.seek(to: .zero)
-        player.play()
+        play()
     }
 
     func play() {
@@ -307,6 +308,10 @@ class PlayerViewModel: NSObject, ObservableObject, VideoPlayerControllerDelegate
 
     func cancelProcessing() async {
         await videoProcessor.cancelProcessing()
+    }
+
+    nonisolated func cleanup() {
+        videoPlayerController.cleanup()
     }
 
     nonisolated func playerController(_ controller: VideoPlayerController, didUpdateTime time: TimeInterval) {

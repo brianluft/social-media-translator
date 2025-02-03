@@ -18,6 +18,7 @@ public class VideoPlayerController: NSObject {
 
     public private(set) var player: AVPlayer
     private var timeObserver: TimeObserverToken?
+    private var timeControlObserver: NSKeyValueObservation?
     public weak var delegate: VideoPlayerControllerDelegate?
 
     public var isPlaying: Bool {
@@ -29,6 +30,7 @@ public class VideoPlayerController: NSObject {
         self.player = AVPlayer()
         super.init()
         setupTimeObserver()
+        setupTimeControlObserver()
     }
 
     public func setVideo(url: URL) {
@@ -41,13 +43,33 @@ public class VideoPlayerController: NSObject {
             name: .AVPlayerItemDidPlayToEndTime,
             object: playerItem
         )
+
+        // Re-establish timeControlObserver since we created a new player
+        timeControlObserver?.invalidate()
+        setupTimeControlObserver()
+    }
+
+    public nonisolated func cleanup() {
+        Task { @MainActor in
+            // Stop playback
+            player.pause()
+
+            // Remove the current item
+            player.replaceCurrentItem(with: nil)
+
+            // Remove observers
+            if let observer = timeObserver {
+                player.removeTimeObserver(observer.token)
+                timeObserver = nil
+            }
+            timeControlObserver?.invalidate()
+            timeControlObserver = nil
+            NotificationCenter.default.removeObserver(self)
+        }
     }
 
     deinit {
-        if let observer = timeObserver {
-            player.removeTimeObserver(observer.token)
-        }
-        NotificationCenter.default.removeObserver(self)
+        cleanup()
     }
 
     private func setupTimeObserver() {
@@ -62,6 +84,15 @@ public class VideoPlayerController: NSObject {
         timeObserver = TimeObserverToken(token)
     }
 
+    private func setupTimeControlObserver() {
+        timeControlObserver = player.observe(\.timeControlStatus) { [weak self] player, _ in
+            guard let self else { return }
+            Task { @MainActor in
+                self.delegate?.playerController(self, didChangePlaybackState: player.timeControlStatus == .playing)
+            }
+        }
+    }
+
     @objc private func playerItemDidReachEnd() {
         delegate?.playerController(self, didChangePlaybackState: false)
     }
@@ -70,12 +101,10 @@ public class VideoPlayerController: NSObject {
 
     public func play() {
         player.play()
-        delegate?.playerController(self, didChangePlaybackState: true)
     }
 
     public func pause() {
         player.pause()
-        delegate?.playerController(self, didChangePlaybackState: false)
     }
 
     public func seek(to time: TimeInterval) {
