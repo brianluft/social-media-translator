@@ -35,7 +35,6 @@ public class VideoPlayerController: NSObject {
         let playerItem = AVPlayerItem(url: url)
         player.replaceCurrentItem(with: playerItem)
 
-        NotificationCenter.default.removeObserver(self)
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(playerItemDidReachEnd),
