@@ -33,3 +33,4 @@ disabled_rules:
   - file_length
   - cyclomatic_complexity
   - line_length
+  - type_body_length

@@ -215,6 +215,141 @@ final class VideoProcessor {
         await cancellationTask?.value
     }
 
+    func processVideo(_ url: URL, translationSession: TranslationSession) async {
+        processingStartTime = ProcessInfo.processInfo.systemUptime
+        // Create a task we can wait on during cancellation
+        cancellationTask = Task { @MainActor in
+            do {
+                // Check for cancellation before starting
+                if await isCancelled {
+                    return
+                }
+
+                // Create directory if needed
+                try? FileManager.default.createDirectory(
+                    at: Self.temporaryVideoDirectory,
+                    withIntermediateDirectories: true
+                )
+
+                // Copy to temporary file
+                let tempURL = Self.temporaryVideoDirectory.appendingPathComponent(UUID().uuidString + ".mov")
+                try FileManager.default.copyItem(at: url, to: tempURL)
+
+                // Create AVAsset
+                let asset = AVURLAsset(url: tempURL)
+
+                // Get video size
+                var videoSize: CGSize?
+                if let tracks = try? await asset.loadTracks(withMediaType: .video),
+                   let track = tracks.first {
+                    if let size = try? await track.load(.naturalSize),
+                       let transform = try? await track.load(.preferredTransform) {
+                        videoSize = size.applying(transform)
+                        videoSize = CGSize(width: abs(videoSize?.width ?? 0), height: abs(videoSize?.height ?? 0))
+                    }
+                }
+
+                processedVideo.updateVideo(url: tempURL, size: videoSize)
+
+                // Initialize processing components with Sendable closures
+                let detectionDelegate = DetectionDelegate(
+                    progressHandler: { [weak self] progress in
+                        Task { @MainActor [weak self] in
+                            self?.handleDetectionProgress(progress: progress)
+                        }
+                    },
+                    frameHandler: { [weak self] frame in
+                        Task { @MainActor [weak self] in
+                            self?.handleDetectionFrame(frame)
+                        }
+                    },
+                    didComplete: { [weak self] in
+                        Task { @MainActor [weak self] in
+                            self?.handleDetectionComplete()
+                        }
+                    },
+                    didFail: { [weak self] error in
+                        Task { @MainActor [weak self] in
+                            self?.handleDetectionFail(error: error)
+                        }
+                    }
+                )
+
+                let translationDelegate = TranslationDelegate(
+                    progressHandler: { [weak self] progress in
+                        Task { @MainActor [weak self] in
+                            self?.handleTranslationProgress(progress: progress)
+                        }
+                    },
+                    didComplete: { [weak self] in
+                        Task { @MainActor [weak self] in
+                            self?.handleTranslationComplete()
+                        }
+                    },
+                    didFail: { [weak self] error in
+                        Task { @MainActor [weak self] in
+                            self?.handleTranslationFail(error: error)
+                        }
+                    }
+                )
+
+                translator = TranslationService(
+                    session: translationSession,
+                    delegate: translationDelegate,
+                    target: destinationLanguage
+                )
+
+                detector = SubtitleDetector(
+                    videoAsset: asset,
+                    delegate: detectionDelegate,
+                    recognitionLanguages: [sourceLanguage.languageCode?.identifier ?? "en-US"],
+                    translationService: translator
+                )
+
+                // Detect subtitles
+                try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+                    Task { @MainActor in
+                        do {
+                            if let detector {
+                                try await withThrowingTaskGroup(of: Void.self) { group in
+                                    group.addTask {
+                                        let shouldContinue = await !(self.isCancelled)
+                                        if shouldContinue {
+                                            try await detector.detectText()
+                                        }
+                                    }
+                                    _ = try await group.next()
+                                }
+
+                                let shouldComplete = await !(self.isCancelled)
+                                if shouldComplete {
+                                    continuation.resume()
+                                } else {
+                                    continuation.resume(throwing: CancellationError())
+                                }
+                            } else {
+                                continuation.resume(throwing: NSError(
+                                    domain: "VideoProcessing",
+                                    code: -1,
+                                    userInfo: [NSLocalizedDescriptionKey: "Detector not initialized"]
+                                ))
+                            }
+                        } catch {
+                            continuation.resume(throwing: error)
+                        }
+                    }
+                }
+
+            } catch {
+                showError = true
+                errorMessage = error.localizedDescription
+            }
+        }
+
+        // Wait for the processing task to complete
+        await cancellationTask?.value
+    }
+
     func cancelProcessing() async {
         await MainActor.run { _isCancelled = true }
 

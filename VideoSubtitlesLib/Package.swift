@@ -14,11 +14,13 @@ let package = Package(
             targets: ["VideoSubtitlesLib"]
         ),
     ],
-    dependencies: [],
+    dependencies: [
+        .package(url: "https://github.com/scinfu/SwiftSoup.git", from: "2.7.0"),
+    ],
     targets: [
         .target(
             name: "VideoSubtitlesLib",
-            dependencies: [],
+            dependencies: ["SwiftSoup"],
             path: "Sources/VideoSubtitlesLib",
             exclude: [],
             sources: ["Models", "Core", "Services", "Player"]

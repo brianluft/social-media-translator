@@ -6,7 +6,7 @@ import Translation
 import VideoSubtitlesLib
 
 struct PlayerView: View {
-    let videoItem: PhotosPickerItem
+    private let videoSource: VideoSource
     let sourceLanguage: Locale.Language
 
     @StateObject private var viewModel: PlayerViewModel
@@ -14,11 +14,24 @@ struct PlayerView: View {
     @State private var videoSize: CGSize = .zero
 
     init(videoItem: PhotosPickerItem, sourceLanguage: Locale.Language) {
-        self.videoItem = videoItem
+        self.videoSource = .photosItem(videoItem)
         self.sourceLanguage = sourceLanguage
         _viewModel = StateObject(
             wrappedValue: PlayerViewModel(sourceLanguage: sourceLanguage)
         )
+    }
+
+    init(videoURL: URL, sourceLanguage: Locale.Language) {
+        self.videoSource = .url(videoURL)
+        self.sourceLanguage = sourceLanguage
+        _viewModel = StateObject(
+            wrappedValue: PlayerViewModel(sourceLanguage: sourceLanguage)
+        )
+    }
+
+    private enum VideoSource {
+        case photosItem(PhotosPickerItem)
+        case url(URL)
     }
 
     var body: some View {
@@ -92,7 +105,12 @@ struct PlayerView: View {
             ),
             action: { session in
                 Task { @MainActor in
-                    await viewModel.processVideo(videoItem, translationSession: session)
+                    switch videoSource {
+                    case let .photosItem(item):
+                        await viewModel.processVideo(item, translationSession: session)
+                    case let .url(url):
+                        await viewModel.processVideo(url, translationSession: session)
+                    }
                 }
             }
         )
@@ -119,25 +137,6 @@ struct PlayerView: View {
                 height: containerSize.height
             )
         }
-    }
-}
-
-struct CircularProgressViewStyle: ProgressViewStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        Circle()
-            .trim(from: 0.0, to: CGFloat(configuration.fractionCompleted ?? 0))
-            .stroke(style: StrokeStyle(lineWidth: 3.0, lineCap: .round, lineJoin: .round))
-            .foregroundColor(.blue)
-            .rotationEffect(.degrees(-90))
-            .frame(width: 24, height: 24)
-            .animation(.linear, value: configuration.fractionCompleted)
-            .background(
-                Circle()
-                    .stroke(lineWidth: 3.0)
-                    .opacity(0.3)
-                    .foregroundColor(.blue)
-                    .frame(width: 24, height: 24)
-            )
     }
 }
 
@@ -304,6 +303,23 @@ class PlayerViewModel: NSObject, ObservableObject, VideoPlayerControllerDelegate
         }
 
         await videoProcessor.processVideo(item, translationSession: translationSession)
+    }
+
+    func processVideo(_ url: URL, translationSession: TranslationSession) async {
+        // Start a task to monitor readyToPlay state
+        Task {
+            for await ready in videoProcessor.$readyToPlay.values {
+                if ready && !hasSetVideo {
+                    if let url = processedVideo.currentURL as URL?, url.isFileURL {
+                        videoPlayerController.setVideo(url: url)
+                        hasSetVideo = true
+                        play() // Auto-play when video is ready
+                    }
+                }
+            }
+        }
+
+        await videoProcessor.processVideo(url, translationSession: translationSession)
     }
 
     func cancelProcessing() async {
