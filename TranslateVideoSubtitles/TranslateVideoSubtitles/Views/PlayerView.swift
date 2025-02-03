@@ -296,6 +296,7 @@ class PlayerViewModel: NSObject, ObservableObject, VideoPlayerControllerDelegate
                     if let url = processedVideo.currentURL as URL?, url.isFileURL {
                         videoPlayerController.setVideo(url: url)
                         hasSetVideo = true
+                        play() // Auto-play when video is ready
                     }
                 }
             }
