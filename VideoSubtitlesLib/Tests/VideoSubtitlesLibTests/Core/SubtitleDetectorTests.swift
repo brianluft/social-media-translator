@@ -27,13 +27,18 @@ final class SubtitleDetectorTests: XCTestCase {
         var progressUpdates: [Float] = []
         var completedFrames: [FrameSegments]?
         var detectionError: Error?
+        var receivedFrames: [FrameSegments] = []
 
         func detectionDidProgress(_ progress: Float) {
             progressUpdates.append(progress)
         }
 
-        func detectionDidComplete(frames: [FrameSegments]) {
-            completedFrames = frames
+        func detectionDidReceiveFrame(_ frame: FrameSegments) {
+            receivedFrames.append(frame)
+        }
+
+        func detectionDidComplete() {
+            completedFrames = receivedFrames
         }
 
         func detectionDidFail(with error: Error) {

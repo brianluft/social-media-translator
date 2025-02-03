@@ -14,6 +14,7 @@ final class VideoProcessor {
     @Published var showError: Bool = false
     @Published var errorMessage: String = ""
     @Published var processingComplete: Bool = false
+    @Published var readyToPlay: Bool = false
 
     var processedVideo: ProcessedVideo
 
@@ -24,6 +25,7 @@ final class VideoProcessor {
         }
     }
 
+    private var processingStartTime: TimeInterval = 0
     private var detector: SubtitleDetector?
     private var translator: TranslationService?
     private var cancellationTask: Task<Void, Never>?
@@ -39,6 +41,7 @@ final class VideoProcessor {
     }
 
     func processVideo(_ item: PhotosPickerItem, translationSession: TranslationSession) async {
+        processingStartTime = ProcessInfo.processInfo.systemUptime
         // Create a task we can wait on during cancellation
         cancellationTask = Task { @MainActor in
             do {
@@ -191,6 +194,7 @@ final class VideoProcessor {
     private func handleDetectionComplete() {
         Task { @MainActor in
             processingComplete = true
+            readyToPlay = true
         }
     }
 
@@ -201,6 +205,14 @@ final class VideoProcessor {
 
     private func handleDetectionFrame(_ frame: FrameSegments) {
         Task { @MainActor in
+            let currentTime = ProcessInfo.processInfo.systemUptime
+            let elapsedTime = currentTime - processingStartTime
+            let processingRate = frame.timestamp / elapsedTime
+
+            if frame.timestamp >= 5.0 && processingRate > 1.0 {
+                readyToPlay = true
+            }
+
             processedVideo.appendFrameSegments([frame])
         }
     }
