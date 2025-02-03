@@ -35,7 +35,8 @@ import Vision
 /// Protocol for reporting text detection progress
 public protocol TextDetectionDelegate: AnyObject {
     func detectionDidProgress(_ progress: Float)
-    func detectionDidComplete(frames: [FrameSegments])
+    func detectionDidReceiveFrame(_ frame: FrameSegments)
+    func detectionDidComplete()
     func detectionDidFail(with error: Error)
 }
 
@@ -114,7 +115,6 @@ public class SubtitleDetector {
             let duration = try await videoAsset.load(.duration)
             let durationSeconds = CMTimeGetSeconds(duration)
             let frameCount = Int(durationSeconds * Float64(samplingRate))
-            var frames: [FrameSegments] = []
 
             // Process frames
             for frameIndex in 0 ..< frameCount {
@@ -150,7 +150,7 @@ public class SubtitleDetector {
                 }
 
                 let frameSegments = try await detectText(in: image, at: time)
-                frames.append(frameSegments)
+                delegate?.detectionDidReceiveFrame(frameSegments)
 
                 // Report progress
                 let progress = Float(frameIndex + 1) / Float(frameCount)
@@ -162,7 +162,7 @@ public class SubtitleDetector {
                 throw CancellationError()
             }
 
-            delegate?.detectionDidComplete(frames: frames)
+            delegate?.detectionDidComplete()
 
         } catch {
             delegate?.detectionDidFail(with: error)

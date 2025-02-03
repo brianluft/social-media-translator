@@ -6,8 +6,8 @@ import SwiftUI
 import Translation
 import VideoSubtitlesLib
 
-/// A mechanical refactor of the old `processVideo(_ item:translationSession:)` function.
-/// This class replicates that logic unmodified — no behavioral changes.
+/// This class is responsible for handling the video processing logic.
+/// It is responsible for detecting subtitles, translating them, and saving the processed video.
 @MainActor
 final class VideoProcessor {
     @Published var progress: Double = 0
@@ -72,9 +72,14 @@ final class VideoProcessor {
                             self?.handleDetectionProgress(progress: progress)
                         }
                     },
-                    didComplete: { [weak self] frames in
+                    frameHandler: { [weak self] frame in
                         Task { @MainActor [weak self] in
-                            self?.handleDetectionComplete(frames: frames)
+                            self?.handleDetectionFrame(frame)
+                        }
+                    },
+                    didComplete: { [weak self] in
+                        Task { @MainActor [weak self] in
+                            self?.handleDetectionComplete()
                         }
                     },
                     didFail: { [weak self] error in
@@ -183,9 +188,8 @@ final class VideoProcessor {
         self.progress = Double(progress) // Use full progress range for detection
     }
 
-    private func handleDetectionComplete(frames: [FrameSegments]) {
+    private func handleDetectionComplete() {
         Task { @MainActor in
-            processedVideo.appendFrameSegments(frames)
             processingComplete = true
         }
     }
@@ -193,6 +197,12 @@ final class VideoProcessor {
     private func handleDetectionFail(error: Error) {
         showError = true
         errorMessage = error.localizedDescription
+    }
+
+    private func handleDetectionFrame(_ frame: FrameSegments) {
+        Task { @MainActor in
+            processedVideo.appendFrameSegments([frame])
+        }
     }
 
     // MARK: - Translation Delegate Handlers
@@ -215,15 +225,18 @@ final class VideoProcessor {
 
 private final class DetectionDelegate: TextDetectionDelegate, @unchecked Sendable {
     private let progressHandler: @Sendable (Float) -> Void
-    private let completionHandler: @Sendable ([FrameSegments]) -> Void
+    private let frameHandler: @Sendable (FrameSegments) -> Void
+    private let completionHandler: @Sendable () -> Void
     private let failureHandler: @Sendable (Error) -> Void
 
     init(
         progressHandler: @escaping @Sendable (Float) -> Void,
-        didComplete: @escaping @Sendable ([FrameSegments]) -> Void,
+        frameHandler: @escaping @Sendable (FrameSegments) -> Void,
+        didComplete: @escaping @Sendable () -> Void,
         didFail: @escaping @Sendable (Error) -> Void
     ) {
         self.progressHandler = progressHandler
+        self.frameHandler = frameHandler
         completionHandler = didComplete
         failureHandler = didFail
     }
@@ -232,8 +245,12 @@ private final class DetectionDelegate: TextDetectionDelegate, @unchecked Sendabl
         progressHandler(progress)
     }
 
-    func detectionDidComplete(frames: [FrameSegments]) {
-        completionHandler(frames)
+    func detectionDidReceiveFrame(_ frame: FrameSegments) {
+        frameHandler(frame)
+    }
+
+    func detectionDidComplete() {
+        completionHandler()
     }
 
     func detectionDidFail(with error: Error) {
