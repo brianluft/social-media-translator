@@ -8,8 +8,6 @@ import VideoSubtitlesLib
 
 @MainActor
 class VideoSelectionViewModel: ObservableObject {
-    private let logger = Logger(subsystem: "com.brianluft.TranslateVideoSubtitles", category: "VideoSelectionViewModel")
-
     @Published var selectedSourceLanguage: Locale.Language? {
         didSet {
             if let language = selectedSourceLanguage {

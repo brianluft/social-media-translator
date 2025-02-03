@@ -2,7 +2,10 @@ import Foundation
 import os
 
 /// Represents a video that has been processed for subtitle translation
-public struct ProcessedVideo: Hashable {
+public class ProcessedVideo: Hashable {
+    // A unique ID for this video, used only for logging
+    public let id = UUID()
+
     /// The URL of the video file
     public private(set) var url: URL
 
@@ -31,7 +34,7 @@ public struct ProcessedVideo: Hashable {
 
     /// Updates the video URL
     /// - Parameter newURL: The new URL for the video file
-    public mutating func updateURL(_ newURL: URL) {
+    public func updateURL(_ newURL: URL) {
         lock.lock()
         defer { lock.unlock() }
         url = newURL
@@ -41,7 +44,7 @@ public struct ProcessedVideo: Hashable {
     /// - Parameter newSegments: Array of new frame segments to append
     /// - Precondition: All timestamps in newSegments must be greater than any existing timestamps,
     ///                 as this method assumes frames are processed sequentially from start to end
-    public mutating func appendFrameSegments(_ newSegments: [FrameSegments]) {
+    public func appendFrameSegments(_ newSegments: [FrameSegments]) {
         lock.lock()
         defer { lock.unlock() }
 

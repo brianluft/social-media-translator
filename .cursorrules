@@ -43,8 +43,7 @@ iOS app to translate burned-in video subtitles to user's preferred language.
   The lifetime of the session will be tied to the lifetime of the view.
   There is absolutely no other way to do it. You cannot create a `TranslationSession` yourself.
 
-- Don't use print(). Use os.Logger instead. Create a file-level logger.
-  Use `com.brianluft.TranslateVideoSubtitles` as the logger subsystem.
+- Don't use `os.Logger`. Use `print()` instead.
 
 ## Building
 

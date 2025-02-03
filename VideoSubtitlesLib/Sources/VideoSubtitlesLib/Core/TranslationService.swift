@@ -3,8 +3,6 @@ import os
 import SwiftUI
 import Translation
 
-private let logger = Logger(subsystem: "com.brianluft.VideoSubtitlesLib", category: "TranslationService")
-
 /// Protocol for reporting translation progress
 public protocol TranslationProgressDelegate: AnyObject, Sendable {
     func translationDidProgress(_ progress: Float) async
@@ -143,10 +141,6 @@ public final class TranslationService {
         delegate: TranslationProgressDelegate? = nil,
         target: Locale.Language
     ) {
-        logger
-            .info(
-                "Initializing TranslationService with target language: \(target.languageCode?.identifier ?? "unknown")"
-            )
         // Create a local copy of session to avoid data races
         let sendableSession = SendableTranslationSession(session: session)
         translationActor = TranslationActor(
@@ -171,8 +165,6 @@ public final class TranslationService {
     ///   - frameSegments: Array of frame segments to translate
     /// - Returns: Dictionary mapping original text to translated text
     public nonisolated func translate(_ frameSegments: [FrameSegments]) async throws -> [String: String] {
-        logger.info("Starting translation of \(frameSegments.count) frame segments")
-
         // Reset cancellation state
         await MainActor.run {
             isCancelled = false
@@ -183,7 +175,6 @@ public final class TranslationService {
             await delegate?.translationDidComplete()
             return translations
         } catch {
-            logger.error("Translation failed with error: \(error.localizedDescription)")
             await delegate?.translationDidFail(with: error)
             throw error
         }
