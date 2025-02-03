@@ -148,7 +148,16 @@ public class SubtitleOverlayRenderer {
     public func createSubtitleOverlay(for segments: [(segment: TextSegment, text: String)]) -> some View {
         GeometryReader { geometry in
             ZStack {
-                ForEach(segments, id: \.segment.id) { [self] segment in
+                // Sort segments by vertical position (higher y = lower in frame = higher z-index)
+                // Use horizontal position as tiebreaker (right = higher z-index)
+                let sortedSegments = segments.sorted { first, second in
+                    if first.segment.position.midY == second.segment.position.midY {
+                        return first.segment.position.midX < second.segment.position.midX
+                    }
+                    return first.segment.position.midY < second.segment.position.midY
+                }
+                
+                ForEach(sortedSegments, id: \.segment.id) { [self] segment in
                     let textSize = measureText(segment.text)
                     let originalPosition = CGPoint(
                         x: segment.segment.position.midX * geometry.size.width,
