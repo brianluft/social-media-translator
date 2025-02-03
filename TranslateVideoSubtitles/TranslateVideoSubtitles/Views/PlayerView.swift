@@ -25,7 +25,12 @@ struct PlayerView: View {
         ZStack {
             Color.black.edgesIgnoringSafeArea(.all)
 
-            if viewModel.readyToPlay {
+            if !viewModel.readyToPlay {
+                ProgressView()
+                    .progressViewStyle(.circular)
+                    .scaleEffect(1.5)
+                    .tint(.white)
+            } else {
                 GeometryReader { geometry in
                     let size = calculateVideoFrame(
                         videoSize: viewModel.processedVideo.naturalSize ?? videoSize,
