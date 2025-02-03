@@ -36,26 +36,22 @@ final class VideoProcessor {
     init(sourceLanguage: Locale.Language, processedVideo: ProcessedVideo) {
         self.sourceLanguage = sourceLanguage
         self.processedVideo = processedVideo
-        print("[VideoProcessor] Initialized with ProcessedVideo \(processedVideo.id) URL: \(processedVideo.currentURL.path)")
         // For consistency, we preserve the idea of the "current language" as the destination
         self.destinationLanguage = Locale.current.language
     }
 
     func processVideo(_ item: PhotosPickerItem, translationSession: TranslationSession) async {
         processingStartTime = ProcessInfo.processInfo.systemUptime
-        print("[VideoProcessor] Starting video processing for ProcessedVideo \(processedVideo.id)")
         // Create a task we can wait on during cancellation
         cancellationTask = Task { @MainActor in
             do {
                 // Check for cancellation before starting
                 if await isCancelled {
-                    print("[VideoProcessor] Processing cancelled before start")
                     return
                 }
 
                 // Load video from PhotosPickerItem
                 guard let videoData = try await item.loadTransferable(type: Data.self) else {
-                    print("[VideoProcessor] Failed to load video data")
                     throw NSError(
                         domain: "VideoProcessing",
                         code: -1,
@@ -65,18 +61,23 @@ final class VideoProcessor {
 
                 // Save to temporary file
                 let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".mov")
-                print("[VideoProcessor] Generated temp URL: \(tempURL.path)")
-                print("[VideoProcessor] Saving video to temporary file: \(tempURL.path)")
                 try videoData.write(to: tempURL)
-                print("[VideoProcessor] Video data written successfully")
-                print("[VideoProcessor] Temp file exists?: \(FileManager.default.fileExists(atPath: tempURL.path))")
-
-                processedVideo.updateURL(tempURL)
-                print("[VideoProcessor] ProcessedVideo \(processedVideo.id) URL after update: \(processedVideo.currentURL.path)")
 
                 // Create AVAsset
-                print("[VideoProcessor] Creating AVAsset with URL: \(tempURL.path)")
                 let asset = AVURLAsset(url: tempURL)
+
+                // Get video size
+                var videoSize: CGSize?
+                if let tracks = try? await asset.loadTracks(withMediaType: .video),
+                   let track = tracks.first {
+                    if let size = try? await track.load(.naturalSize),
+                       let transform = try? await track.load(.preferredTransform) {
+                        videoSize = size.applying(transform)
+                        videoSize = CGSize(width: abs(videoSize?.width ?? 0), height: abs(videoSize?.height ?? 0))
+                    }
+                }
+
+                processedVideo.updateVideo(url: tempURL, size: videoSize)
 
                 // Initialize processing components with Sendable closures
                 let detectionDelegate = DetectionDelegate(
@@ -178,7 +179,6 @@ final class VideoProcessor {
     }
 
     func cancelProcessing() async {
-        print("[VideoProcessor] Starting cancellation for ProcessedVideo \(processedVideo.id)")
         await MainActor.run { _isCancelled = true }
 
         // Cancel any ongoing detection
@@ -193,9 +193,7 @@ final class VideoProcessor {
         }
 
         // Clean up temporary video file
-        print("[VideoProcessor] Cleaning up temporary file at: \(processedVideo.currentURL.path)")
         try? FileManager.default.removeItem(at: processedVideo.currentURL)
-        print("[VideoProcessor] File still exists?: \(FileManager.default.fileExists(atPath: processedVideo.currentURL.path))")
     }
 
     // MARK: - Detection Delegate Handlers

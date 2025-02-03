@@ -32,10 +32,6 @@ public class VideoPlayerController: NSObject {
     }
 
     public func setVideo(url: URL) {
-        print("[VideoPlayerController] Setting video URL: \(url.path)")
-        print("[VideoPlayerController] URL exists?: \(FileManager.default.fileExists(atPath: url.path))")
-        print("[VideoPlayerController] Is file URL?: \(url.isFileURL)")
-        
         let playerItem = AVPlayerItem(url: url)
         player.replaceCurrentItem(with: playerItem)
 

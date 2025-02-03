@@ -22,46 +22,55 @@ struct PlayerView: View {
     }
 
     var body: some View {
-        GeometryReader { _ in
-            ZStack {
-                Color.black
+        ZStack {
+            Color.black.edgesIgnoringSafeArea(.all)
 
-                if viewModel.readyToPlay {
+            if viewModel.readyToPlay {
+                GeometryReader { geometry in
+                    let size = calculateVideoFrame(
+                        videoSize: viewModel.processedVideo.naturalSize ?? videoSize,
+                        containerSize: geometry.size
+                    )
+
+                    // Container exactly matching video frame
                     ZStack {
-                        VideoPlayerView(player: viewModel.player, onVideoSizeChange: { @MainActor size in
-                            videoSize = size
-                        })
-                        #if os(iOS)
-                        .edgesIgnoringSafeArea(.all)
-                        #endif
-                        .onTapGesture {
-                            viewModel.togglePlayback()
-                        }
+                        ZStack(alignment: .topLeading) {
+                            VideoPlayerView(player: viewModel.player, onVideoSizeChange: { @MainActor size in
+                                videoSize = size
+                            })
+                            .frame(width: size.width, height: size.height)
+                            .onTapGesture {
+                                viewModel.togglePlayback()
+                            }
 
-                        viewModel.subtitleOverlay
+                            GeometryReader { _ in
+                                viewModel.subtitleOverlay
+                                    .frame(width: size.width, height: size.height)
+                            }
 
-                        if !viewModel.isPlaying && viewModel.processingComplete {
-                            Image(systemName: "play.circle.fill")
-                                .font(.system(size: 72))
-                                .foregroundColor(.white.opacity(0.8))
-                                .onTapGesture {
-                                    viewModel.togglePlayback()
-                                }
+                            if !viewModel.isPlaying && viewModel.processingComplete {
+                                Image(systemName: "play.circle.fill")
+                                    .font(.system(size: 72))
+                                    .foregroundColor(.white.opacity(0.8))
+                                    .onTapGesture {
+                                        viewModel.togglePlayback()
+                                    }
+                            }
                         }
+                        .frame(width: size.width, height: size.height)
                     }
-                    .aspectRatio(videoSize.width > 0 ? videoSize.width / videoSize.height : nil, contentMode: .fit)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
                 }
+            }
 
-                VStack {
+            VStack {
+                Spacer()
+                HStack {
                     Spacer()
-                    HStack {
-                        Spacer()
-                        if !viewModel.readyToPlay || !viewModel.processingComplete {
-                            ProgressView(value: viewModel.progress)
-                                .progressViewStyle(CircularProgressViewStyle())
-                                .padding()
-                        }
+                    if !viewModel.readyToPlay || !viewModel.processingComplete {
+                        ProgressView(value: viewModel.progress)
+                            .progressViewStyle(CircularProgressViewStyle())
+                            .padding()
                     }
                 }
             }
@@ -86,6 +95,29 @@ struct PlayerView: View {
                 }
             }
         )
+    }
+
+    private func calculateVideoFrame(videoSize: CGSize, containerSize: CGSize) -> CGSize {
+        guard videoSize.width > 0 && videoSize.height > 0 else {
+            return containerSize
+        }
+
+        let videoAspectRatio = videoSize.width / videoSize.height
+        let screenAspectRatio = containerSize.width / containerSize.height
+
+        if videoAspectRatio > screenAspectRatio {
+            // Video is wider than screen - fit to width
+            return CGSize(
+                width: containerSize.width,
+                height: containerSize.width / videoAspectRatio
+            )
+        } else {
+            // Video is taller than screen - fit to height
+            return CGSize(
+                width: containerSize.height * videoAspectRatio,
+                height: containerSize.height
+            )
+        }
     }
 }
 
@@ -177,10 +209,7 @@ class PlayerViewModel: NSObject, ObservableObject, VideoPlayerControllerDelegate
     let sourceLanguage: Locale.Language
     let destinationLanguage = Locale.current.language
 
-    private var processedVideo = ProcessedVideo(
-        targetLanguage: Locale.current.language.languageCode?
-            .identifier ?? "en"
-    )
+    let processedVideo: ProcessedVideo
 
     let videoProcessor: VideoProcessor
 
@@ -203,12 +232,15 @@ class PlayerViewModel: NSObject, ObservableObject, VideoPlayerControllerDelegate
 
     init(sourceLanguage: Locale.Language) {
         self.sourceLanguage = sourceLanguage
+        self.processedVideo = ProcessedVideo(
+            targetLanguage: Locale.current.language.languageCode?
+                .identifier ?? "en"
+        )
         self.videoProcessor = VideoProcessor(
             sourceLanguage: sourceLanguage,
             processedVideo: processedVideo
         )
 
-        print("[PlayerViewModel] Initializing with empty VideoPlayerController")
         videoPlayerController = VideoPlayerController()
         subtitleRenderer = SubtitleOverlayRenderer()
 
@@ -257,28 +289,22 @@ class PlayerViewModel: NSObject, ObservableObject, VideoPlayerControllerDelegate
     }
 
     func processVideo(_ item: PhotosPickerItem, translationSession: TranslationSession) async {
-        print("[PlayerViewModel] Starting video processing for ProcessedVideo \(processedVideo.id)")
-        
         // Start a task to monitor readyToPlay state
         Task {
             for await ready in videoProcessor.$readyToPlay.values {
                 if ready && !hasSetVideo {
-                    print("[PlayerViewModel] Ready to play, setting video URL for ProcessedVideo \(processedVideo.id)")
                     if let url = processedVideo.currentURL as URL?, url.isFileURL {
-                        print("[PlayerViewModel] Setting video URL: \(url.path)")
-                        print("[PlayerViewModel] URL exists?: \(FileManager.default.fileExists(atPath: url.path))")
                         videoPlayerController.setVideo(url: url)
                         hasSetVideo = true
                     }
                 }
             }
         }
-        
+
         await videoProcessor.processVideo(item, translationSession: translationSession)
     }
 
     func cancelProcessing() async {
-        print("[PlayerViewModel] Cancelling processing for ProcessedVideo \(processedVideo.id)")
         await videoProcessor.cancelProcessing()
     }
 
