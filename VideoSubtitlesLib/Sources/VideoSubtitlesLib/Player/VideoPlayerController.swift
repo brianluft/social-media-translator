@@ -16,7 +16,7 @@ public class VideoPlayerController: NSObject {
         }
     }
 
-    public let player: AVPlayer
+    public private(set) var player: AVPlayer
     private var timeObserver: TimeObserverToken?
     public weak var delegate: VideoPlayerControllerDelegate?
 
@@ -25,17 +25,21 @@ public class VideoPlayerController: NSObject {
     }
 
     override public init() {
-        fatalError("Use init(url:)")
+        // Initialize with an empty player
+        self.player = AVPlayer()
+        super.init()
+        setupTimeObserver()
     }
 
-    public init(url: URL) {
+    public func setVideo(url: URL) {
+        print("[VideoPlayerController] Setting video URL: \(url.path)")
+        print("[VideoPlayerController] URL exists?: \(FileManager.default.fileExists(atPath: url.path))")
+        print("[VideoPlayerController] Is file URL?: \(url.isFileURL)")
+        
         let playerItem = AVPlayerItem(url: url)
-        player = AVPlayer(playerItem: playerItem)
+        player.replaceCurrentItem(with: playerItem)
 
-        super.init()
-
-        setupTimeObserver()
-
+        NotificationCenter.default.removeObserver(self)
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(playerItemDidReachEnd),

@@ -28,6 +28,7 @@ public class ProcessedVideo: Hashable {
     /// - Parameter targetLanguage: The language code of the translated text
     public init(targetLanguage: String) {
         self.url = URL(fileURLWithPath: "")
+        print("[ProcessedVideo \(id)] Initialized with empty URL path: /")
         self._frameSegments = []
         self.targetLanguage = targetLanguage
     }
@@ -37,7 +38,19 @@ public class ProcessedVideo: Hashable {
     public func updateURL(_ newURL: URL) {
         lock.lock()
         defer { lock.unlock() }
+        print("[ProcessedVideo \(id)] Updating video URL from: \(url.path)")
+        print("[ProcessedVideo \(id)] Updating video URL to: \(newURL.path)")
+        print("[ProcessedVideo \(id)] New URL exists?: \(FileManager.default.fileExists(atPath: newURL.path))")
         url = newURL
+    }
+
+    /// Returns the current URL
+    public var currentURL: URL {
+        lock.lock()
+        defer { lock.unlock() }
+        print("[ProcessedVideo \(id)] Accessing current URL: \(url.path)")
+        print("[ProcessedVideo \(id)] Current URL exists?: \(FileManager.default.fileExists(atPath: url.path))")
+        return url
     }
 
     /// Appends new frame segments to the video

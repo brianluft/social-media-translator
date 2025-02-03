@@ -6,36 +6,20 @@ import VideoSubtitlesLib
 struct VideoSelectionView: View {
     @StateObject private var viewModel = VideoSelectionViewModel()
     @State private var isShowingPhotoPicker = false
-    @State private var navigateToProcessing = false
+    @State private var navigateToPlayerView = false
     @State private var selectedItem: PhotosPickerItem?
-    @State private var processedVideo: ProcessedVideo?
 
     var body: some View {
         NavigationStack {
             mainContent
-                .navigationDestination(isPresented: $navigateToProcessing) {
+                .navigationDestination(isPresented: $navigateToPlayerView) {
                     if let selectedItem,
                        let sourceLanguage = viewModel.selectedSourceLanguage {
-                        ProcessingView(
+                        PlayerView(
                             videoItem: selectedItem,
-                            sourceLanguage: sourceLanguage,
-                            processedVideo: ProcessedVideo(
-                                targetLanguage: Locale.current.language.languageCode?.identifier ?? "en"
-                            ),
-                            onProcessingComplete: { video in
-                                processedVideo = video
-                                navigateToProcessing = false
-                            }
+                            sourceLanguage: sourceLanguage
                         )
                     }
-                }
-                .navigationDestination(item: $processedVideo) { video in
-                    PlayerView(video: video)
-                        .onDisappear {
-                            // Reset state when returning from player
-                            selectedItem = nil
-                            processedVideo = nil
-                        }
                 }
                 .photosPicker(
                     isPresented: $isShowingPhotoPicker,
@@ -44,9 +28,7 @@ struct VideoSelectionView: View {
                 )
                 .onChange(of: selectedItem) { _, newValue in
                     if newValue != nil {
-                        // Always navigate to processing when a video is selected
-                        processedVideo = nil
-                        navigateToProcessing = true
+                        navigateToPlayerView = true
                     }
                 }
         }
