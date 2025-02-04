@@ -5,7 +5,7 @@ struct CircularProgressViewStyle: ProgressViewStyle {
         Circle()
             .trim(from: 0.0, to: CGFloat(configuration.fractionCompleted ?? 0))
             .stroke(style: StrokeStyle(lineWidth: 3.0, lineCap: .round, lineJoin: .round))
-            .foregroundColor(.blue)
+            .foregroundColor(.accentColor)
             .rotationEffect(.degrees(-90))
             .frame(width: 24, height: 24)
             .animation(.linear, value: configuration.fractionCompleted)
@@ -13,7 +13,7 @@ struct CircularProgressViewStyle: ProgressViewStyle {
                 Circle()
                     .stroke(lineWidth: 3.0)
                     .opacity(0.3)
-                    .foregroundColor(.blue)
+                    .foregroundColor(.accentColor)
                     .frame(width: 24, height: 24)
             )
     }

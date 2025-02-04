@@ -36,13 +36,13 @@ struct PlayerView: View {
 
     var body: some View {
         ZStack {
-            Color.black.edgesIgnoringSafeArea(.all)
+            Color(uiColor: .systemBackground)
+                .edgesIgnoringSafeArea(.all)
 
             if !viewModel.readyToPlay {
                 ProgressView()
                     .progressViewStyle(.circular)
                     .scaleEffect(1.5)
-                    .tint(.white)
             } else {
                 GeometryReader { geometry in
                     let size = calculateVideoFrame(
@@ -76,12 +76,13 @@ struct PlayerView: View {
             if viewModel.readyToPlay && !viewModel.isPlaying {
                 Image(systemName: "play.circle.fill")
                     .font(.system(size: 72))
-                    .foregroundColor(.white.opacity(0.8))
+                    .foregroundColor(.primary.opacity(0.8))
                     .onTapGesture {
                         viewModel.togglePlayback()
                     }
             }
         }
+        .preferredColorScheme(.dark)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -97,7 +98,7 @@ struct PlayerView: View {
             }
             viewModel.pause()
             viewModel.cleanup()
-            
+
             // Clear video source state when leaving player view
             switch videoSource {
             case .photosItem:

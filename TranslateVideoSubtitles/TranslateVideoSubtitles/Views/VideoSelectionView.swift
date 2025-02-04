@@ -74,17 +74,11 @@ struct VideoSelectionView: View {
 
             Image(systemName: "film")
                 .font(.system(size: 60))
-                .foregroundColor(.accentColor)
+                .foregroundColor(.primary)
 
             Text("Translate Video Subtitles")
                 .font(.title2)
                 .bold()
-
-            Text("Choose a video from your photo library to translate its subtitles")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
 
             languageSelectionContent
 
@@ -171,7 +165,7 @@ struct VideoSelectionView: View {
                     .padding()
                 }
             )
-            .buttonStyle(.bordered)
+            .buttonStyle(.borderless)
             .padding(.horizontal)
             .disabled(!viewModel.canSelectVideo)
             .alert("Paste Error", isPresented: $showPasteError) {
