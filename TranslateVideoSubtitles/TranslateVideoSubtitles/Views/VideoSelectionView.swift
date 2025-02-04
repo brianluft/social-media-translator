@@ -11,6 +11,25 @@ struct VideoSelectionView: View {
     @State private var showDownloader = false
     @State private var urlToDownload: String = ""
     @State private var downloadedVideoURL: URL?
+    @State private var showPasteError = false
+    @State private var pasteErrorMessage = ""
+
+    private enum URLError: Error {
+        case emptyClipboard
+        case noValidURL
+        case unsupportedDomain(String)
+
+        var message: String {
+            switch self {
+            case .emptyClipboard:
+                return "No text found in clipboard. Please copy a video URL and try again."
+            case .noValidURL:
+                return "No valid URL found in clipboard. Please copy a video URL and try again."
+            case let .unsupportedDomain(domain):
+                return "\(domain) is not supported. Try saving the video to your Photo Library."
+            }
+        }
+    }
 
     var body: some View {
         NavigationStack {
@@ -131,13 +150,17 @@ struct VideoSelectionView: View {
 
             Button(
                 action: {
-                    if let url = parseURLFromClipboard() {
+                    switch parseURLFromClipboard() {
+                    case let .success(url):
                         print("[VideoSelection] Setting urlToDownload to: '\(url)'")
                         urlToDownload = url
                         print("[VideoSelection] urlToDownload is now: '\(urlToDownload)'")
                         print("[VideoSelection] Setting showDownloader to true")
                         showDownloader = true
                         print("[VideoSelection] showDownloader is now: \(showDownloader)")
+                    case let .failure(error):
+                        pasteErrorMessage = error.message
+                        showPasteError = true
                     }
                 },
                 label: {
@@ -152,20 +175,27 @@ struct VideoSelectionView: View {
             .buttonStyle(.bordered)
             .padding(.horizontal)
             .disabled(!viewModel.canSelectVideo)
+            .alert("Paste Error", isPresented: $showPasteError) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(pasteErrorMessage)
+            }
         }
     }
 
-    private func parseURLFromClipboard() -> String? {
+    private func parseURLFromClipboard() -> Result<String, URLError> {
         print("[VideoSelection] Checking clipboard contents...")
         guard let clipboardString = UIPasteboard.general.string else {
             print("[VideoSelection] Clipboard is empty or doesn't contain text")
-            return nil
+            return .failure(.emptyClipboard)
         }
         print("[VideoSelection] Raw clipboard contents: '\(clipboardString)'")
 
         // Split by commas (both standard and Chinese)
         let components = clipboardString.components(separatedBy: [",", "，"])
         print("[VideoSelection] Split into \(components.count) components: \(components)")
+
+        let unsupportedDomains = ["tiktok.com", "instagram.com", "facebook.com", "youtube.com", "x.com"]
 
         // Look for URLs in each component
         for (index, component) in components.enumerated() {
@@ -184,7 +214,15 @@ struct VideoSelectionView: View {
                 print("[VideoSelection] Extracted URL string: '\(urlString)'")
                 if let url = URL(string: urlString) {
                     print("[VideoSelection] Successfully validated URL: \(url.absoluteString)")
-                    return url.absoluteString
+
+                    // Check for unsupported domains
+                    if let host = url.host?.lowercased(),
+                       let unsupportedDomain = unsupportedDomains.first(where: { host.contains($0) }) {
+                        print("[VideoSelection] Detected unsupported domain: \(unsupportedDomain)")
+                        return .failure(.unsupportedDomain(unsupportedDomain))
+                    }
+
+                    return .success(url.absoluteString)
                 } else {
                     print("[VideoSelection] Failed to validate URL string")
                 }
@@ -192,6 +230,6 @@ struct VideoSelectionView: View {
         }
 
         print("[VideoSelection] No valid URLs found in clipboard")
-        return nil
+        return .failure(.noValidURL)
     }
 }
