@@ -64,11 +64,12 @@ public class VideoPlayerController: NSObject {
             }
             timeControlObserver?.invalidate()
             timeControlObserver = nil
-            NotificationCenter.default.removeObserver(self)
         }
     }
 
     deinit {
+        // Remove notification center observer in deinit
+        NotificationCenter.default.removeObserver(self)
         cleanup()
     }
 

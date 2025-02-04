@@ -287,7 +287,7 @@ private class ProgressDelegate: NSObject, URLSessionDownloadDelegate {
 
         // Move the downloaded file to the destination
         // This must happen here instead of the completion block
-        guard let downloader = downloader else { return }
+        guard let downloader else { return }
         let destinationURL = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString)
             .appendingPathExtension("mp4")
