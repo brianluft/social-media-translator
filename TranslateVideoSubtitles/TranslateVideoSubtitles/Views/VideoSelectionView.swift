@@ -132,6 +132,8 @@ struct VideoSelectionView: View {
         VStack(spacing: 12) {
             Button(
                 action: {
+                    downloadedVideoURL = nil
+                    urlToDownload = ""
                     selectedItem = nil
                     isShowingPhotoPicker = true
                 },
@@ -150,6 +152,7 @@ struct VideoSelectionView: View {
 
             Button(
                 action: {
+                    selectedItem = nil
                     switch parseURLFromClipboard() {
                     case let .success(url):
                         urlToDownload = url

@@ -97,6 +97,18 @@ struct PlayerView: View {
             }
             viewModel.pause()
             viewModel.cleanup()
+            
+            // Clear video source state when leaving player view
+            switch videoSource {
+            case .photosItem:
+                // PhotosPickerItem is automatically released
+                break
+            case let .url(url):
+                // Delete temporary downloaded video file if it exists
+                if url.isFileURL {
+                    try? FileManager.default.removeItem(at: url)
+                }
+            }
         }
         .translationTask(
             TranslationSession.Configuration(
