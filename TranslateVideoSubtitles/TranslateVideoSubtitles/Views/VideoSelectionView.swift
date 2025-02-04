@@ -41,13 +41,10 @@ struct VideoSelectionView: View {
                     }
                 }
                 .sheet(isPresented: $showDownloader) {
-                    VideoDownloaderView(
-                        videoURL: $urlToDownload,
-                        onDownloadComplete: { url in
-                            downloadedVideoURL = url
-                            navigateToPlayerView = true
-                        }
-                    )
+                    WebVideoDownloaderView(videoURL: $urlToDownload) { url in
+                        downloadedVideoURL = url
+                        navigateToPlayerView = true
+                    }
                 }
         }
     }

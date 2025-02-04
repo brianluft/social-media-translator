@@ -1,5 +1,4 @@
 import Foundation
-import SwiftSoup
 
 enum VideoDownloadError: Error {
     case invalidURL
@@ -56,64 +55,15 @@ class VideoDownloader {
         print("[VideoDownloader] Updated progress delegate with self reference")
     }
 
-    private func extractVideoURL(from html: String, pageURL: URL) -> URL? {
-        do {
-            print("[VideoDownloader] Parsing HTML from \(pageURL.absoluteString)")
-            let doc = try SwiftSoup.parse(html)
-
-            // Look for og:video meta tag
-            let metaTags = try doc.select("meta[name=og:video], meta[property=og:video]")
-            print("[VideoDownloader] Found \(metaTags.array().count) og:video meta tags")
-
-            if let videoMeta = metaTags.first() {
-                try print("[VideoDownloader] Found meta tag: \(videoMeta.outerHtml())")
-                if let videoURL = try? videoMeta.attr("content") {
-                    print("[VideoDownloader] Extracted video URL: \(videoURL)")
-                    if !videoURL.isEmpty {
-                        var urlString = videoURL
-                        if urlString.hasPrefix("http://") {
-                            print("[VideoDownloader] Converting video URL from HTTP to HTTPS")
-                            urlString = "https://" + urlString.dropFirst("http://".count)
-                        }
-
-                        if let url = URL(string: urlString) {
-                            print("[VideoDownloader] Successfully created URL object: \(url.absoluteString)")
-                            return url
-                        } else {
-                            print("[VideoDownloader] Failed to create URL object from: \(urlString)")
-                        }
-                    } else {
-                        print("[VideoDownloader] Video URL was empty")
-                    }
-                } else {
-                    print("[VideoDownloader] Failed to get content attribute")
-                }
-            } else {
-                print("[VideoDownloader] No og:video meta tag found")
-                // Let's also print all meta tags to see what we have
-                let allMeta = try doc.select("meta")
-                print("[VideoDownloader] All meta tags:")
-                for meta in allMeta.array() {
-                    try print(meta.outerHtml())
-                }
-            }
-
-            return nil
-
-        } catch {
-            print("[VideoDownloader] HTML parsing error: \(error)")
-            return nil
-        }
-    }
-
     private func downloadVideo(from videoURL: URL, to destinationURL: URL) {
         print("[VideoDownloader] Starting video download")
         print("[VideoDownloader] From: \(videoURL.absoluteString)")
         print("[VideoDownloader] To: \(destinationURL.path)")
 
-        // Removed the withCheckedThrowingContinuation and completion-based downloadTask
-        // Create the task **without** a completion block so delegates will be called
-        downloadTask = session.downloadTask(with: videoURL)
+        var request = URLRequest(url: videoURL)
+        request.setValue(Constants.chromeUserAgent, forHTTPHeaderField: "User-Agent")
+
+        downloadTask = session.downloadTask(with: request)
         print("[VideoDownloader] Starting download task")
         downloadTask?.resume()
     }
@@ -135,57 +85,21 @@ class VideoDownloader {
                 urlString = "https://" + urlString.dropFirst("http://".count)
             }
 
-            guard let pageURL = URL(string: urlString) else {
+            guard let videoURL = URL(string: urlString) else {
                 print("[VideoDownloader] Failed to create URL object from string: '\(urlString)'")
                 throw VideoDownloadError.invalidURL
             }
-            print("[VideoDownloader] Successfully created URL: \(pageURL.absoluteString)")
+            print("[VideoDownloader] Successfully created URL: \(videoURL.absoluteString)")
 
-            // 2. Fetch the HTML page
-            print("[VideoDownloader] Fetching HTML page from: \(pageURL.absoluteString)")
-            let (data, response) = try await session.data(from: pageURL)
-            guard let httpResponse = response as? HTTPURLResponse else {
-                print("[VideoDownloader] Response was not HTTP: \(response)")
-                throw VideoDownloadError.networkError("Invalid response type")
-            }
-            print("[VideoDownloader] Got HTTP response: \(httpResponse.statusCode)")
-            print("[VideoDownloader] Response headers: \(httpResponse.allHeaderFields)")
-
-            guard (200 ... 299).contains(httpResponse.statusCode) else {
-                print("[VideoDownloader] Bad HTTP status: \(httpResponse.statusCode)")
-                throw VideoDownloadError.networkError("HTTP \(httpResponse.statusCode)")
-            }
-
-            guard let html = String(data: data, encoding: .utf8) else {
-                print("[VideoDownloader] Failed to decode HTML as UTF-8. Data size: \(data.count) bytes")
-                throw VideoDownloadError.networkError("Failed to decode webpage")
-            }
-            print("[VideoDownloader] Successfully decoded HTML (\(html.count) characters)")
-            print("[VideoDownloader] First 500 chars of HTML: \(String(html.prefix(500)))")
-
-            // 3. Extract video URL from HTML
-            guard let videoURL = extractVideoURL(from: html, pageURL: pageURL) else {
-                print("[VideoDownloader] No video URL found in HTML")
-                throw VideoDownloadError.noVideoFound
-            }
-            print("[VideoDownloader] Found video URL: \(videoURL.absoluteString)")
-
-            // 4. Create destination URL
+            // 2. Create destination URL
             let destinationURL = FileManager.default.temporaryDirectory
                 .appendingPathComponent(UUID().uuidString)
                 .appendingPathExtension("mp4")
             print("[VideoDownloader] Will save video to: \(destinationURL.path)")
 
-            // 5. Download the video
+            // 3. Download the video
             print("[VideoDownloader] Starting video download from: \(videoURL.absoluteString)")
             downloadVideo(from: videoURL, to: destinationURL)
-
-            if isDownloading { // Check if we weren't cancelled
-                print("[VideoDownloader] Download completed successfully")
-                delegate?.downloadCompleted(tempURL: destinationURL)
-            } else {
-                print("[VideoDownloader] Download was cancelled")
-            }
 
         } catch {
             print("[VideoDownloader] Error occurred: \(error)")
@@ -196,10 +110,9 @@ class VideoDownloader {
             } else {
                 delegate?.downloadFailed(.downloadFailed(error.localizedDescription))
             }
+            isDownloading = false
+            downloadTask = nil
         }
-
-        isDownloading = false
-        downloadTask = nil
     }
 
     func cancelDownload() {
