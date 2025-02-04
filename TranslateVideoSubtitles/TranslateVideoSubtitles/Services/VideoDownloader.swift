@@ -20,11 +20,17 @@ protocol VideoDownloaderDelegate: AnyObject {
 }
 
 class VideoDownloader {
+    // Use the same temporary directory as VideoProcessor
+    static var temporaryVideoDirectory: URL {
+        FileManager.default.temporaryDirectory.appendingPathComponent("VideoSubtitles", isDirectory: true)
+    }
+
     weak var delegate: VideoDownloaderDelegate?
     private var isDownloading = false
     private var downloadTask: URLSessionDownloadTask?
     private let session: URLSession
     private let progressDelegate: ProgressDelegate
+    var currentDestinationURL: URL?
 
     init() {
         print("[VideoDownloader] Initializing")
@@ -60,6 +66,12 @@ class VideoDownloader {
         print("[VideoDownloader] From: \(videoURL.absoluteString)")
         print("[VideoDownloader] To: \(destinationURL.path)")
 
+        // Create directory if needed
+        try? FileManager.default.createDirectory(
+            at: Self.temporaryVideoDirectory,
+            withIntermediateDirectories: true
+        )
+
         var request = URLRequest(url: videoURL)
         request.setValue(Constants.chromeUserAgent, forHTTPHeaderField: "User-Agent")
 
@@ -74,6 +86,7 @@ class VideoDownloader {
             return
         }
         isDownloading = true
+        currentDestinationURL = nil
         delegate?.downloadProgressUpdated(.indeterminate)
 
         do {
@@ -92,7 +105,7 @@ class VideoDownloader {
             print("[VideoDownloader] Successfully created URL: \(videoURL.absoluteString)")
 
             // 2. Create destination URL
-            let destinationURL = FileManager.default.temporaryDirectory
+            let destinationURL = VideoDownloader.temporaryVideoDirectory
                 .appendingPathComponent(UUID().uuidString)
                 .appendingPathExtension("mp4")
             print("[VideoDownloader] Will save video to: \(destinationURL.path)")
@@ -119,6 +132,12 @@ class VideoDownloader {
         isDownloading = false
         downloadTask?.cancel()
         downloadTask = nil
+
+        // Clean up any downloaded file
+        if let url = currentDestinationURL {
+            try? FileManager.default.removeItem(at: url)
+            currentDestinationURL = nil
+        }
     }
 }
 
@@ -201,13 +220,14 @@ private class ProgressDelegate: NSObject, URLSessionDownloadDelegate {
         // Move the downloaded file to the destination
         // This must happen here instead of the completion block
         guard let downloader else { return }
-        let destinationURL = FileManager.default.temporaryDirectory
+        let destinationURL = VideoDownloader.temporaryVideoDirectory
             .appendingPathComponent(UUID().uuidString)
             .appendingPathExtension("mp4")
 
         do {
             try FileManager.default.moveItem(at: location, to: destinationURL)
             print("[ProgressDelegate] Successfully moved file to: \(destinationURL.path)")
+            downloader.currentDestinationURL = destinationURL
             downloader.delegate?.downloadCompleted(tempURL: destinationURL)
         } catch {
             print("[ProgressDelegate] Failed to move downloaded file: \(error)")

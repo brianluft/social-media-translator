@@ -190,7 +190,7 @@ struct VideoSelectionView: View {
         let unsupportedDomains = ["tiktok.com", "instagram.com", "facebook.com", "youtube.com", "x.com"]
 
         // Look for URLs in each component
-        for (index, component) in components.enumerated() {
+        for component in components {
             let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue)
             let matches = detector?.matches(
                 in: component,

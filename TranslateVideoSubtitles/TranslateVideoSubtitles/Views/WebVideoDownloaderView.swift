@@ -145,9 +145,6 @@ class WebViewNavigationDelegate: NSObject, WKNavigationDelegate {
 
             let propertyMetaTags = try doc.select("meta[property=og:video]")
 
-            // Print all meta tags to see what we have
-            let allMeta = try doc.select("meta")
-
             // Try name first
             if let videoMeta = nameMetaTags.first() {
                 if let videoURL = try? videoMeta.attr("content") {
