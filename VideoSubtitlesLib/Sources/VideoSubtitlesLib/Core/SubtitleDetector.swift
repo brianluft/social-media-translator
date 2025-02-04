@@ -59,10 +59,8 @@ public class SubtitleDetector {
 
     // Vision request for text detection
     private lazy var textRecognitionRequest: VNRecognizeTextRequest = {
-        let request = VNRecognizeTextRequest { [weak self] _, error in
-            if let error {
-                print("Text recognition error: \(error)")
-            }
+        let request = VNRecognizeTextRequest { [weak self] _, _ in
+            // Text recognition error
         }
         request.recognitionLevel = .accurate
         request.usesLanguageCorrection = true

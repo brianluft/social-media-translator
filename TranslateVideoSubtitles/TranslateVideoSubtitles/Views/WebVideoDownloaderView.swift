@@ -124,62 +124,38 @@ class WebViewNavigationDelegate: NSObject, WKNavigationDelegate {
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        print("[WebViewNavigationDelegate] Page finished loading")
-
         // Get the page HTML and look for video meta tag
-        webView.evaluateJavaScript("document.documentElement.outerHTML") { [weak self] result, error in
+        webView.evaluateJavaScript("document.documentElement.outerHTML") { [weak self] result, _ in
             guard let html = result as? String else {
-                print("[WebViewNavigationDelegate] Failed to get HTML: \(String(describing: error))")
                 return
             }
 
             if let videoURL = self?.extractVideoURL(from: html) {
-                print("[WebViewNavigationDelegate] Found video URL: \(videoURL)")
                 self?.startVideoDownload(from: videoURL)
-            } else {
-                print("[WebViewNavigationDelegate] No video URL found in page")
             }
         }
     }
 
     private func extractVideoURL(from html: String) -> URL? {
-        print("[WebViewNavigationDelegate] Starting HTML parsing, length: \(html.count)")
-        print("[WebViewNavigationDelegate] First 500 chars of HTML: \(String(html.prefix(500)))")
-
         do {
             let doc = try SwiftSoup.parse(html)
-            print("[WebViewNavigationDelegate] Successfully parsed HTML document")
 
             // First try exact og:video meta tag
-            print("[WebViewNavigationDelegate] Searching for meta[name=og:video]")
             let nameMetaTags = try doc.select("meta[name=og:video]")
-            print("[WebViewNavigationDelegate] Found \(nameMetaTags.array().count) meta tags with name=og:video")
 
-            print("[WebViewNavigationDelegate] Searching for meta[property=og:video]")
             let propertyMetaTags = try doc.select("meta[property=og:video]")
-            print(
-                "[WebViewNavigationDelegate] Found \(propertyMetaTags.array().count) meta tags with property=og:video"
-            )
 
             // Print all meta tags to see what we have
-            print("[WebViewNavigationDelegate] All meta tags in document:")
             let allMeta = try doc.select("meta")
-            for meta in allMeta.array() {
-                try print("[WebViewNavigationDelegate] Meta tag: \(meta.outerHtml())")
-            }
 
             // Try name first
             if let videoMeta = nameMetaTags.first() {
-                try print("[WebViewNavigationDelegate] Found meta tag with name=og:video: \(videoMeta.outerHtml())")
                 if let videoURL = try? videoMeta.attr("content") {
-                    print("[WebViewNavigationDelegate] Extracted video URL from name tag: \(videoURL)")
                     if !videoURL.isEmpty {
                         var urlString = videoURL
                         if urlString.hasPrefix("http://") {
-                            print("[WebViewNavigationDelegate] Converting video URL from HTTP to HTTPS")
                             urlString = "https://" + urlString.dropFirst("http://".count)
                         }
-                        print("[WebViewNavigationDelegate] Using secure URL: \(urlString)")
                         return URL(string: urlString)
                     }
                 }
@@ -187,25 +163,19 @@ class WebViewNavigationDelegate: NSObject, WKNavigationDelegate {
 
             // Try property if name failed
             if let videoMeta = propertyMetaTags.first() {
-                try print("[WebViewNavigationDelegate] Found meta tag with property=og:video: \(videoMeta.outerHtml())")
                 if let videoURL = try? videoMeta.attr("content") {
-                    print("[WebViewNavigationDelegate] Extracted video URL from property tag: \(videoURL)")
                     if !videoURL.isEmpty {
                         var urlString = videoURL
                         if urlString.hasPrefix("http://") {
-                            print("[WebViewNavigationDelegate] Converting video URL from HTTP to HTTPS")
                             urlString = "https://" + urlString.dropFirst("http://".count)
                         }
-                        print("[WebViewNavigationDelegate] Using secure URL: \(urlString)")
                         return URL(string: urlString)
                     }
                 }
             }
 
-            print("[WebViewNavigationDelegate] No video URL found in any meta tags")
             return nil
         } catch {
-            print("[WebViewNavigationDelegate] HTML parsing error: \(error)")
             return nil
         }
     }

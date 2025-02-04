@@ -152,12 +152,8 @@ struct VideoSelectionView: View {
                 action: {
                     switch parseURLFromClipboard() {
                     case let .success(url):
-                        print("[VideoSelection] Setting urlToDownload to: '\(url)'")
                         urlToDownload = url
-                        print("[VideoSelection] urlToDownload is now: '\(urlToDownload)'")
-                        print("[VideoSelection] Setting showDownloader to true")
                         showDownloader = true
-                        print("[VideoSelection] showDownloader is now: \(showDownloader)")
                     case let .failure(error):
                         pasteErrorMessage = error.message
                         showPasteError = true
@@ -184,52 +180,39 @@ struct VideoSelectionView: View {
     }
 
     private func parseURLFromClipboard() -> Result<String, URLError> {
-        print("[VideoSelection] Checking clipboard contents...")
         guard let clipboardString = UIPasteboard.general.string else {
-            print("[VideoSelection] Clipboard is empty or doesn't contain text")
             return .failure(.emptyClipboard)
         }
-        print("[VideoSelection] Raw clipboard contents: '\(clipboardString)'")
 
         // Split by commas (both standard and Chinese)
         let components = clipboardString.components(separatedBy: [",", "，"])
-        print("[VideoSelection] Split into \(components.count) components: \(components)")
 
         let unsupportedDomains = ["tiktok.com", "instagram.com", "facebook.com", "youtube.com", "x.com"]
 
         // Look for URLs in each component
         for (index, component) in components.enumerated() {
-            print("[VideoSelection] Checking component \(index): '\(component)'")
             let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue)
             let matches = detector?.matches(
                 in: component,
                 options: [],
                 range: NSRange(location: 0, length: component.utf16.count)
             )
-            print("[VideoSelection] Found \(matches?.count ?? 0) URLs in component")
 
             if let firstMatch = matches?.first,
                let range = Range(firstMatch.range, in: component) {
                 let urlString = String(component[range])
-                print("[VideoSelection] Extracted URL string: '\(urlString)'")
                 if let url = URL(string: urlString) {
-                    print("[VideoSelection] Successfully validated URL: \(url.absoluteString)")
-
                     // Check for unsupported domains
                     if let host = url.host?.lowercased(),
                        let unsupportedDomain = unsupportedDomains.first(where: { host.contains($0) }) {
-                        print("[VideoSelection] Detected unsupported domain: \(unsupportedDomain)")
                         return .failure(.unsupportedDomain(unsupportedDomain))
                     }
 
                     return .success(url.absoluteString)
-                } else {
-                    print("[VideoSelection] Failed to validate URL string")
                 }
             }
         }
 
-        print("[VideoSelection] No valid URLs found in clipboard")
         return .failure(.noValidURL)
     }
 }
