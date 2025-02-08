@@ -41,7 +41,7 @@ public protocol TextDetectionDelegate: AnyObject {
 }
 
 /// Handles detection of text from video frames using Vision OCR
-public class SubtitleDetector {
+public class SubtitleDetector: @unchecked Sendable {
     // MARK: - Properties
 
     private let videoAsset: AVAsset

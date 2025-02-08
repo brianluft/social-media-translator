@@ -1,12 +1,13 @@
 import os
 import PhotosUI
 import SwiftUI
+import UniformTypeIdentifiers
 import VideoSubtitlesLib
 
 struct VideoSelectionView: View {
     @StateObject private var viewModel = VideoSelectionViewModel()
-    @State private var isShowingPhotoPicker = false
-    @State private var navigateToPlayerView = false
+    @State private var isShowingMediaPicker = false
+    @State private var navigateToMediaView = false
     @State private var selectedItem: PhotosPickerItem?
     @State private var showDownloader = false
     @State private var urlToDownload: String = ""
@@ -34,13 +35,26 @@ struct VideoSelectionView: View {
     var body: some View {
         NavigationStack {
             mainContent
-                .navigationDestination(isPresented: $navigateToPlayerView) {
+                .navigationDestination(isPresented: $navigateToMediaView) {
                     if let selectedItem,
                        let sourceLanguage = viewModel.selectedSourceLanguage {
-                        PlayerView(
-                            videoItem: selectedItem,
-                            sourceLanguage: sourceLanguage
-                        )
+                        Group {
+                            switch selectedItem.supportedContentTypes.first {
+                            case .some(UTType.movie), .some(UTType.video), .some(UTType.quickTimeMovie),
+                                 .some(UTType.mpeg4Movie):
+                                PlayerView(
+                                    videoItem: selectedItem,
+                                    sourceLanguage: sourceLanguage
+                                )
+                            case .some(UTType.image), .some(UTType.jpeg), .some(UTType.png), .some(UTType.heic):
+                                PhotoView(
+                                    photoItem: selectedItem,
+                                    sourceLanguage: sourceLanguage
+                                )
+                            default:
+                                Text("Unsupported media type")
+                            }
+                        }
                     } else if let downloadedVideoURL,
                               let sourceLanguage = viewModel.selectedSourceLanguage {
                         PlayerView(
@@ -50,19 +64,20 @@ struct VideoSelectionView: View {
                     }
                 }
                 .photosPicker(
-                    isPresented: $isShowingPhotoPicker,
+                    isPresented: $isShowingMediaPicker,
                     selection: $selectedItem,
-                    matching: .videos
+                    matching: PHPickerFilter.any(of: [.videos, .images])
                 )
                 .onChange(of: selectedItem) { _, newValue in
-                    if newValue != nil {
-                        navigateToPlayerView = true
+                    if let newValue {
+                        print("Selected media types: \(newValue.supportedContentTypes)")
+                        navigateToMediaView = true
                     }
                 }
                 .sheet(isPresented: $showDownloader) {
                     WebVideoDownloaderView(videoURL: $urlToDownload) { url in
                         downloadedVideoURL = url
-                        navigateToPlayerView = true
+                        navigateToMediaView = true
                     }
                 }
         }
@@ -81,16 +96,16 @@ struct VideoSelectionView: View {
 
                 VStack {
                     if isPortrait {
-                        Spacer()  // In portrait, push to bottom
+                        Spacer() // In portrait, push to bottom
                     }
-                    
+
                     VStack(spacing: isPortrait ? 24 : 12) {
                         Text("Social Media Translator")
                             .font(.title)
                             .fontWeight(.bold)
                             .foregroundColor(.primary)
                             .multilineTextAlignment(.center)
-                        
+
                         languageSelectionContent
                         selectVideoButton
                     }
@@ -102,10 +117,10 @@ struct VideoSelectionView: View {
 
                     if isPortrait {
                         Spacer()
-                            .frame(height: 48)  // Fixed bottom margin for portrait
+                            .frame(height: 48) // Fixed bottom margin for portrait
                     }
                 }
-                .frame(maxHeight: isPortrait ? nil : .infinity)  // Center vertically in landscape
+                .frame(maxHeight: isPortrait ? nil : .infinity) // Center vertically in landscape
             }
         }
     }
@@ -149,7 +164,7 @@ struct VideoSelectionView: View {
                     downloadedVideoURL = nil
                     urlToDownload = ""
                     selectedItem = nil
-                    isShowingPhotoPicker = true
+                    isShowingMediaPicker = true
                 },
                 label: {
                     HStack(spacing: 8) {
