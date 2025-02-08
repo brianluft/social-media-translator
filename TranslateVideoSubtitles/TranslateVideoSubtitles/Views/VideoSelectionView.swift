@@ -80,11 +80,16 @@ struct VideoSelectionView: View {
                 .font(.title2)
                 .bold()
 
-            languageSelectionContent
-
             Spacer()
 
-            selectVideoButton
+            VStack(spacing: 24) {
+                languageSelectionContent
+                selectVideoButton
+            }
+            .padding(24)
+            .background(Color(.systemGray6))
+            .cornerRadius(16)
+            .padding(.horizontal)
 
             Spacer()
         }
