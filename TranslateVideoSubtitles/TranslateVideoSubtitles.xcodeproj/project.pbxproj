@@ -28,7 +28,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		D334ED5E2D45881D00C4ACF9 /* Translate Video.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Translate Video.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		D334ED5E2D45881D00C4ACF9 /* Social Translator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Social Translator.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		D334ED6E2D45881E00C4ACF9 /* TranslateVideoSubtitlesTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TranslateVideoSubtitlesTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D334ED782D45881E00C4ACF9 /* TranslateVideoSubtitlesUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TranslateVideoSubtitlesUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -91,7 +91,7 @@
 		D334ED5F2D45881D00C4ACF9 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				D334ED5E2D45881D00C4ACF9 /* Translate Video.app */,
+				D334ED5E2D45881D00C4ACF9 /* Social Translator.app */,
 				D334ED6E2D45881E00C4ACF9 /* TranslateVideoSubtitlesTests.xctest */,
 				D334ED782D45881E00C4ACF9 /* TranslateVideoSubtitlesUITests.xctest */,
 			);
@@ -128,7 +128,7 @@
 				D305206E2D46C0B90042FB84 /* VideoSubtitlesLib */,
 			);
 			productName = TranslateVideoSubtitles;
-			productReference = D334ED5E2D45881D00C4ACF9 /* Translate Video.app */;
+			productReference = D334ED5E2D45881D00C4ACF9 /* Social Translator.app */;
 			productType = "com.apple.product-type.application";
 		};
 		D334ED6D2D45881E00C4ACF9 /* TranslateVideoSubtitlesTests */ = {
@@ -428,8 +428,8 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.brianluft.TranslateVideoSubtitles;
-				PRODUCT_NAME = "Translate Video";
+				PRODUCT_BUNDLE_IDENTIFIER = com.brianluft.SocialMediaTranslator;
+				PRODUCT_NAME = "Social Translator";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -460,8 +460,8 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.brianluft.TranslateVideoSubtitles;
-				PRODUCT_NAME = "Translate Video";
+				PRODUCT_BUNDLE_IDENTIFIER = com.brianluft.SocialMediaTranslator;
+				PRODUCT_NAME = "Social Translator";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;

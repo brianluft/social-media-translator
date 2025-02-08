@@ -76,7 +76,7 @@ struct VideoSelectionView: View {
                 .font(.system(size: 60))
                 .foregroundColor(.primary)
 
-            Text("Translate Video Subtitles")
+            Text("Social Media Translator")
                 .font(.title2)
                 .bold()
 
