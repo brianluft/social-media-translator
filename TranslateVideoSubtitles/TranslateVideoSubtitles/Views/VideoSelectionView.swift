@@ -159,7 +159,7 @@ struct VideoSelectionView: View {
                 label: {
                     HStack {
                         Image(systemName: "doc.on.clipboard")
-                        Text("Paste social media link")
+                        Text("Paste Link")
                     }
                     .frame(maxWidth: .infinity)
                     .padding()
