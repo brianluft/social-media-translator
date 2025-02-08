@@ -69,29 +69,44 @@ struct VideoSelectionView: View {
     }
 
     private var mainContent: some View {
-        VStack(spacing: 20) {
-            Spacer()
+        GeometryReader { geometry in
+            let isPortrait = geometry.size.width < geometry.size.height
+            ZStack {
+                // Background image
+                Image("Background")
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .edgesIgnoringSafeArea(.all)
+                    .frame(minWidth: geometry.size.width, minHeight: geometry.size.height)
 
-            Image(systemName: "film")
-                .font(.system(size: 60))
-                .foregroundColor(.primary)
+                VStack {
+                    if isPortrait {
+                        Spacer()  // In portrait, push to bottom
+                    }
+                    
+                    VStack(spacing: isPortrait ? 24 : 12) {
+                        Text("Social Media Translator")
+                            .font(.title)
+                            .fontWeight(.bold)
+                            .foregroundColor(.primary)
+                            .multilineTextAlignment(.center)
+                        
+                        languageSelectionContent
+                        selectVideoButton
+                    }
+                    .padding(24)
+                    .padding(.horizontal, 16)
+                    .background(Color(.systemGray6))
+                    .cornerRadius(24)
+                    .frame(maxWidth: isPortrait ? 375 : 550)
 
-            Text("Social Media Translator")
-                .font(.title2)
-                .bold()
-
-            Spacer()
-
-            VStack(spacing: 24) {
-                languageSelectionContent
-                selectVideoButton
+                    if isPortrait {
+                        Spacer()
+                            .frame(height: 48)  // Fixed bottom margin for portrait
+                    }
+                }
+                .frame(maxHeight: isPortrait ? nil : .infinity)  // Center vertically in landscape
             }
-            .padding(24)
-            .background(Color(.systemGray6))
-            .cornerRadius(16)
-            .padding(.horizontal)
-
-            Spacer()
         }
     }
 
@@ -137,12 +152,12 @@ struct VideoSelectionView: View {
                     isShowingPhotoPicker = true
                 },
                 label: {
-                    HStack {
+                    HStack(spacing: 8) {
                         Image(systemName: "photo.on.rectangle")
                         Text("Choose from Photo Library")
                     }
                     .frame(maxWidth: .infinity)
-                    .padding()
+                    .padding(8)
                 }
             )
             .buttonStyle(.borderedProminent)
@@ -164,13 +179,12 @@ struct VideoSelectionView: View {
                 label: {
                     HStack {
                         Image(systemName: "doc.on.clipboard")
-                        Text("Paste Link")
+                        Text("Paste Video Link")
                     }
                     .frame(maxWidth: .infinity)
-                    .padding()
+                    .padding(8)
                 }
             )
-            .buttonStyle(.borderless)
             .padding(.horizontal)
             .disabled(!viewModel.canSelectVideo)
             .alert("Paste Error", isPresented: $showPasteError) {

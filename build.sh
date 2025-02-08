@@ -8,6 +8,15 @@ if [ -z "$NUM_CORES" ]; then
   exit 1
 fi
 
+echo "--- Copy Assets ---"
+(cd assets && ./copy.sh 2>&1) > log
+EXIT_CODE=$?
+if [ $EXIT_CODE -ne 0 ]; then
+  cat log
+  echo "assets/copy.sh failed with exit code $EXIT_CODE"
+  exit 1
+fi
+
 echo "--- BuildTools Resolve ---"
 (cd BuildTools && NSUnbufferedIO=YES swift package resolve 2>&1) > log
 EXIT_CODE=$?
