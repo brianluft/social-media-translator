@@ -20,11 +20,6 @@ protocol VideoDownloaderDelegate: AnyObject {
 }
 
 class VideoDownloader {
-    // Use the same temporary directory as VideoProcessor
-    static var temporaryVideoDirectory: URL {
-        FileManager.default.temporaryDirectory.appendingPathComponent("VideoSubtitles", isDirectory: true)
-    }
-
     weak var delegate: VideoDownloaderDelegate?
     private var isDownloading = false
     private var downloadTask: URLSessionDownloadTask?
@@ -68,7 +63,7 @@ class VideoDownloader {
 
         // Create directory if needed
         try? FileManager.default.createDirectory(
-            at: Self.temporaryVideoDirectory,
+            at: TempFileManager.temporaryVideoDirectory,
             withIntermediateDirectories: true
         )
 
@@ -105,7 +100,7 @@ class VideoDownloader {
             print("[VideoDownloader] Successfully created URL: \(videoURL.absoluteString)")
 
             // 2. Create destination URL
-            let destinationURL = VideoDownloader.temporaryVideoDirectory
+            let destinationURL = TempFileManager.temporaryVideoDirectory
                 .appendingPathComponent(UUID().uuidString)
                 .appendingPathExtension("mp4")
             print("[VideoDownloader] Will save video to: \(destinationURL.path)")
@@ -220,7 +215,7 @@ private class ProgressDelegate: NSObject, URLSessionDownloadDelegate {
         // Move the downloaded file to the destination
         // This must happen here instead of the completion block
         guard let downloader else { return }
-        let destinationURL = VideoDownloader.temporaryVideoDirectory
+        let destinationURL = TempFileManager.temporaryVideoDirectory
             .appendingPathComponent(UUID().uuidString)
             .appendingPathExtension("mp4")
 

@@ -3,7 +3,7 @@ import SwiftUI
 struct TranslateVideoSubtitlesApp: App {
     init() {
         // Clean up any orphaned temporary files on launch
-        VideoProcessor.cleanupTemporaryFiles()
+        TempFileManager.cleanupTemporaryFiles()
     }
 
     var body: some Scene {
