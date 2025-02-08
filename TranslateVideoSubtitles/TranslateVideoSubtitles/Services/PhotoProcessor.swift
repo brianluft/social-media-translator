@@ -19,7 +19,7 @@ final class PhotoProcessor {
     @Published var readyToDisplay: Bool = false
 
     /// The processed photo containing detected and translated text
-    let processedPhoto: ProcessedVideo
+    let processedPhoto: ProcessedMedia
 
     private var _isCancelled = false
     /// Whether processing has been cancelled
@@ -40,7 +40,7 @@ final class PhotoProcessor {
     /// - Parameters:
     ///   - sourceLanguage: The language of text in the photo
     ///   - processedPhoto: The model to store processed results in
-    init(sourceLanguage: Locale.Language, processedPhoto: ProcessedVideo) {
+    init(sourceLanguage: Locale.Language, processedPhoto: ProcessedMedia) {
         self.sourceLanguage = sourceLanguage
         self.processedPhoto = processedPhoto
         // For consistency, we preserve the idea of the "current language" as the destination

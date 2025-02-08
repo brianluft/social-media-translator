@@ -18,7 +18,7 @@ final class VideoProcessor {
     @Published var processingComplete: Bool = false
     @Published var readyToPlay: Bool = false
 
-    var processedVideo: ProcessedVideo
+    var processedVideo: ProcessedMedia
 
     private var _isCancelled = false
     var isCancelled: Bool {
@@ -35,7 +35,7 @@ final class VideoProcessor {
     private let sourceLanguage: Locale.Language
     private let destinationLanguage: Locale.Language
 
-    init(sourceLanguage: Locale.Language, processedVideo: ProcessedVideo) {
+    init(sourceLanguage: Locale.Language, processedVideo: ProcessedMedia) {
         self.sourceLanguage = sourceLanguage
         self.processedVideo = processedVideo
         // For consistency, we preserve the idea of the "current language" as the destination
@@ -378,7 +378,7 @@ final class VideoProcessor {
     }
 
     private func handleTranslationComplete() {
-        // Handled in detection complete when creating ProcessedVideo
+        // Handled in detection complete when creating ProcessedMedia
     }
 
     private func handleTranslationFail(error: Error) {

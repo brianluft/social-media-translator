@@ -14,7 +14,7 @@ class PhotoViewModel: ObservableObject {
 
     let sourceLanguage: Locale.Language
     let destinationLanguage = Locale.current.language
-    let processedPhoto: ProcessedVideo
+    let processedPhoto: ProcessedMedia
     private let photoProcessor: PhotoProcessor
     private let subtitleRenderer: SubtitleOverlayRenderer
 
@@ -29,7 +29,7 @@ class PhotoViewModel: ObservableObject {
 
     init(sourceLanguage: Locale.Language) {
         self.sourceLanguage = sourceLanguage
-        self.processedPhoto = ProcessedVideo(
+        self.processedPhoto = ProcessedMedia(
             targetLanguage: Locale.current.language.languageCode?
                 .identifier ?? "en"
         )

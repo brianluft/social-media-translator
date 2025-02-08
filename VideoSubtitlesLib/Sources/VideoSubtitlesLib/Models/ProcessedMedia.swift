@@ -1,15 +1,16 @@
 import Foundation
 import os
 
-/// Represents a video that has been processed for subtitle translation
-public class ProcessedVideo: Hashable {
-    // A unique ID for this video, used only for logging
+/// Represents a photo or video that has been processed for text translation.
+/// A photo is represented as a video with a single frame.
+public class ProcessedMedia: Hashable {
+    // A unique ID for this media file, used only for logging
     public let id = UUID()
 
-    /// The URL of the video file
+    /// The URL of the media file
     public private(set) var url: URL
 
-    /// The natural size of the video
+    /// The natural size of the photo or video
     public private(set) var videoSize: CGSize?
 
     /// All frame segments with their timestamps, sorted by timestamp
@@ -23,11 +24,11 @@ public class ProcessedVideo: Hashable {
         hasher.combine(url)
     }
 
-    public static func == (lhs: ProcessedVideo, rhs: ProcessedVideo) -> Bool {
+    public static func == (lhs: ProcessedMedia, rhs: ProcessedMedia) -> Bool {
         lhs.url == rhs.url
     }
 
-    /// Creates a new ProcessedVideo instance
+    /// Creates a new ProcessedMedia instance
     /// - Parameter targetLanguage: The language code of the translated text
     public init(targetLanguage: String) {
         self.url = URL(fileURLWithPath: "")

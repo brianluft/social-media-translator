@@ -222,7 +222,7 @@ class PlayerViewModel: NSObject, ObservableObject, VideoPlayerControllerDelegate
     let sourceLanguage: Locale.Language
     let destinationLanguage = Locale.current.language
 
-    let processedVideo: ProcessedVideo
+    let processedVideo: ProcessedMedia
 
     let videoProcessor: VideoProcessor
 
@@ -245,7 +245,7 @@ class PlayerViewModel: NSObject, ObservableObject, VideoPlayerControllerDelegate
 
     init(sourceLanguage: Locale.Language) {
         self.sourceLanguage = sourceLanguage
-        self.processedVideo = ProcessedVideo(
+        self.processedVideo = ProcessedMedia(
             targetLanguage: Locale.current.language.languageCode?
                 .identifier ?? "en"
         )

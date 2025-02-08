@@ -37,7 +37,7 @@ final class ProcessedVideoTests: XCTestCase {
         let frame2 = makeFrameSegments(id: UUID(), timestamp: 2.0, segments: [seg1])
         let frame3 = makeFrameSegments(id: UUID(), timestamp: 3.0, segments: [seg1])
 
-        let video = ProcessedVideo(
+        let video = ProcessedMedia(
             targetLanguage: "es"
         )
 
@@ -61,7 +61,7 @@ final class ProcessedVideoTests: XCTestCase {
         let seg1 = makeTestSegment(id: seg1Id, text: "Hello", translatedText: "Hola")
         let frame = makeFrameSegments(id: UUID(), timestamp: 1.0, segments: [seg1])
 
-        let video = ProcessedVideo(
+        let video = ProcessedMedia(
             targetLanguage: "es"
         )
         video.appendFrameSegments([frame])
@@ -83,7 +83,7 @@ final class ProcessedVideoTests: XCTestCase {
         let frame1 = makeFrameSegments(id: UUID(), timestamp: 1.0, segments: [seg1])
         let frame2 = makeFrameSegments(id: UUID(), timestamp: 2.0, segments: [seg1])
 
-        let video = ProcessedVideo(
+        let video = ProcessedMedia(
             targetLanguage: "es"
         )
         video.appendFrameSegments([frame1, frame2])
@@ -106,7 +106,7 @@ final class ProcessedVideoTests: XCTestCase {
         let seg1 = makeTestSegment(id: seg1Id, text: "Hello", translatedText: nil)
         let frame = makeFrameSegments(id: UUID(), timestamp: 1.0, segments: [seg1])
 
-        let video = ProcessedVideo(
+        let video = ProcessedMedia(
             targetLanguage: "es"
         )
         video.appendFrameSegments([frame])
@@ -122,7 +122,7 @@ final class ProcessedVideoTests: XCTestCase {
 
     func testSegmentsAtTimeWithEmptyResults() {
         // Given
-        let video = ProcessedVideo(
+        let video = ProcessedMedia(
             targetLanguage: "es"
         )
 
@@ -141,7 +141,7 @@ final class ProcessedVideoTests: XCTestCase {
         let frame1 = makeFrameSegments(id: UUID(), timestamp: 1.0, segments: [seg1])
         let frame2 = makeFrameSegments(id: UUID(), timestamp: 2.0, segments: [seg1])
 
-        let video = ProcessedVideo(
+        let video = ProcessedMedia(
             targetLanguage: "es"
         )
         video.appendFrameSegments([frame1, frame2])
