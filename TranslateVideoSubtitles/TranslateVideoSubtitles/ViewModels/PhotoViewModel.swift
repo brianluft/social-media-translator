@@ -16,7 +16,7 @@ class PhotoViewModel: ObservableObject {
     let destinationLanguage = Locale.current.language
     let processedPhoto: ProcessedMedia
     private let photoProcessor: PhotoProcessor
-    private let subtitleRenderer: SubtitleOverlayRenderer
+    private let subtitleRenderer: PhotoSubtitleOverlayRenderer
 
     var subtitleOverlay: some View {
         subtitleRenderer.createSubtitleOverlay(
@@ -37,7 +37,7 @@ class PhotoViewModel: ObservableObject {
             sourceLanguage: sourceLanguage,
             processedPhoto: processedPhoto
         )
-        self.subtitleRenderer = SubtitleOverlayRenderer()
+        self.subtitleRenderer = PhotoSubtitleOverlayRenderer()
 
         // Bind processor state to view model
         photoProcessor.$showError.assign(to: &$showError)

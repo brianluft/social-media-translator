@@ -186,3 +186,93 @@ public class SubtitleOverlayRenderer {
         }
     }
 }
+
+/// Renders subtitle overlays on photos with text forced to fit within original bounds
+@MainActor
+public class PhotoSubtitleOverlayRenderer {
+    /// Defines the visual appearance of subtitle overlays
+    public struct Style: Sendable {
+        /// The font used for subtitle text
+        public let font: Font
+        /// The color of the subtitle text
+        public let textColor: Color
+        /// The background color behind subtitles
+        public let backgroundColor: Color
+        /// The corner radius of the subtitle background
+        public let cornerRadius: CGFloat
+        /// The padding around subtitle text
+        public let padding: EdgeInsets
+
+        /// Default style for subtitle overlays
+        public static let `default` = Style(
+            font: .system(size: 16, weight: .medium),
+            textColor: .white,
+            backgroundColor: Color.black.opacity(0.7),
+            cornerRadius: 2,
+            padding: EdgeInsets(top: 1, leading: 2, bottom: 1, trailing: 2)
+        )
+
+        /// Creates a new subtitle overlay renderer for photos
+        /// - Parameter style: The style configuration for rendering subtitles
+        public init(
+            font: Font,
+            textColor: Color,
+            backgroundColor: Color,
+            cornerRadius: CGFloat,
+            padding: EdgeInsets
+        ) {
+            self.font = font
+            self.textColor = textColor
+            self.backgroundColor = backgroundColor
+            self.cornerRadius = cornerRadius
+            self.padding = padding
+        }
+    }
+
+    private let style: Style
+
+    /// Creates a new subtitle overlay renderer for photos
+    /// - Parameter style: The style configuration for rendering subtitles
+    public init(style: Style = .default) {
+        self.style = style
+    }
+
+    /// Creates a SwiftUI view that renders the provided text segments as subtitle overlays
+    /// - Parameter segments: Array of tuples containing text segments and their translated text
+    /// - Returns: A SwiftUI view that can be overlaid on a photo
+    public func createSubtitleOverlay(for segments: [(segment: TextSegment, text: String)]) -> some View {
+        GeometryReader { [self] geometry in
+            ZStack {
+                // Sort segments by vertical position (higher y = lower in frame = higher z-index)
+                // Use horizontal position as tiebreaker (right = higher z-index)
+                let sortedSegments = segments.sorted { first, second in
+                    if first.segment.position.midY == second.segment.position.midY {
+                        return first.segment.position.midX < second.segment.position.midX
+                    }
+                    return first.segment.position.midY < second.segment.position.midY
+                }
+
+                ForEach(sortedSegments, id: \.segment.id) { segment in
+                    let rect = CGRect(
+                        x: segment.segment.position.minX * geometry.size.width,
+                        y: segment.segment.position.minY * geometry.size.height,
+                        width: segment.segment.position.width * geometry.size.width,
+                        height: segment.segment.position.height * geometry.size.height
+                    )
+
+                    Text(segment.text)
+                        .font(self.style.font)
+                        .foregroundColor(self.style.textColor)
+                        .padding(self.style.padding)
+                        .background(self.style.backgroundColor)
+                        .cornerRadius(self.style.cornerRadius)
+                        .frame(width: rect.width, height: rect.height)
+                        .position(x: rect.midX, y: rect.midY)
+                        .minimumScaleFactor(0.1) // Allow text to scale down to fit
+                        .lineLimit(1) // Force single line
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+    }
+}
