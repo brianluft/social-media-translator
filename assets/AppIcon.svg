@@ -34,7 +34,7 @@
      inkscape:window-x="-6"
      inkscape:window-y="-6"
      inkscape:window-maximized="1"
-     inkscape:current-layer="layer3" />
+     inkscape:current-layer="layer1" />
   <defs
      id="defs1">
     <linearGradient
@@ -231,7 +231,7 @@
      id="layer3"
      inkscape:label="background">
     <rect
-       style="fill:#cd071e;fill-opacity:1;stroke-width:1.73692;fill-rule:nonzero"
+       style="fill:#ff2c55;fill-opacity:1;stroke-width:1.73692;fill-rule:nonzero"
        id="rect1"
        width="1024"
        height="1024"
@@ -271,7 +271,7 @@
        rx="35"
        ry="35" />
     <path
-       style="font-size:192px;font-family:Candara;-inkscape-font-specification:Candara;fill:#0a3161;fill-opacity:1;stroke-width:9.59953"
+       style="font-size:192px;font-family:Candara;-inkscape-font-specification:Candara;fill:#007aff;fill-opacity:1;stroke-width:9.59953"
        d="M 596.2362,336.90059 440.72324,426.7165 c -4.31982,2.5199 -8.69961,2.5199 -13.13942,0 -4.3198,-2.51988 -6.47971,-6.23971 -6.47971,-11.15948 V 235.74516 c 0,-5.03979 2.15991,-8.75961 6.47971,-11.1595 4.43981,-2.51989 8.8196,-2.57986 13.13942,-0.1799 l 155.51296,89.99593 c 4.43979,2.51988 6.65969,6.29971 6.65969,11.33949 0,4.91977 -2.2199,8.6396 -6.65969,11.15949 z"
        id="text3"
        aria-label="▶️"
