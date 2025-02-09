@@ -69,6 +69,14 @@ class VideoSelectionViewModel: ObservableObject {
     private func loadSupportedLanguages() async {
         let availability = LanguageAvailability()
 
+        #if targetEnvironment(simulator)
+        // Mock a single test language for simulator
+        let testLanguage = Locale.Language(identifier: "zh-Hans")
+        supportedSourceLanguages = [testLanguage]
+        selectedSourceLanguage = testLanguage
+        isLoading = false
+        return
+        #else
         // Get all supported languages
         let languages = await availability.supportedLanguages
 
@@ -103,6 +111,7 @@ class VideoSelectionViewModel: ObservableObject {
         }
 
         isLoading = false
+        #endif
     }
 
     var canSelectVideo: Bool {

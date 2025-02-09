@@ -58,6 +58,12 @@ public final class TranslationService {
             // Create request
             let request = TranslationSession.Request(sourceText: text, clientIdentifier: text)
 
+            #if targetEnvironment(simulator)
+            // Mock translation in simulator by appending (TR)
+            let translatedText = text + " (TR)"
+            translationCache[text] = translatedText
+            return translatedText
+            #else
             // Translate
             let responses = try await session.translate(requests: [request])
 
@@ -79,6 +85,7 @@ public final class TranslationService {
             // Cache the result
             translationCache[text] = translatedText
             return translatedText
+            #endif
         }
 
         func translate(_ frameSegments: [FrameSegments]) async throws -> [String: String] {
@@ -104,6 +111,12 @@ public final class TranslationService {
                 TranslationSession.Request(sourceText: text, clientIdentifier: text)
             }
 
+            #if targetEnvironment(simulator)
+            // Mock translations in simulator by appending (TR)
+            return uniqueTexts.reduce(into: [:]) { result, text in
+                result[text] = text + " (TR)"
+            }
+            #else
             // Check for cancellation before translation
             if isCancelled {
                 throw CancellationError()
@@ -126,6 +139,7 @@ public final class TranslationService {
             }
 
             return translations
+            #endif
         }
     }
 
