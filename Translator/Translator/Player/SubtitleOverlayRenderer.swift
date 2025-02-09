@@ -67,17 +67,32 @@ public class SubtitleOverlayRenderer {
         let systemFont = NSFont.systemFont(ofSize: 16, weight: .medium)
         #endif
 
-        let size = (text as NSString).boundingRect(
+        // First measure unconstrained to get height of single line
+        let singleLineSize = (text as NSString).boundingRect(
             with: CGSize(width: CGFloat.infinity, height: CGFloat.infinity),
             options: [.usesLineFragmentOrigin],
             attributes: [.font: systemFont],
             context: nil
         ).size
 
+        // If text is very wide, constrain it to force wrapping
+        let maxWidth: CGFloat = 300 // Maximum width before forcing wrap
+        let finalSize: CGSize
+        if singleLineSize.width > maxWidth {
+            finalSize = (text as NSString).boundingRect(
+                with: CGSize(width: maxWidth, height: CGFloat.infinity),
+                options: [.usesLineFragmentOrigin],
+                attributes: [.font: systemFont],
+                context: nil
+            ).size
+        } else {
+            finalSize = singleLineSize
+        }
+
         // Add padding
         let paddedSize = CGSize(
-            width: size.width + style.padding.leading + style.padding.trailing,
-            height: size.height + style.padding.top + style.padding.bottom
+            width: finalSize.width + style.padding.leading + style.padding.trailing,
+            height: finalSize.height + style.padding.top + style.padding.bottom
         )
 
         textSizeCache[text] = paddedSize
@@ -179,6 +194,8 @@ public class SubtitleOverlayRenderer {
                         .padding(style.padding)
                         .background(style.backgroundColor)
                         .cornerRadius(style.cornerRadius)
+                        .fixedSize(horizontal: false, vertical: true) // Allow vertical growth but constrain width
+                        .frame(maxWidth: 300) // Match maxWidth from measureText
                         .position(adjustedPosition)
                 }
             }
