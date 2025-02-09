@@ -2,7 +2,6 @@ import os
 import PhotosUI
 import SwiftUI
 import UniformTypeIdentifiers
-import VideoSubtitlesLib
 
 struct VideoSelectionView: View {
     @StateObject private var viewModel = VideoSelectionViewModel()

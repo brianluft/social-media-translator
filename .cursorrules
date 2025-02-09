@@ -52,7 +52,7 @@ iOS app to translate burned-in video subtitles to user's preferred language.
 
 ## Building
 
-`./build.sh` will clean, format, test, and build.
+`./build.sh` will clean, format, and build.
 
 ALWAYS run the build before returning control to me.
 

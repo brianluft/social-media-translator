@@ -1,7 +1,6 @@
 import PhotosUI
 import SwiftUI
 import Translation
-import VideoSubtitlesLib
 
 struct PhotoView: View {
     private let photoItem: PhotosPickerItem

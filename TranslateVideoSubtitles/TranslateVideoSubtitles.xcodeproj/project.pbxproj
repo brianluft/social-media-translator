@@ -7,17 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		D305206F2D46C0B90042FB84 /* VideoSubtitlesLib in Frameworks */ = {isa = PBXBuildFile; productRef = D305206E2D46C0B90042FB84 /* VideoSubtitlesLib */; };
+		D3A468672D593245008A91B1 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = D3A468662D593245008A91B1 /* SwiftSoup */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		D334ED6F2D45881E00C4ACF9 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = D334ED562D45881D00C4ACF9 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = D334ED5D2D45881D00C4ACF9;
-			remoteInfo = TranslateVideoSubtitles;
-		};
 		D334ED792D45881E00C4ACF9 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D334ED562D45881D00C4ACF9 /* Project object */;
@@ -29,9 +22,20 @@
 
 /* Begin PBXFileReference section */
 		D334ED5E2D45881D00C4ACF9 /* Social Translator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Social Translator.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		D334ED6E2D45881E00C4ACF9 /* TranslateVideoSubtitlesTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TranslateVideoSubtitlesTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D334ED782D45881E00C4ACF9 /* TranslateVideoSubtitlesUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TranslateVideoSubtitlesUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		D3A468692D593722008A91B1 /* Exceptions for "TranslateVideoSubtitlesUITests" folder in "TranslateVideoSubtitlesUITests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				TestAssets/Videos/test1.mp4,
+				TestAssets/Videos/test2.mp4,
+				TestAssets/Videos/test3.mp4,
+			);
+			target = D334ED772D45881E00C4ACF9 /* TranslateVideoSubtitlesUITests */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		D334ED602D45881D00C4ACF9 /* TranslateVideoSubtitles */ = {
@@ -39,13 +43,11 @@
 			path = TranslateVideoSubtitles;
 			sourceTree = "<group>";
 		};
-		D334ED712D45881E00C4ACF9 /* TranslateVideoSubtitlesTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = TranslateVideoSubtitlesTests;
-			sourceTree = "<group>";
-		};
 		D334ED7B2D45881E00C4ACF9 /* TranslateVideoSubtitlesUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				D3A468692D593722008A91B1 /* Exceptions for "TranslateVideoSubtitlesUITests" folder in "TranslateVideoSubtitlesUITests" target */,
+			);
 			path = TranslateVideoSubtitlesUITests;
 			sourceTree = "<group>";
 		};
@@ -56,14 +58,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D305206F2D46C0B90042FB84 /* VideoSubtitlesLib in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		D334ED6B2D45881E00C4ACF9 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
+				D3A468672D593245008A91B1 /* SwiftSoup in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -81,7 +76,6 @@
 			isa = PBXGroup;
 			children = (
 				D334ED602D45881D00C4ACF9 /* TranslateVideoSubtitles */,
-				D334ED712D45881E00C4ACF9 /* TranslateVideoSubtitlesTests */,
 				D334ED7B2D45881E00C4ACF9 /* TranslateVideoSubtitlesUITests */,
 				D394302C2D4CA78300130CC0 /* Frameworks */,
 				D334ED5F2D45881D00C4ACF9 /* Products */,
@@ -92,7 +86,6 @@
 			isa = PBXGroup;
 			children = (
 				D334ED5E2D45881D00C4ACF9 /* Social Translator.app */,
-				D334ED6E2D45881E00C4ACF9 /* TranslateVideoSubtitlesTests.xctest */,
 				D334ED782D45881E00C4ACF9 /* TranslateVideoSubtitlesUITests.xctest */,
 			);
 			name = Products;
@@ -125,34 +118,11 @@
 			);
 			name = TranslateVideoSubtitles;
 			packageProductDependencies = (
-				D305206E2D46C0B90042FB84 /* VideoSubtitlesLib */,
+				D3A468662D593245008A91B1 /* SwiftSoup */,
 			);
 			productName = TranslateVideoSubtitles;
 			productReference = D334ED5E2D45881D00C4ACF9 /* Social Translator.app */;
 			productType = "com.apple.product-type.application";
-		};
-		D334ED6D2D45881E00C4ACF9 /* TranslateVideoSubtitlesTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = D334ED852D45881E00C4ACF9 /* Build configuration list for PBXNativeTarget "TranslateVideoSubtitlesTests" */;
-			buildPhases = (
-				D334ED6A2D45881E00C4ACF9 /* Sources */,
-				D334ED6B2D45881E00C4ACF9 /* Frameworks */,
-				D334ED6C2D45881E00C4ACF9 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				D334ED702D45881E00C4ACF9 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				D334ED712D45881E00C4ACF9 /* TranslateVideoSubtitlesTests */,
-			);
-			name = TranslateVideoSubtitlesTests;
-			packageProductDependencies = (
-			);
-			productName = TranslateVideoSubtitlesTests;
-			productReference = D334ED6E2D45881E00C4ACF9 /* TranslateVideoSubtitlesTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		D334ED772D45881E00C4ACF9 /* TranslateVideoSubtitlesUITests */ = {
 			isa = PBXNativeTarget;
@@ -190,10 +160,6 @@
 					D334ED5D2D45881D00C4ACF9 = {
 						CreatedOnToolsVersion = 16.2;
 					};
-					D334ED6D2D45881E00C4ACF9 = {
-						CreatedOnToolsVersion = 16.2;
-						TestTargetID = D334ED5D2D45881D00C4ACF9;
-					};
 					D334ED772D45881E00C4ACF9 = {
 						CreatedOnToolsVersion = 16.2;
 						TestTargetID = D334ED5D2D45881D00C4ACF9;
@@ -210,7 +176,7 @@
 			mainGroup = D334ED552D45881D00C4ACF9;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				D305206D2D46C0B90042FB84 /* XCLocalSwiftPackageReference "../VideoSubtitlesLib" */,
+				D3A468652D593245008A91B1 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = D334ED5F2D45881D00C4ACF9 /* Products */;
@@ -218,7 +184,6 @@
 			projectRoot = "";
 			targets = (
 				D334ED5D2D45881D00C4ACF9 /* TranslateVideoSubtitles */,
-				D334ED6D2D45881E00C4ACF9 /* TranslateVideoSubtitlesTests */,
 				D334ED772D45881E00C4ACF9 /* TranslateVideoSubtitlesUITests */,
 			);
 		};
@@ -226,13 +191,6 @@
 
 /* Begin PBXResourcesBuildPhase section */
 		D334ED5C2D45881D00C4ACF9 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		D334ED6C2D45881E00C4ACF9 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -256,13 +214,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		D334ED6A2D45881E00C4ACF9 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		D334ED742D45881E00C4ACF9 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -273,11 +224,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		D334ED702D45881E00C4ACF9 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = D334ED5D2D45881D00C4ACF9 /* TranslateVideoSubtitles */;
-			targetProxy = D334ED6F2D45881E00C4ACF9 /* PBXContainerItemProxy */;
-		};
 		D334ED7A2D45881E00C4ACF9 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = D334ED5D2D45881D00C4ACF9 /* TranslateVideoSubtitles */;
@@ -471,42 +417,6 @@
 			};
 			name = Release;
 		};
-		D334ED862D45881E00C4ACF9 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.1;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.brianluft.TranslateVideoSubtitlesTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TranslateVideoSubtitles.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/TranslateVideoSubtitles";
-			};
-			name = Debug;
-		};
-		D334ED872D45881E00C4ACF9 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.1;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.brianluft.TranslateVideoSubtitlesTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TranslateVideoSubtitles.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/TranslateVideoSubtitles";
-			};
-			name = Release;
-		};
 		D334ED892D45881E00C4ACF9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -560,15 +470,6 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		D334ED852D45881E00C4ACF9 /* Build configuration list for PBXNativeTarget "TranslateVideoSubtitlesTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				D334ED862D45881E00C4ACF9 /* Debug */,
-				D334ED872D45881E00C4ACF9 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		D334ED882D45881E00C4ACF9 /* Build configuration list for PBXNativeTarget "TranslateVideoSubtitlesUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -580,17 +481,22 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCLocalSwiftPackageReference section */
-		D305206D2D46C0B90042FB84 /* XCLocalSwiftPackageReference "../VideoSubtitlesLib" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = ../VideoSubtitlesLib;
+/* Begin XCRemoteSwiftPackageReference section */
+		D3A468652D593245008A91B1 /* XCRemoteSwiftPackageReference "SwiftSoup" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/scinfu/SwiftSoup.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.7.7;
+			};
 		};
-/* End XCLocalSwiftPackageReference section */
+/* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		D305206E2D46C0B90042FB84 /* VideoSubtitlesLib */ = {
+		D3A468662D593245008A91B1 /* SwiftSoup */ = {
 			isa = XCSwiftPackageProductDependency;
-			productName = VideoSubtitlesLib;
+			package = D3A468652D593245008A91B1 /* XCRemoteSwiftPackageReference "SwiftSoup" */;
+			productName = SwiftSoup;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

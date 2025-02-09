@@ -3,7 +3,6 @@ import os
 import PhotosUI
 import SwiftUI
 import Translation
-import VideoSubtitlesLib
 
 struct PlayerView: View {
     private let videoSource: VideoSource

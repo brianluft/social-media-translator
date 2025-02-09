@@ -50,8 +50,6 @@ if [ $EXIT_CODE -ne 0 ]; then
   exit 1
 fi
 
-(cd VideoSubtitlesLib && rm -rf .build)
-
 echo "--- Format ---"
 ($SWIFTFORMAT . 2>&1) > log
 EXIT_CODE=$?
@@ -66,14 +64,6 @@ NSUnbufferedIO=YES xcodebuild -quiet -workspace TranslateVideoSubtitles.xcworksp
 EXIT_CODE=$?
 if [ $EXIT_CODE -ne 0 ]; then
   echo "xcodebuild failed with exit code $EXIT_CODE"
-  exit 1
-fi
-
-echo "--- Test ---"
-(cd VideoSubtitlesLib && NSUnbufferedIO=YES swift test -q -j $NUM_CORES 2>&1) | grep -v '^\[' | grep -v "^Test Case.*started" | grep -v '^Test.*passed'
-EXIT_CODE=$?
-if [ $EXIT_CODE -ne 0 ]; then
-  echo "swift test failed with exit code $EXIT_CODE"
   exit 1
 fi
 

@@ -2,7 +2,6 @@ import AVFoundation
 import CoreImage
 import Foundation
 import Translation
-import VideoSubtitlesLib
 
 /// Handles processing of photos to detect and translate text
 @MainActor

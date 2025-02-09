@@ -4,7 +4,6 @@ import os
 import PhotosUI
 import SwiftUI
 import Translation
-import VideoSubtitlesLib
 
 /// This class is responsible for handling the video processing logic.
 /// It is responsible for detecting subtitles, translating them, and saving the processed video.

@@ -2,7 +2,6 @@ import Foundation
 import PhotosUI
 import SwiftUI
 import Translation
-import VideoSubtitlesLib
 
 @MainActor
 class PhotoViewModel: ObservableObject {

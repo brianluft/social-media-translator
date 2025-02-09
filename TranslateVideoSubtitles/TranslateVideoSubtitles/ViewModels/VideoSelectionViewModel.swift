@@ -4,7 +4,6 @@ import os
 import PhotosUI
 import SwiftUI
 import Translation
-import VideoSubtitlesLib
 
 @MainActor
 class VideoSelectionViewModel: ObservableObject {

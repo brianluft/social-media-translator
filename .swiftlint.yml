@@ -1,6 +1,5 @@
 included:
   - TranslateVideoSubtitles
-  - VideoSubtitlesLib
 
 excluded:
   - "**/BuildTools"
