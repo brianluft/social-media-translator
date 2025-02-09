@@ -9,7 +9,7 @@ if [ -z "$NUM_CORES" ]; then
 fi
 
 echo "--- Test ---"
-NSUnbufferedIO=YES xcodebuild test -quiet -workspace Translator.xcworkspace -scheme Translator -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 16 Pro' -jobs $NUM_CORES 2>&1
+NSUnbufferedIO=YES xcodebuild test -quiet -project Translator/Translator.xcodeproj -scheme Translator -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 16 Pro' -jobs $NUM_CORES 2>&1
 EXIT_CODE=$?
 if [ $EXIT_CODE -ne 0 ]; then
   echo "xcodebuild test failed with exit code $EXIT_CODE"

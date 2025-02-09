@@ -52,12 +52,11 @@ iOS app to translate burned-in video subtitles to user's preferred language.
 
 ## Building
 
-`./build.sh` will clean, format, and build.
+`./build.sh` will clean, format, and build. ALWAYS run the build before returning control to me.
+`./test.sh` will run the UI tests. This is slow so only run it when working on the UI tests themselves.
 
-ALWAYS run the build before returning control to me.
-
-The build prints "===SUCCESS===" at the end if it succeeds.
-If you don't see "===SUCCESS===", then the build script was NOT successful!
+The build and test both print "===SUCCESS===" at the end if they succeed.
+If you don't see "===SUCCESS===", then the script was NOT successful!
 
 ## Debugging
 
