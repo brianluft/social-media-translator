@@ -4,7 +4,13 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct VideoSelectionView: View {
+    enum TranslationMode {
+        case text
+        case audio
+    }
+
     @StateObject private var viewModel = VideoSelectionViewModel()
+    @State private var translationMode: TranslationMode = .text
     @State private var isShowingMediaPicker = false
     @State private var navigateToMediaView = false
     @State private var selectedItem: PhotosPickerItem?
@@ -99,12 +105,6 @@ struct VideoSelectionView: View {
                     }
 
                     VStack(spacing: isPortrait ? 24 : 12) {
-                        Text("Social Media Translator")
-                            .font(.title)
-                            .fontWeight(.bold)
-                            .foregroundColor(.primary)
-                            .multilineTextAlignment(.center)
-
                         languageSelectionContent
                         selectVideoButton
                     }
@@ -112,7 +112,7 @@ struct VideoSelectionView: View {
                     .padding(.horizontal, 16)
                     .background(Color(.systemGray6))
                     .cornerRadius(24)
-                    .frame(maxWidth: isPortrait ? 375 : 550)
+                    .frame(maxWidth: 375)
 
                     if isPortrait {
                         Spacer()
@@ -131,7 +131,7 @@ struct VideoSelectionView: View {
                 .padding()
         } else if !viewModel.supportedSourceLanguages.isEmpty {
             VStack(spacing: 8) {
-                Text("Source Language")
+                Text("Original Language")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     .frame(maxWidth: .infinity, alignment: .center)
@@ -141,10 +141,23 @@ struct VideoSelectionView: View {
                             .tag(Optional(language))
                     }
                 }
+                .accentColor(.primary)
+                .buttonStyle(.bordered)
                 .pickerStyle(.menu)
                 .frame(maxWidth: .infinity)
+
+                Text("What to Translate")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.top, 16)
+                
+                Picker("Translation Mode", selection: $translationMode) {
+                    Text("Text").tag(TranslationMode.text)
+                    Text("Audio").tag(TranslationMode.audio)
+                }
+                .pickerStyle(.segmented)
             }
-            .padding()
         } else if let error = viewModel.error {
             Text(error)
                 .foregroundColor(.red)
@@ -170,13 +183,13 @@ struct VideoSelectionView: View {
                         Image(systemName: "photo.on.rectangle")
                         Text("Choose from Photo Library")
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(8)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             )
             .buttonStyle(.borderedProminent)
             .padding(.horizontal)
             .disabled(!viewModel.canSelectVideo)
+            .frame(height: 48)
 
             Button(
                 action: {
@@ -191,16 +204,18 @@ struct VideoSelectionView: View {
                     }
                 },
                 label: {
-                    HStack {
+                    HStack(spacing: 8) {
                         Image(systemName: "doc.on.clipboard")
                         Text("Paste Video Link")
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(8)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             )
+            .foregroundStyle(.primary)
+            .buttonStyle(.bordered)
             .padding(.horizontal)
             .disabled(!viewModel.canSelectVideo)
+            .frame(height: 48)
             .alert("Paste Error", isPresented: $showPasteError) {
                 Button("OK", role: .cancel) {}
             } message: {
