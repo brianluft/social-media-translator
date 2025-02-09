@@ -23,6 +23,7 @@
 /* Begin PBXFileReference section */
 		D334ED5E2D45881D00C4ACF9 /* Social Translator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Social Translator.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		D334ED782D45881E00C4ACF9 /* TranslatorUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TranslatorUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D337A7112D5940E7006E6E98 /* Translator.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = Translator.xctestplan; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -75,6 +76,7 @@
 		D334ED552D45881D00C4ACF9 = {
 			isa = PBXGroup;
 			children = (
+				D337A7112D5940E7006E6E98 /* Translator.xctestplan */,
 				D334ED602D45881D00C4ACF9 /* Translator */,
 				D334ED7B2D45881E00C4ACF9 /* TranslatorUITests */,
 				D394302C2D4CA78300130CC0 /* Frameworks */,

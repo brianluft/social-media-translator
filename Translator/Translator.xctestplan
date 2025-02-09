@@ -1,0 +1,29 @@
+{
+  "configurations" : [
+    {
+      "id" : "A7FAC688-37EE-4723-A114-C38B47F24E1D",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:Translator.xcodeproj",
+      "identifier" : "D334ED5D2D45881D00C4ACF9",
+      "name" : "Translator"
+    }
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:Translator.xcodeproj",
+        "identifier" : "D334ED772D45881E00C4ACF9",
+        "name" : "TranslatorUITests"
+      }
+    }
+  ],
+  "version" : 1
+}
