@@ -39,5 +39,5 @@ assets/mac_icons/
 /log
 
 # Files created by assets/update.sh
-TranslateVideoSubtitles/TranslateVideoSubtitles/Assets.xcassets/AppIcon.appiconset/AppIcon_1024.png
-TranslateVideoSubtitles/TranslateVideoSubtitles/Assets.xcassets/Background.imageset/Background.jpg
+Translator/Translator/Assets.xcassets/AppIcon.appiconset/AppIcon_1024.png
+Translator/Translator/Assets.xcassets/Background.imageset/Background.jpg

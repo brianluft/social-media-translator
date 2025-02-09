@@ -1,6 +1,6 @@
 import XCTest
 
-final class TranslateVideoSubtitlesUITestsLaunchTests: XCTestCase {
+final class TranslatorUITestsLaunchTests: XCTestCase {
     override static var runsForEachTargetApplicationUIConfiguration: Bool {
         true
     }

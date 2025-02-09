@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct TranslateVideoSubtitlesApp: App {
+struct TranslatorApp: App {
     init() {
         // Clean up any orphaned temporary files on launch
         TempFileManager.cleanupTemporaryFiles()

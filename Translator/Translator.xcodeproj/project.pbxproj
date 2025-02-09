@@ -16,39 +16,39 @@
 			containerPortal = D334ED562D45881D00C4ACF9 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = D334ED5D2D45881D00C4ACF9;
-			remoteInfo = TranslateVideoSubtitles;
+			remoteInfo = Translator;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		D334ED5E2D45881D00C4ACF9 /* Social Translator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Social Translator.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		D334ED782D45881E00C4ACF9 /* TranslateVideoSubtitlesUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TranslateVideoSubtitlesUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D334ED782D45881E00C4ACF9 /* TranslatorUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TranslatorUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		D3A468692D593722008A91B1 /* Exceptions for "TranslateVideoSubtitlesUITests" folder in "TranslateVideoSubtitlesUITests" target */ = {
+		D3A468692D593722008A91B1 /* Exceptions for "TranslatorUITests" folder in "TranslatorUITests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				TestAssets/Videos/test1.mp4,
 				TestAssets/Videos/test2.mp4,
 				TestAssets/Videos/test3.mp4,
 			);
-			target = D334ED772D45881E00C4ACF9 /* TranslateVideoSubtitlesUITests */;
+			target = D334ED772D45881E00C4ACF9 /* TranslatorUITests */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		D334ED602D45881D00C4ACF9 /* TranslateVideoSubtitles */ = {
+		D334ED602D45881D00C4ACF9 /* Translator */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = TranslateVideoSubtitles;
+			path = Translator;
 			sourceTree = "<group>";
 		};
-		D334ED7B2D45881E00C4ACF9 /* TranslateVideoSubtitlesUITests */ = {
+		D334ED7B2D45881E00C4ACF9 /* TranslatorUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				D3A468692D593722008A91B1 /* Exceptions for "TranslateVideoSubtitlesUITests" folder in "TranslateVideoSubtitlesUITests" target */,
+				D3A468692D593722008A91B1 /* Exceptions for "TranslatorUITests" folder in "TranslatorUITests" target */,
 			);
-			path = TranslateVideoSubtitlesUITests;
+			path = TranslatorUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -75,8 +75,8 @@
 		D334ED552D45881D00C4ACF9 = {
 			isa = PBXGroup;
 			children = (
-				D334ED602D45881D00C4ACF9 /* TranslateVideoSubtitles */,
-				D334ED7B2D45881E00C4ACF9 /* TranslateVideoSubtitlesUITests */,
+				D334ED602D45881D00C4ACF9 /* Translator */,
+				D334ED7B2D45881E00C4ACF9 /* TranslatorUITests */,
 				D394302C2D4CA78300130CC0 /* Frameworks */,
 				D334ED5F2D45881D00C4ACF9 /* Products */,
 			);
@@ -86,7 +86,7 @@
 			isa = PBXGroup;
 			children = (
 				D334ED5E2D45881D00C4ACF9 /* Social Translator.app */,
-				D334ED782D45881E00C4ACF9 /* TranslateVideoSubtitlesUITests.xctest */,
+				D334ED782D45881E00C4ACF9 /* TranslatorUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -101,9 +101,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		D334ED5D2D45881D00C4ACF9 /* TranslateVideoSubtitles */ = {
+		D334ED5D2D45881D00C4ACF9 /* Translator */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = D334ED822D45881E00C4ACF9 /* Build configuration list for PBXNativeTarget "TranslateVideoSubtitles" */;
+			buildConfigurationList = D334ED822D45881E00C4ACF9 /* Build configuration list for PBXNativeTarget "Translator" */;
 			buildPhases = (
 				D334ED5A2D45881D00C4ACF9 /* Sources */,
 				D334ED5B2D45881D00C4ACF9 /* Frameworks */,
@@ -114,19 +114,19 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				D334ED602D45881D00C4ACF9 /* TranslateVideoSubtitles */,
+				D334ED602D45881D00C4ACF9 /* Translator */,
 			);
-			name = TranslateVideoSubtitles;
+			name = Translator;
 			packageProductDependencies = (
 				D3A468662D593245008A91B1 /* SwiftSoup */,
 			);
-			productName = TranslateVideoSubtitles;
+			productName = Translator;
 			productReference = D334ED5E2D45881D00C4ACF9 /* Social Translator.app */;
 			productType = "com.apple.product-type.application";
 		};
-		D334ED772D45881E00C4ACF9 /* TranslateVideoSubtitlesUITests */ = {
+		D334ED772D45881E00C4ACF9 /* TranslatorUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = D334ED882D45881E00C4ACF9 /* Build configuration list for PBXNativeTarget "TranslateVideoSubtitlesUITests" */;
+			buildConfigurationList = D334ED882D45881E00C4ACF9 /* Build configuration list for PBXNativeTarget "TranslatorUITests" */;
 			buildPhases = (
 				D334ED742D45881E00C4ACF9 /* Sources */,
 				D334ED752D45881E00C4ACF9 /* Frameworks */,
@@ -138,13 +138,13 @@
 				D334ED7A2D45881E00C4ACF9 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				D334ED7B2D45881E00C4ACF9 /* TranslateVideoSubtitlesUITests */,
+				D334ED7B2D45881E00C4ACF9 /* TranslatorUITests */,
 			);
-			name = TranslateVideoSubtitlesUITests;
+			name = TranslatorUITests;
 			packageProductDependencies = (
 			);
-			productName = TranslateVideoSubtitlesUITests;
-			productReference = D334ED782D45881E00C4ACF9 /* TranslateVideoSubtitlesUITests.xctest */;
+			productName = TranslatorUITests;
+			productReference = D334ED782D45881E00C4ACF9 /* TranslatorUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -166,7 +166,7 @@
 					};
 				};
 			};
-			buildConfigurationList = D334ED592D45881D00C4ACF9 /* Build configuration list for PBXProject "TranslateVideoSubtitles" */;
+			buildConfigurationList = D334ED592D45881D00C4ACF9 /* Build configuration list for PBXProject "Translator" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -183,8 +183,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				D334ED5D2D45881D00C4ACF9 /* TranslateVideoSubtitles */,
-				D334ED772D45881E00C4ACF9 /* TranslateVideoSubtitlesUITests */,
+				D334ED5D2D45881D00C4ACF9 /* Translator */,
+				D334ED772D45881E00C4ACF9 /* TranslatorUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -226,7 +226,7 @@
 /* Begin PBXTargetDependency section */
 		D334ED7A2D45881E00C4ACF9 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = D334ED5D2D45881D00C4ACF9 /* TranslateVideoSubtitles */;
+			target = D334ED5D2D45881D00C4ACF9 /* Translator */;
 			targetProxy = D334ED792D45881E00C4ACF9 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -360,7 +360,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"TranslateVideoSubtitles/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"Translator/Preview Content\"";
 				DEVELOPMENT_TEAM = K44279KBD7;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -393,7 +393,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"TranslateVideoSubtitles/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"Translator/Preview Content\"";
 				DEVELOPMENT_TEAM = K44279KBD7;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -424,12 +424,12 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.brianluft.TranslateVideoSubtitlesUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.brianluft.TranslatorUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = TranslateVideoSubtitles;
+				TEST_TARGET_NAME = Translator;
 			};
 			name = Debug;
 		};
@@ -440,19 +440,19 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.brianluft.TranslateVideoSubtitlesUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.brianluft.TranslatorUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = TranslateVideoSubtitles;
+				TEST_TARGET_NAME = Translator;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		D334ED592D45881D00C4ACF9 /* Build configuration list for PBXProject "TranslateVideoSubtitles" */ = {
+		D334ED592D45881D00C4ACF9 /* Build configuration list for PBXProject "Translator" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				D334ED802D45881E00C4ACF9 /* Debug */,
@@ -461,7 +461,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		D334ED822D45881E00C4ACF9 /* Build configuration list for PBXNativeTarget "TranslateVideoSubtitles" */ = {
+		D334ED822D45881E00C4ACF9 /* Build configuration list for PBXNativeTarget "Translator" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				D334ED832D45881E00C4ACF9 /* Debug */,
@@ -470,7 +470,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		D334ED882D45881E00C4ACF9 /* Build configuration list for PBXNativeTarget "TranslateVideoSubtitlesUITests" */ = {
+		D334ED882D45881E00C4ACF9 /* Build configuration list for PBXNativeTarget "TranslatorUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				D334ED892D45881E00C4ACF9 /* Debug */,

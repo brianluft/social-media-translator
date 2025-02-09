@@ -42,7 +42,7 @@ if [ -z "$SWIFTFORMAT" ]; then
 fi
 
 echo "--- Clean ---"
-NSUnbufferedIO=YES xcodebuild clean -quiet -workspace TranslateVideoSubtitles.xcworkspace -scheme TranslateVideoSubtitles -configuration Debug -destination 'generic/platform=iOS Simulator' 2>&1 > log
+NSUnbufferedIO=YES xcodebuild clean -quiet -workspace Translator.xcworkspace -scheme Translator -configuration Debug -destination 'generic/platform=iOS Simulator' 2>&1 > log
 EXIT_CODE=$?
 if [ $EXIT_CODE -ne 0 ]; then
   cat log
@@ -60,7 +60,7 @@ if [ $EXIT_CODE -ne 0 ]; then
 fi
 
 echo "--- Build ---"
-NSUnbufferedIO=YES xcodebuild -quiet -workspace TranslateVideoSubtitles.xcworkspace -scheme TranslateVideoSubtitles -configuration Debug -destination 'generic/platform=iOS Simulator' -jobs $NUM_CORES 2>&1
+NSUnbufferedIO=YES xcodebuild -quiet -workspace Translator.xcworkspace -scheme Translator -configuration Debug -destination 'generic/platform=iOS Simulator' -jobs $NUM_CORES 2>&1
 EXIT_CODE=$?
 if [ $EXIT_CODE -ne 0 ]; then
   echo "xcodebuild failed with exit code $EXIT_CODE"
