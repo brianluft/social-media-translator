@@ -45,7 +45,9 @@ iOS app to translate burned-in video subtitles to user's preferred language.
 
 - Don't use `os.Logger`. Use `print()` instead.
 
-- NEVER use `AVAsset(url:)` - it's deprecated in iOS 18.0. Always use `AVURLAsset(url:)` instead.
+- Never use `AVAsset(url:)` - it's deprecated in iOS 18.0. Always use `AVURLAsset(url:)` instead.
+
+- Never use `@preconcurrency`. Write all code to be complaint with Swift 6 changes.
 
 - When fixing compiler and linter warnings, do it properly. Don't take shortcuts or try to ignore the warning.
   If you have to redesign your code to fix the warning, so be it. Warnings are there for a reason.

@@ -27,7 +27,7 @@ final class VideoProcessor {
     }
 
     private var processingStartTime: TimeInterval = 0
-    private var detector: SubtitleDetector?
+    private var detector: SubtitleTextDetector?
     private var translator: TranslationService?
     private var cancellationTask: Task<Void, Never>?
 
@@ -134,7 +134,7 @@ final class VideoProcessor {
                     target: destinationLanguage
                 )
 
-                detector = SubtitleDetector(
+                detector = SubtitleTextDetector(
                     videoAsset: asset,
                     delegate: detectionDelegate,
                     recognitionLanguages: [sourceLanguage.languageCode?.identifier ?? "en-US"],
@@ -269,7 +269,7 @@ final class VideoProcessor {
                     target: destinationLanguage
                 )
 
-                detector = SubtitleDetector(
+                detector = SubtitleTextDetector(
                     videoAsset: asset,
                     delegate: detectionDelegate,
                     recognitionLanguages: [sourceLanguage.languageCode?.identifier ?? "en-US"],

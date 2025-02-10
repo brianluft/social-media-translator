@@ -28,7 +28,8 @@ final class PhotoProcessor {
         }
     }
 
-    private var detector: SubtitleDetector?
+    private var processingStartTime: TimeInterval = 0
+    private var detector: SubtitleTextDetector?
     private var translator: TranslationService?
     private var cancellationTask: Task<Void, Never>?
 
@@ -113,7 +114,7 @@ final class PhotoProcessor {
                 // Create a dummy AVAsset for the photo
                 let dummyAsset = AVURLAsset(url: URL(fileURLWithPath: ""))
 
-                detector = SubtitleDetector(
+                detector = SubtitleTextDetector(
                     videoAsset: dummyAsset,
                     delegate: detectionDelegate,
                     recognitionLanguages: [sourceLanguage.languageCode?.identifier ?? "en-US"],

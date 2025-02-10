@@ -151,7 +151,7 @@ struct VideoSelectionView: View {
                     .foregroundColor(.secondary)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.top, 16)
-                
+
                 Picker("Translation Mode", selection: $translationMode) {
                     Text("Text").tag(TranslationMode.text)
                     Text("Audio").tag(TranslationMode.audio)

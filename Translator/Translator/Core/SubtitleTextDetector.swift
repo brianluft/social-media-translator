@@ -4,7 +4,7 @@ import Foundation
 import Vision
 
 /// Theory of Operation:
-/// The SubtitleDetector processes videos to extract text through the following steps:
+/// The SubtitleTextDetector processes videos to extract text through the following steps:
 ///
 /// 1. Frame Extraction:
 ///    - Samples video at a low rate using AVFoundation
@@ -32,41 +32,25 @@ import Vision
 /// It handles video orientation correctly and provides normalized coordinates for
 /// text positioning.
 
-/// Protocol for reporting text detection progress
-public protocol TextDetectionDelegate: AnyObject {
-    func detectionDidProgress(_ progress: Float)
-    func detectionDidReceiveFrame(_ frame: FrameSegments)
-    func detectionDidComplete()
-    func detectionDidFail(with error: Error)
-}
-
 /// Handles detection of text from video frames using Vision OCR
-public class SubtitleDetector: @unchecked Sendable {
+public final class SubtitleTextDetector: TextDetector {
     // MARK: - Properties
 
-    private let videoAsset: AVAsset
-    private let imageGenerator: AVAssetImageGenerator
-    private weak var delegate: TextDetectionDelegate?
+    private let videoActor: VideoProcessingActor
+    private let delegateActor: TextDetectionDelegateActor
     private let recognitionLanguages: [String]
-    private var isCancelled = false
     private let translationService: TranslationService?
+
+    /// The delegate to receive detection progress and results
+    public var delegate: TextDetectionDelegate? {
+        get async { await delegateActor.delegate }
+    }
 
     /// Sampling rate in frames per second
     public let samplingRate: Float = 3 // Sample at video frame rate
 
     /// Minimum confidence score for text detection
     private let minimumConfidence: Float = 0.4
-
-    // Vision request for text detection
-    private lazy var textRecognitionRequest: VNRecognizeTextRequest = {
-        let request = VNRecognizeTextRequest { [weak self] _, _ in
-            // Text recognition error
-        }
-        request.recognitionLevel = .accurate
-        request.usesLanguageCorrection = true
-        request.recognitionLanguages = recognitionLanguages
-        return request
-    }()
 
     // MARK: - Initialization
 
@@ -82,23 +66,20 @@ public class SubtitleDetector: @unchecked Sendable {
         recognitionLanguages: [String] = ["en-US"],
         translationService: TranslationService? = nil
     ) {
-        self.videoAsset = videoAsset
-        self.delegate = delegate
         self.recognitionLanguages = recognitionLanguages
         self.translationService = translationService
-
-        // Configure image generator
-        imageGenerator = AVAssetImageGenerator(asset: videoAsset)
-        imageGenerator.appliesPreferredTrackTransform = true
-        imageGenerator.requestedTimeToleranceBefore = .zero
-        imageGenerator.requestedTimeToleranceAfter = .zero
+        self.delegateActor = TextDetectionDelegateActor(delegate: delegate)
+        self.videoActor = VideoProcessingActor(
+            videoAsset: videoAsset,
+            recognitionLanguages: recognitionLanguages
+        )
     }
 
     // MARK: - Public Methods
 
     /// Cancels any ongoing detection
     public func cancelDetection() {
-        isCancelled = true
+        Task { await delegateActor.setCancelled(true) }
     }
 
     /// Processes the video asset to detect text in frames
@@ -107,63 +88,45 @@ public class SubtitleDetector: @unchecked Sendable {
     public func detectText() async throws {
         do {
             // Reset cancellation state
-            isCancelled = false
+            await delegateActor.setCancelled(false)
 
             // Get video duration
-            let duration = try await videoAsset.load(.duration)
+            let duration = try await videoActor.getDuration()
             let durationSeconds = CMTimeGetSeconds(duration)
             let frameCount = Int(durationSeconds * Float64(samplingRate))
 
             // Process frames
             for frameIndex in 0 ..< frameCount {
                 // Check for cancellation
-                if isCancelled {
+                if await delegateActor.isCancelled() {
                     throw CancellationError()
                 }
 
                 let time = CMTime(seconds: Double(frameIndex) / Double(samplingRate), preferredTimescale: 600)
-
-                let image = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<
-                    CGImage,
-                    Error
-                >) in
-                    imageGenerator.generateCGImageAsynchronously(for: time) { cgImage, _, error in
-                        if let error {
-                            continuation.resume(throwing: error)
-                        } else if let cgImage {
-                            continuation.resume(returning: cgImage)
-                        } else {
-                            continuation.resume(throwing: NSError(
-                                domain: "SubtitleDetector",
-                                code: -1,
-                                userInfo: [NSLocalizedDescriptionKey: "Failed to generate image"]
-                            ))
-                        }
-                    }
-                }
+                let image = try await videoActor.generateImage(at: time)
 
                 // Check for cancellation again after image generation
-                if isCancelled {
+                if await delegateActor.isCancelled() {
                     throw CancellationError()
                 }
 
                 let frameSegments = try await detectText(in: image, at: time)
-                delegate?.detectionDidReceiveFrame(frameSegments)
+                await delegateActor.didReceiveFrame(frameSegments)
 
                 // Report progress
                 let progress = Float(frameIndex + 1) / Float(frameCount)
-                delegate?.detectionDidProgress(progress)
+                await delegateActor.didProgress(progress)
             }
 
             // Final cancellation check before completing
-            if isCancelled {
+            if await delegateActor.isCancelled() {
                 throw CancellationError()
             }
 
-            delegate?.detectionDidComplete()
+            await delegateActor.didComplete()
 
         } catch {
-            delegate?.detectionDidFail(with: error)
+            await delegateActor.didFail(error)
             throw error
         }
     }
@@ -174,12 +137,7 @@ public class SubtitleDetector: @unchecked Sendable {
     ///   - time: The timestamp of the frame
     /// - Returns: FrameSegments containing all detected text
     public func detectText(in image: CGImage, at time: CMTime) async throws -> FrameSegments {
-        let requestHandler = VNImageRequestHandler(cgImage: image)
-        try requestHandler.perform([textRecognitionRequest])
-
-        guard let observations = textRecognitionRequest.results else {
-            return FrameSegments(timestamp: CMTimeGetSeconds(time), segments: [])
-        }
+        let observations = try await videoActor.detectText(in: image)
 
         // Capture translationService before task group to avoid data race
         let translationService = self.translationService
@@ -228,5 +186,56 @@ public class SubtitleDetector: @unchecked Sendable {
             timestamp: CMTimeGetSeconds(time),
             segments: segments
         )
+    }
+}
+
+/// Actor to safely handle video processing operations with non-Sendable AVFoundation types
+private actor VideoProcessingActor {
+    private let videoAsset: AVAsset
+    private let imageGenerator: AVAssetImageGenerator
+    private let textRecognitionRequest: VNRecognizeTextRequest
+
+    init(videoAsset: AVAsset, recognitionLanguages: [String]) {
+        self.videoAsset = videoAsset
+
+        // Configure image generator
+        self.imageGenerator = AVAssetImageGenerator(asset: videoAsset)
+        imageGenerator.appliesPreferredTrackTransform = true
+        imageGenerator.requestedTimeToleranceBefore = .zero
+        imageGenerator.requestedTimeToleranceAfter = .zero
+
+        // Configure text recognition request
+        self.textRecognitionRequest = VNRecognizeTextRequest()
+        textRecognitionRequest.recognitionLevel = .accurate
+        textRecognitionRequest.usesLanguageCorrection = true
+        textRecognitionRequest.recognitionLanguages = recognitionLanguages
+    }
+
+    func getDuration() async throws -> CMTime {
+        try await videoAsset.load(.duration)
+    }
+
+    func generateImage(at time: CMTime) async throws -> CGImage {
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<CGImage, Error>) in
+            imageGenerator.generateCGImageAsynchronously(for: time) { cgImage, _, error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else if let cgImage {
+                    continuation.resume(returning: cgImage)
+                } else {
+                    continuation.resume(throwing: NSError(
+                        domain: "SubtitleTextDetector",
+                        code: -1,
+                        userInfo: [NSLocalizedDescriptionKey: "Failed to generate image"]
+                    ))
+                }
+            }
+        }
+    }
+
+    func detectText(in image: CGImage) async throws -> [VNRecognizedTextObservation] {
+        let requestHandler = VNImageRequestHandler(cgImage: image)
+        try requestHandler.perform([textRecognitionRequest])
+        return textRecognitionRequest.results ?? []
     }
 }
