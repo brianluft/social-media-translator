@@ -5,8 +5,16 @@ import PhotosUI
 import SwiftUI
 import Translation
 
+/// Specifies which method to use for detecting text in videos
+public enum DetectionMode {
+    /// Use OCR to detect burned-in subtitles
+    case subtitles
+    /// Use speech recognition to detect spoken words
+    case speech
+}
+
 /// This class is responsible for handling the video processing logic.
-/// It is responsible for detecting subtitles, translating them, and saving the processed video.
+/// It is responsible for detecting subtitles or speech, translating them, and saving the processed video.
 @MainActor
 final class VideoProcessor {
     // MARK: - Instance Properties
@@ -27,16 +35,18 @@ final class VideoProcessor {
     }
 
     private var processingStartTime: TimeInterval = 0
-    private var detector: SubtitleTextDetector?
+    private var detector: (any TextDetector)?
     private var translator: TranslationService?
     private var cancellationTask: Task<Void, Never>?
 
     private let sourceLanguage: Locale.Language
     private let destinationLanguage: Locale.Language
+    private let detectionMode: DetectionMode
 
-    init(sourceLanguage: Locale.Language, processedVideo: ProcessedMedia) {
+    init(sourceLanguage: Locale.Language, processedVideo: ProcessedMedia, detectionMode: DetectionMode = .subtitles) {
         self.sourceLanguage = sourceLanguage
         self.processedVideo = processedVideo
+        self.detectionMode = detectionMode
         // For consistency, we preserve the idea of the "current language" as the destination
         self.destinationLanguage = Locale.current.language
     }
@@ -134,14 +144,14 @@ final class VideoProcessor {
                     target: destinationLanguage
                 )
 
-                detector = SubtitleTextDetector(
-                    videoAsset: asset,
+                // Create appropriate detector based on mode
+                detector = try await createDetector(
+                    for: asset,
                     delegate: detectionDelegate,
-                    recognitionLanguages: [sourceLanguage.languageCode?.identifier ?? "en-US"],
                     translationService: translator
                 )
 
-                // Detect subtitles
+                // Detect text
                 try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
                     Task { @MainActor in
                         do {
@@ -183,6 +193,29 @@ final class VideoProcessor {
 
         // Wait for the processing task to complete
         await cancellationTask?.value
+    }
+
+    private func createDetector(
+        for asset: AVAsset,
+        delegate: TextDetectionDelegate,
+        translationService: TranslationService?
+    ) async throws -> any TextDetector {
+        switch detectionMode {
+        case .subtitles:
+            return SubtitleTextDetector(
+                videoAsset: asset,
+                delegate: delegate,
+                recognitionLanguages: [sourceLanguage.languageCode?.identifier ?? "en-US"],
+                translationService: translationService
+            )
+        case .speech:
+            return try SpokenTextDetector(
+                videoAsset: asset,
+                delegate: delegate,
+                recognitionLocale: Locale(identifier: sourceLanguage.languageCode?.identifier ?? "en_US"),
+                translationService: translationService
+            )
+        }
     }
 
     func processVideo(_ url: URL, translationSession: TranslationSession) async {
@@ -269,14 +302,14 @@ final class VideoProcessor {
                     target: destinationLanguage
                 )
 
-                detector = SubtitleTextDetector(
-                    videoAsset: asset,
+                // Create appropriate detector based on mode
+                detector = try await createDetector(
+                    for: asset,
                     delegate: detectionDelegate,
-                    recognitionLanguages: [sourceLanguage.languageCode?.identifier ?? "en-US"],
                     translationService: translator
                 )
 
-                // Detect subtitles
+                // Detect text
                 try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
                     Task { @MainActor in
                         do {

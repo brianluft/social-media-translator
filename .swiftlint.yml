@@ -33,3 +33,4 @@ disabled_rules:
   - cyclomatic_complexity
   - line_length
   - type_body_length
+  - large_tuple

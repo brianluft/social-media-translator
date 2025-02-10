@@ -49,7 +49,8 @@ struct VideoSelectionView: View {
                                  .some(UTType.mpeg4Movie):
                                 PlayerView(
                                     videoItem: selectedItem,
-                                    sourceLanguage: sourceLanguage
+                                    sourceLanguage: sourceLanguage,
+                                    detectionMode: translationMode == .text ? .subtitles : .speech
                                 )
                             case .some(UTType.image), .some(UTType.jpeg), .some(UTType.png), .some(UTType.heic):
                                 PhotoView(
@@ -64,7 +65,8 @@ struct VideoSelectionView: View {
                               let sourceLanguage = viewModel.selectedSourceLanguage {
                         PlayerView(
                             videoURL: downloadedVideoURL,
-                            sourceLanguage: sourceLanguage
+                            sourceLanguage: sourceLanguage,
+                            detectionMode: translationMode == .text ? .subtitles : .speech
                         )
                     }
                 }

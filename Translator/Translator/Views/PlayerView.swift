@@ -7,24 +7,33 @@ import Translation
 struct PlayerView: View {
     private let videoSource: VideoSource
     let sourceLanguage: Locale.Language
+    let detectionMode: DetectionMode
 
     @StateObject private var viewModel: PlayerViewModel
     @Environment(\.dismiss) private var dismiss
     @State private var videoSize: CGSize = .zero
 
-    init(videoItem: PhotosPickerItem, sourceLanguage: Locale.Language) {
+    init(videoItem: PhotosPickerItem, sourceLanguage: Locale.Language, detectionMode: DetectionMode = .subtitles) {
         self.videoSource = .photosItem(videoItem)
         self.sourceLanguage = sourceLanguage
+        self.detectionMode = detectionMode
         _viewModel = StateObject(
-            wrappedValue: PlayerViewModel(sourceLanguage: sourceLanguage)
+            wrappedValue: PlayerViewModel(
+                sourceLanguage: sourceLanguage,
+                detectionMode: detectionMode
+            )
         )
     }
 
-    init(videoURL: URL, sourceLanguage: Locale.Language) {
+    init(videoURL: URL, sourceLanguage: Locale.Language, detectionMode: DetectionMode = .subtitles) {
         self.videoSource = .url(videoURL)
         self.sourceLanguage = sourceLanguage
+        self.detectionMode = detectionMode
         _viewModel = StateObject(
-            wrappedValue: PlayerViewModel(sourceLanguage: sourceLanguage)
+            wrappedValue: PlayerViewModel(
+                sourceLanguage: sourceLanguage,
+                detectionMode: detectionMode
+            )
         )
     }
 
@@ -220,6 +229,7 @@ class PlayerViewModel: NSObject, ObservableObject, VideoPlayerControllerDelegate
 
     let sourceLanguage: Locale.Language
     let destinationLanguage = Locale.current.language
+    let detectionMode: DetectionMode
 
     let processedVideo: ProcessedMedia
 
@@ -242,15 +252,17 @@ class PlayerViewModel: NSObject, ObservableObject, VideoPlayerControllerDelegate
         )
     }
 
-    init(sourceLanguage: Locale.Language) {
+    init(sourceLanguage: Locale.Language, detectionMode: DetectionMode) {
         self.sourceLanguage = sourceLanguage
+        self.detectionMode = detectionMode
         self.processedVideo = ProcessedMedia(
             targetLanguage: Locale.current.language.languageCode?
                 .identifier ?? "en"
         )
         self.videoProcessor = VideoProcessor(
             sourceLanguage: sourceLanguage,
-            processedVideo: processedVideo
+            processedVideo: processedVideo,
+            detectionMode: detectionMode
         )
 
         videoPlayerController = VideoPlayerController()
